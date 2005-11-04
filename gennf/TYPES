@@ -1,0 +1,4 @@
+(("aux" :IGNORE)
+ ("dvi" :IGNORE)
+ ("log" :IGNORE)
+ ("tex" :DEFAULT))

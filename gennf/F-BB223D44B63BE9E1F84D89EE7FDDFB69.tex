@@ -1,0 +1,150 @@
+\documentclass[german, 10pt, a4paper]{article}
+\usepackage{babel}
+
+\begin{document}
+\title{\emph{Scratchpad}\\
+{\scshape Infrastructures for Open Source Software Development}\\
+Distributed Version Management System with Code Signing}
+\maketitle
+
+\section{Prologue}
+This document is our project's scratchpad accompanying the development
+of a distributed version management system enhanced with code signing as
+part of the \emph{Infrastructures for Open Source Software Development}
+course held by Steffen Evers at the Berlin Technical University.
+
+Our hope is, that eventually the project's documentation will be
+distilled out of this text. Up to that point, it will be a bit messy,
+probably unstructured and a moving target of course.1
+
+\section{Developers}
+Development is currently planned to be undertaken by
+\begin{itemize}
+\item Hannes Mehnert, \texttt{mehnert@cs.tu-berlin.de}
+\item Florian Lorenzen, \texttt{florenz@cs.tu-berlin.de}
+\end{itemize}
+
+\section{The goal}
+We want to implement a better version management system based on
+some existing software. 'Better' in this case means that it supports
+code signing and distributed repositories.
+
+Code signing means, that each chunk of code checked into the repository
+has to be signed by the programmer using some public/private key scheme
+to enable other developers or users to verify the origin of the code (as
+long as the keys are trustworthy).
+
+Distributed means that the repository is not stored on a single server
+but that check ins can be done on several servers and the result be
+merged. The advantages are a better failure behaviour and the
+possibility to structure the repositories according to some external
+requirements, e.~g. responsibilities for or maintenance of certain code
+sections by certain parties.
+
+Initially, we also thought about improving the code merging capabilities
+which are geavily relied on in distributed environments. The idea was to
+do a merge not of streams of characters (the source code) but of
+abstract syntax trees of the programming language used. This seemd very
+promising because fewer conflicts should arise. We abandoned this plan
+for several reasons:
+\begin{itemize}
+\item It is language dependant: for every language used in the code at
+least a context free and a regular grammar are  required. To do the
+lexing and parsing a lexer- and parser-generator or some function $\phi
+: G_L \rightarrow G_P \rightarrow S \rightarrow T$ with $G_L$ being a
+lexer grammar, $G_P$ a parser grammar, $S$ a source code and $T$ an
+abstract syntax tree would have to be implemented. This is not something
+impossible but takes quite some time.
+\item The algorithm to compare two abstract syntax trees is not so
+trivial, at least if something better than line based diffs is supposed
+to come out. Another trouble is what to consider as a conflict.
+\item How to store diffs of to trees? Our idea was to store functions
+$\tau : T \rightarrow T$ which transform one tree into the other. Those
+function could also be used to apply the changes. At this point the
+question arose if $\tau_1 \circ \tau_2 \neq \tau_2 \circ \tau_1$ could
+be used as the definition of a conflict. But this is probably to simple.
+Those function $\tau_i$ in turn would be compositions of atomic
+transformations of one node in the tree, i.~e. a combinataion of paths
+in the tree and actions to be taken at the end of the path.
+\item Preserving the code layout may be a problem, even with layout
+annotations in the syntax trees.
+\item What to use as the storage backend? Some line based store would
+not really fulfil the needs because this meant to pretty-print the
+syntax tree (using the layout annotations) and to parse the last checked in
+version at each commit. Consequently, the transformation function
+should be stored. This in the end lead to the decision to forget about
+improving the merge because the best way to do it is to write something
+completely new which is too much work for one semester.
+\end{itemize}
+
+\section{The plan}
+We discussed improving the handling of repositories in \textsc{darcs} or
+adding distributed repositories to \textsc{metacvs}. Code Signing is not
+available in any of them (at least not in our sense).
+
+We decided to build on \textsc{metacvs} because it is, in turn, based on
+\textsc{cvs} which we know quite well and because it is written in
+\textsc{Common~Lisp} which makes rapid development at least possible.
+
+In the end we would of course like to integrate our development back
+into \textsc{metacvs} if convenient for the \textsc{metacvs} developers.
+Hence the \ldots
+
+\subsection{Nameing issue}
+There is no name yet, thus the thing we will put together will probably
+be called \emph{the system} or something similair less meaningful.
+
+\subsection{Technical stuff}
+\textsc{metacvs} is implemented in \textsc{clisp} which is now installed
+in \texttt{/home/pub/bin} in the IRB-network. \textsc{metacvs} is
+installed in the same location to get familiar with it and for testing
+purposes. \textsc{metacvs} requires \texttt{libsigsegv}, which is
+installed but I had to patch the \texttt{/home/pub/bin/mcvs}-script and
+the install-script to have a proper \texttt{LD\_LIBRARY\_PATH}. The
+patched sources (also for \textsc{clisp}) are in \texttt{/home/pub/src}.
+
+\textsc{slime} is installed in \texttt{/home/pub/share/emacs/slime} and
+can be used by putting
+\verb|
+(add-to-list 'load-path "/home/pub/share/emacs/slime")
+(require 'slime)
+(slime-setup)
+(setq inferior-lisp-program "clisp")|
+into \texttt{~/.emacs}.
+
+\subsection{Communication}
+Everyone participating in the project is free to mess up this file to
+record relevant thoughts, ideas, \ldots.
+As we are only very few people, there will probably be meetings once in
+a while (see \ref{schedule} for appointments).
+Day-to-day communication will be done using
+\texttt{ossi@insel.cs.tu-berlin.de} with the subject \texttt{SCM:}.
+\subsection{Schedule \label{schedule}}
+There is no real schedule yet but\ldots
+
+\begin{tabular}{|p{.3\textwidth}|p{.6\textwidth}|}
+\hline
+\textmd{When} & \textmd{What} \\
+\hline\hline
+Nov. 7 &
+Meeting at 12 o'clock in FR5017 to discuss design issues. \\
+\hline
+Nov. 4 to Nov. 15 &
+Getting familiar with the code of \textsc{metacvs}
+and drafting a design for distributiveness and signing. \\
+\hline
+\end{tabular}
+
+\section{References}
+
+\begin{itemize}
+\item \texttt{http://users.footprints.net/\textasciitilde{}kaz/mcvs.html} is the home of
+\textsc{metacvs}.
+\item \texttt{http://www.gigamonkeys.com/book/} is a very good
+\textsc{Common Lisp} book.
+\item \texttt{http://clisp.cons.org/} is the home of \textsc{clisp}.
+\item \texttt{http://common-lisp.net/project/slime/} is the home of
+\textsc{slime}, a good interface to different \textsc{Common~Lisp}
+systems for \textsc{emacs}.
+\end{itemize}
+\end{document}
