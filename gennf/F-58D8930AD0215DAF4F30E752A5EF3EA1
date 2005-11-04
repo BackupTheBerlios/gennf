@@ -1,0 +1,20 @@
+# Makefile fuer TeX-Dokument.
+#
+
+NAME = scratchpad
+OUTPUT = $(NAME).dvi $(NAME).ps $(NAME).pdf
+
+all : $(OUTPUT)
+
+%.pdf : %.dvi
+	dvipdfm $<
+
+%.ps : %.dvi
+	dvips -f $< > $@
+
+%.dvi : %.tex
+	latex $<
+	latex $<
+
+clean :
+	rm -f *.dvi *.aux *.log *.ps *.pdf
