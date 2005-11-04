@@ -105,11 +105,13 @@ patched sources (also for \textsc{clisp}) are in \texttt{/home/pub/src}.
 
 \textsc{slime} is installed in \texttt{/home/pub/share/emacs/slime} and
 can be used by putting
-\verb|
+\begin{verbatim}
 (add-to-list 'load-path "/home/pub/share/emacs/slime")
 (require 'slime)
 (slime-setup)
-(setq inferior-lisp-program "clisp")|
+(setq inferior-lisp-program "clisp")
+\end{verbatim}
+
 into \texttt{~/.emacs}.
 
 \subsection{Communication}
