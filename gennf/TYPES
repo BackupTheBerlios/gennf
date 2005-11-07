@@ -1,4 +1,5 @@
 (("aux" :IGNORE)
  ("dvi" :IGNORE)
  ("log" :IGNORE)
- ("tex" :DEFAULT))
+ ("tex" :DEFAULT)
+ ("txt" :DEFAULT))

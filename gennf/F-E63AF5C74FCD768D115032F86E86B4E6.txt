@@ -1,0 +1,36 @@
+As part of the course "Infrastructures for Open Source Software
+Development" [1] held by Steffen Evers at Berlin Technical University
+[2], we want to implement a distributed version management system with
+code signing support.
+
+Code signing intends to open the possibility that the origin of each
+chunk of code of a piece of software can be verified using
+public/private key signing. Without code signing users and other
+developers have to trust the integrity of the machine hosting the
+sources.
+
+Distributed version management means that there is no need for a central
+repository which avoids single points of failure and provides means to
+structure the repositories according to some external criteria like
+responsibilities or maintenanceships. We want to implement a system
+without the necessity that each site hosting a repository has to
+store all revisions of projects which can cause huge storage
+consumption.
+
+We want to implement the system as an extension of Meta-CVS [3], which
+is open source under the GPL license. The code signing will 
+heavily rely on GnuPG [4].
+Meta-CVS is written in CLISP [5], which is an open source implementation
+of Common Lisp [6]. To ease development, our code will be written in
+Common Lisp (using CLISP extension when necessary).
+
+The name of the project will be gennf.
+
+----------
+References:
+[1] http://flp.cs.tu-berlin.de/lehre/wise05-06/ossi.html
+[2] http://www.tu-berlin.de
+[3] http://users.footprints.net/~kaz/mcvs.html
+[4] http://www.gnupg.org/
+[5] http://clisp.cons.org/
+[6] http://www.cs.cmu.edu/Groups/AI/html/cltl/cltl2.html

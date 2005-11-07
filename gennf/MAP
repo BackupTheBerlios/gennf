@@ -3,4 +3,7 @@
   "doc/Makefile")
  (:FILE
   "MCVS/F-BB223D44B63BE9E1F84D89EE7FDDFB69.tex"
-  "doc/scratchpad.tex"))
+  "doc/scratchpad.tex")
+ (:FILE
+  "MCVS/F-E63AF5C74FCD768D115032F86E86B4E6.txt"
+  "doc/proposal.txt"))
