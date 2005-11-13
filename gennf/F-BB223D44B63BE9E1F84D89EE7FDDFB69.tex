@@ -90,7 +90,7 @@ In the end we would of course like to integrate our development back
 into \textsc{metacvs} if convenient for the \textsc{metacvs} developers.
 Hence the \ldots
 
-\subsection{Nameing issue}
+\subsection{Naming issue}
 For the course of development, the \emph{thing} will be called
 \textsc{gennf} just to have a name (gennf is the name of the gas emitted
 by the time snails in Zamonia).
@@ -138,6 +138,93 @@ and drafting a design for distributiveness and signing. \\
 \hline
 \end{tabular}
 
+\section{Code Signing}
+
+\subsection{Motivation}
+Currently most version management systems doesn't use any digital signatures
+for code (apart from \textsc{tla}). Authentication is done by an own password
+server (\textsc{CVS}: pserver), via a ssh public key (\textsc{CVS},
+\textsc{subversion}, \textsc{darcs}, \textsc{metacvs}) or
+via a digitally signed mail (\textsc{darcs}).
+
+On the other hand, data integrity is not supported.
+Every user has to trust the repository server
+to be secure from a possible hacker breaking into it.
+A hacker with access to the repository is able to compromise the
+software by unperceived insert of a backdoor.
+
+In the past, several big repositories have been hacked, including
+KDE\footnote{http://seclists.org/lists/fulldisclosure/2004/May/0349.html},
+sourceforge, jabber.org [TODO: add links].
+
+
+\subsection{Vision}
+A developer using \textsc{metacvs} should be able to sign his patches via
+an already known-to-work and widely deployed public key cryptosystem.
+
+An auditor should be able to look at any number of parts of the code
+and sign them digitally after a successful code audit.
+
+A user checking out the code should be able to verify the code, looking
+at the different trust levels of the lines of code.
+He should be able to easily spot the lines
+which are least trusted according to his web of trust. If he cares much
+about security, he can audit those hot spots and sign them in the repository,
+becoming an auditor.
+
+So, the trust is moved from the single point of failure (the repository
+server) to every developer (able to protect his private key, or otherwise
+revoke his key).
+
+\subsection{Workflows}
+A possible workflow for the developer would be that he first starts coding,
+fixing a bug or implementing a new feature. When he has done with that,
+during the commit he'll be asked whether he wants to sign this commit.
+If he chooses to sign, he is asked for the passphrase protecting
+his private key. After successfully verification of the passphrase,
+the commit will be signed and transferred to the server.
+Authentication could probably also be done via the signature on the code,
+so no user management is anymore needed on the server, only a public keyring
+including all developer keys, but possibly anyone can commit, and the user
+has to choose who to trust during checkout.
+
+A user with access to the repository checking out can verify the checked
+out code, and see how safe it is.
+Via \texttt{metacvs blame} he should be able to look which lines are
+at which trust levels.
+
+Via \texttt{metacvs sign} a code auditor (or user) should be able to
+sign parts of code (line-, file-based).
+
+\subsection{Implementation overview}
+\begin{itemize}
+\item public key cryptography interface for \textsc{clisp}
+\item unique patchset number, like in subversion, to match a signature to a revision.
+\item virtual patchsets describing regions in source files for auditor
+\item decide where to store signatures
+\item integration in \textsc{metacvs} commands like commit, checkout, blame.
+\item implement more \textsc{metacvs} commands like verify, sign
+\end{itemize}
+
+\subsection{Implementation detail}
+OpenPGP will be used as pulic key cryptosystem, because it has an
+open-source implementation \textsc{gpg} (GNU Privacy Guard), is not
+hierarchically structured due to the web of trust and keyserver rings.
+It is also widely deployed in open source developer communities.
+
+It has a \texttt{GnuPG Made Easy} \textsc{gpgme} development library,
+which need to be wrapped in a C-Interface for \textsc{clisp}.
+
+The signatures has to be stored somewhere in \textsc{metacvs}, probably
+in the metadata.
+
+Some parts should be configurable for \textsc{metacvs} code signing,
+a default key ID for the developer, a public keyring file for authentication
+on the repository server, and possibly other things.
+
+Probably an emacs-integration for metacvs, including the audit-part
+would be useful.
+
 \section{References}
 
 \begin{itemize}
@@ -149,5 +236,8 @@ and drafting a design for distributiveness and signing. \\
 \item \texttt{http://common-lisp.net/project/slime/} is the home of
 \textsc{slime}, a good interface to different \textsc{Common~Lisp}
 systems for \textsc{emacs}.
+\item \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the Howto of the
+GNU arch project using signed archives
+\item \texttt{http://www.gnupg.org} GNU Privacy Guard
 \end{itemize}
 \end{document}
