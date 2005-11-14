@@ -141,9 +141,9 @@ and drafting a design for distributiveness and signing. \\
 \section{Code Signing}
 
 \subsection{Motivation}
-Currently most version management systems doesn't use any digital signatures
+Currently most version management systems don't use any digital signatures
 for code (apart from \textsc{tla}). Authentication is done by an own password
-server (\textsc{CVS}: pserver), via a ssh public key (\textsc{CVS},
+server (\textsc{cvs}: pserver), via a ssh public key (\textsc{cvs},
 \textsc{subversion}, \textsc{darcs}, \textsc{metacvs}) or
 via a digitally signed mail (\textsc{darcs}).
 
@@ -198,12 +198,21 @@ sign parts of code (line-, file-based).
 
 \subsection{Implementation overview}
 \begin{itemize}
-\item public key cryptography interface for \textsc{clisp}
-\item unique patchset number, like in subversion, to match a signature to a revision.
-\item virtual patchsets describing regions in source files for auditor
-\item decide where to store signatures
-\item integration in \textsc{metacvs} commands like commit, checkout, blame.
-\item implement more \textsc{metacvs} commands like verify, sign
+\item Public key cryptography interface for \textsc{clisp}.
+\item Unique patchset number, like in subversion, to match a signature to a revision.
+\item Virtual patchsets describing regions in source files for auditor.
+\item Decide where to store signatures.
+(I think, there should be a new meta file containg the signatures, what
+lines and revisions they apply to. Putting it this way audits can be handled
+in the same mannner. Change and audit signatures have to distinguished by
+some tag. Storeing all this in a meta file makes audit signs an
+ordinary check in operation on this file -- which should be wrapped in
+a nice command of course. The same applies to normal commits: they
+change the F-files and make a change to the new meta file. [Florian])
+\item Integration in \textsc{metacvs} commands like \texttt{commit},
+\texttt{checkout}, \texttt{blame}.
+\item Implement more \textsc{metacvs} commands like \texttt{verify},
+\texttt{sign}.
 \end{itemize}
 
 \subsection{Implementation detail}
@@ -213,7 +222,7 @@ hierarchically structured due to the web of trust and keyserver rings.
 It is also widely deployed in open source developer communities.
 
 It has a \texttt{GnuPG Made Easy} \textsc{gpgme} development library,
-which need to be wrapped in a C-Interface for \textsc{clisp}.
+which needs to be wrapped in a C-Interface for \textsc{clisp}.
 
 The signatures has to be stored somewhere in \textsc{metacvs}, probably
 in the metadata.
@@ -222,8 +231,54 @@ Some parts should be configurable for \textsc{metacvs} code signing,
 a default key ID for the developer, a public keyring file for authentication
 on the repository server, and possibly other things.
 
-Probably an emacs-integration for metacvs, including the audit-part
-would be useful.
+Probably an \textsc{emacs}-integration for \textsc{metacvs}, including the
+audit-part, would be useful.
+
+
+\section{Distributed repositories}
+
+\subsection{Outline}
+By \emph{distributed repository} we mean support for the following
+features:
+
+\begin{itemize}
+\item The possibility to build a new repository from a given a 
+\textsc{metacvs} repository either by replicating the whole history or
+by takeing a certain revision as new starting point -- on a per module
+base of course.
+\item Generation of patch sets between two given revisions (for example
+\texttt{head}/\texttt{head}) of two different repositories either by pull
+or push. To clarify this: Let $r_L$ be the repository of the developer
+demanding a patch set and $r_R$ the partner repository. A pull patch set
+is one suitable for application to $r_L$ and a push patch set is one
+suitable for application to $r_R$.
+There should be different methods to store and transport a patchset:
+on the fly generation and application as well as saveing as an archive file
+to be sent per e-mail for example.
+\end{itemize}
+
+\subsection{Technical issues}
+
+As for the code signing part unique revision numbers for each change have
+to be introduced. I suggest, this will be the first thing to be done anyway.
+\emph{We should agree on a sensible name for this. I suggest changeset number
+to distinguish it from revision number (of a file) and patchset. A changeset
+may be a patchset but has not to be necessarily.}
+
+Generation of one repository out of another one takes part on the backend
+side of the version management. The same is true for the generation
+of patch sets. This means that the repository handling capabilities of
+\textsc{metacvs} will probably have to be improved. It would be good if
+this was possible by exclusive usage of calls to \textsc{cvs}.
+They differ from most of the rest of the \texttt{metacvs} commands
+because they do not affect any working copy whatsoever.
+
+Two new commands with several options will be necessary:
+\begin{itemize}
+\item \texttt{inherit} to produce a new repository from some existing one,
+either full blown or just of partly.
+\item \texttt{create-patchset} to produce push and pull patchsets.
+\end{itemize}
 
 \section{References}
 
@@ -239,5 +294,8 @@ systems for \textsc{emacs}.
 \item \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the Howto of the
 GNU arch project using signed archives
 \item \texttt{http://www.gnupg.org} GNU Privacy Guard
+\item \textsc{hocvs} is an extension to \textsc{metacvs} with change based
+revisions. It is done with \textsc{cvs} tags, I believe, but perhaps worth a
+glance. It can be found at \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
 \end{itemize}
 \end{document}
