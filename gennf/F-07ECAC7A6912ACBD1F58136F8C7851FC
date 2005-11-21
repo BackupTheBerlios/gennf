@@ -1,0 +1,3071 @@
+2004-02-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* docs/Meta-CVS-PAPER.txt: Revising and editing.
+
+2004-02-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/convert.lisp (mcvs-convert): Ensure that the converted
+	project has TYPES and .cvsignore files, not just a MAP, and that
+	these have all the branch and version tags.  This is important,
+	because users might end up independently adding these on branches
+	and end up with merge problems.
+
+2004-01-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/clisp-unix.lisp (current-dir-restore): An inner macro
+	called in-original-dir is now visible to the body enclosed in
+	current-dir-restore. This allows the current directory to be
+	temporarily escaped back to the original directory.
+
+	* code/convert.lisp (mcvs-convert): Fixed to no longer assume
+	that the target directory is a sibling of the source.  The two can be
+	located anywhere.
+	(*convert-help*): Revise text.
+
+2004-01-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/remap.lisp (mcvs-remap): Provide a restart for continuing
+	in the case when an F- file is referenced in the MAP, but no
+	working copy of it exists.  By continuing through all these
+	errors, the MAP is cleaned of the nonexistent entries, which
+	provies a way to clean up after the naive ``mcvs convert''
+	algorithm.
+
+	* code/convert.lisp (*convert-help*): Add text recommending the use
+	of ``mcvs remap'' to clean up.
+
+2004-01-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/convert.lisp (mcvs-convert): RCS files that are in an Attic
+	subdirectory in the source CVS project end up in the Attic
+	directory of the target Meta-CVS project.
+	(remove-attic-component): Return second value that indicates
+	whether the Attic component was stripped.
+
+2004-01-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/convert.lisp (mcvs-convert): Skip CVS directories.
+	In the repository, these contain things like watcher and editor lists,
+	which probably should not be be replicated in the Meta-CVS sandbox.
+	Sort the newly created MAP properly.
+	(remove-attic-component): If input is "Attic", produce ".".
+	
+2004-01-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	More convert-related changes.
+
+	* code/mcvs-main.lisp (*mcvs-command-table*): Add *convert-help*.
+
+	* code/convert.lisp (mcvs-convert): Bugfix: failure to increment
+	branch number by two to generate unique branch tags.
+	Bugfix: paths going into MAP must be canonicalized.
+	(*convert-help*): New string constant.
+
+2004-01-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fixes to convert command to make it useable.
+
+	* code/posix.lisp (suffix): Return dir name as additional value.
+	(execute-program-xargs): In the case that there are no variable 
+	args passed, the fixed trailing args should still be passed
+	to the command.
+
+	* code/convert.lisp (remove-attic-component): Rewrite with
+	different semantics.
+	(mcvs-convert): Fix path handling bug whereby basenames
+	instead of full paths were written to MAP file.
+	Don't call rcs to make tags when there are none.
+	Extra tracing to tell user what is going on.
+
+2004-01-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (mcvs-grab): Bugfixes to repeated grab over
+	partial sandbox: abstract path instead of real path used for
+	reading new symbolic link targets, and execute permissions.
+
+2004-01-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/branch.lisp (equal-sticky): Add missing cases for handling
+	the valid tag value NIL.
+
+2004-01-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/link.lisp (*link-help*): Grammar fix.
+
+2004-01-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/options.lisp (process-cvs-options): Update
+	--version copyright message to 2004.
+
+2004-01-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Parsing directory sticky tag from CVS/Tag requires
+	slightly different logic from the sticky tags in CVS/Entries.
+	CVS/Entries doesn't distinguish branch and version
+	sticky tags. 
+
+	This change gets rid of the incorrect warning about
+	not all files being on the same tag when the working
+	copy is sticky to a version tag.
+
+	* code/branch.lisp (parse-sticky): Function renamed to
+	parse-dir-sticky.
+	(parse-entries-sticky): New function.
+	(equal-sticky): New function.
+	(read-cvs-entries): Use parse-entries-sticky.
+	(same-tag-check): Use equal-sticky instead of equal.
+	(what-are-we-sticky-to): Use parse-dir-sticky.
+	
+2004-01-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Cleanup.
+
+	* code/grab.lisp (*grab-help*): Spelling error.
+
+	* code/system.lisp: Require posix module before clisp-unix,
+	which wants it.
+
+	* code/clisp-unix.lisp: Don't bother requiring posix,
+	since it comes from system.
+	Require "chatter" rather than "chatter.lisp"; this is why
+	were not getting the compiled version of this module
+	into the images.
+
+2004-01-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Upgrade to CLISP 2.32.
+
+	* code/unix-bindings/unix.lisp: If the CLISP version is 
+	newer than 2.31 then set the variables ffi::*output-c-functions*
+	and ffi::*output-c-variables* to get the old translator
+	behavior.
+
+	* code/rcs-utils.lisp: We can't use #s read syntax for
+	specifying an rcs-token structure literal, because
+	we have not specialized make-load-form. This used to
+	work anyway but now breaks under CLISP 2.32.
+
+2003-07-15  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-generic.lisp (mcvs-generic): Removed
+	the default-include-meta-files keyword parameter.
+	(mcvs-tag, mcvs-commit): Remove use of keyword parameter.
+	This fixes the silly behavior of including meta files
+	even when the command line specifies a file list.
+	Also, bugfix: *nometa-option* now works when
+	global-if-empty-file-list is true, and there are no files.
+
+	* code/update.lisp (mcvs-update): Remove use of keyword
+	parameter in call to mcvs-generic.
+
+2003-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Based on a patch from Walter C. Pelissero <walter@pelissero.de>
+
+	* code/mcvs-main.lisp (with-open-file-ignore-errors): New macro.
+	(mcvs-execute): Use new macro to properly handle opening the
+	controlling terminal when there are errors other than 
+	the non-existence of the object.
+
+2003-06-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (mcvs-help): Move some special declarations
+	out of the function to the top level.
+
+2003-05-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/filt.lisp (mcvs-filt-loop): Do not filter F- names that
+	are embedded in paths (preceded by a slash). This supersedes
+	the old behavior which was to avoid filtering F- names preceded
+	by "MCVS/".
+
+2003-04-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/generic.lisp (mcvs-generic): The after-synchronization
+	was going in both directions rather than just MCVS -> tree.
+
+2003-04-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (mcvs-execute): If not able to open controlling
+	tty, emit some warning messages that interactive error handling is
+	disabled. This alerts users to problems, like missing /dev directory
+	on Cygwin.
+
+2003-04-24  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* docs/generate.sh: Use valid shell syntax for identifiers.
+
+2003-04-24  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (mcvs-execute): Bugfix: add missing OPEN
+	option to avoid trying to create the controlling terminal device
+	if it does not exist, and yield NIL as expected. 
+
+2003-04-23  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New commands, sync-from-cvs and sync-to-cvs.
+
+	* code/mcvs-main.lisp (*sync-to-cvs-options*, *sync-from-cvs-options*):
+	New option constants.
+	(*mcvs-command-table*): New entries.
+	(*usage*): New help text.
+
+	* code/generic.lisp (mcvs-generic): New keyword parameter
+	no-invoke-cvs.
+	(mcvs-sync-to-wrapper, mcvs-sync-from-wrapper): New functions.
+
+2003-04-23  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Improved error handling again in a flash of sanity. The whole
+	idea of ``bail'' as a restart is gone. All code which must perform
+	some complex cleanup action does so as part of normal unwinding.
+	And so termination becomes safe.
+
+	* code/update.lisp (mcvs-update): Change bail restart to continue.
+
+	* code/mcvs-main.lisp (*global-options*): Remove "error-bail".
+	(*usage*): Remove description of --error-bail.
+	(mcvs-execute): Bind *mcvs-error-treatment* to :terminate rather
+	than :bail if controlling TTY cannot be opened.
+
+	* code/move.lisp (mcvs-move): Change "Undoing move" error message
+	to "Undoing changes to map".
+
+	* code/add.lisp (mcvs-add): Get rid of bail restart; move cleanup
+	code into unwind-protect block.
+
+	* code/error.lisp (*mcvs-error-treatment*): Touch up docstring.
+	(mcvs-error-handler): Remove anything having to do with :bail.
+	Change description of `T' command to suggest that it is safe.
+
+	* code/options.lisp (filter-mcvs-options): Remove handling of
+	"error-bail" option.
+
+	* code/mapping.lisp (mapping-update): Get rid of outermost
+	restart-case, which had just a bail restart. Replace it with
+	unwind-protect block which does exactly the same restoration.
+
+2003-04-22  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Improved error handling.  Use of tty for user interaction, plus
+	new global option for selecting non-interactive bail behavior.
+
+	* code/mcvs-main.lisp (*global-options*): add --error-bail option.
+	(*usage*): Describe new option.
+	(mcvs-execute): Dynamically bind *interactive-error-io* variable
+	to a stream formed by opening the controlling tty.
+	Send error message to *error-output* rather than *standard-output*.
+
+	* code/unix-bindings/unix.lisp (unix-funcs:ctermid): New function,
+	FFI interface to mcvs_ctermid.
+
+	* code/unix-bindings/wrap.c (mcvs_ctermid): New function.
+
+	* code/chatter.lisp (chatter): Chatter now goes to *error-output*
+	rather than *standard-output*.
+
+	* code/error.lisp (*interactive-error-io*): New special variable,
+	holds stream open to controlling tty.
+	(mcvs-terminate): New function.
+	(mcvs-error-handler): Use *interactive-error-io* to print menu
+	and obtain user input. Support the :bail value of
+	*mcvs-error-treatment* Plus some cosmetic changes.
+
+	* code/options.lisp (filter-mcvs-options): Support --error-bail option.
+
+	* code/filt.lisp (mcvs-filt-loop): Bugfix, (read-line t ...)
+	should be (read-line *standard-input* ...) because t stands
+	for *terminal-io* rather than *standard-io*, unlike in the
+	format function!
+
+	* code/rcs-utils.lisp (rcs-read-token): Read from *standard-input*
+	rather than *terminal-io*.
+
+
+2003-04-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Slightly redesigned error handling protocol.
+
+	* code/update.lisp (mcvs-update): Change continue restart to bail.
+
+	* code/add.lisp (mcvs-add): Likewise.
+
+	* code/error.lisp (mcvs-error-handler): Specially recognize two
+	additional restart symbols, bail and info. A bail restart performs
+	any rolling back and cleanup and terminates. Continuation is now
+	properly reserved for actions that proceed boldly to finish
+	the job, possibly irretrievably clobbering precious data.
+	The info restart is now a standard way to indicate that more
+	details about the error can be obtained, so this does not have
+	to be represented as a special action with an ad-hoc restart.
+
+	* code/create.lisp (mcvs-create): Change show restart to info.
+
+	* code/remap.lisp (mcvs-remap): Change ignore restart to continue.
+
+	* code/mapping.lisp (mapping-update): Change ignore and do-clobber
+	restarts to continue, and print-clobbers restart to info.
+	Change continue restart to bail.
+
+2003-04-14  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New command, remote-filt.
+
+	* code/mcvs-main.lisp (*remote-filt-options*): New option constant.
+	(*mcvs-command-table*): Entries for new command added.
+	(*usage*): Help text added.
+
+	* code/filt.lisp (filt-select-map): New keyword parameter for
+	specifing repository module. CVS up -p or co -p command generated
+	accordingly. Also, little glitch fixed: the local case descends
+	into the MCVS directory, to avoid a warning message that occurs
+	when CVS is used in server mode.
+	(mcvs-filt-loop): New function, contains most of the old mcvs-filt
+	function body.
+	(mcvs-filt): Calls new mcvs-filt-loop to do actual filtering work.
+	(mcvs-remote-filt, mcvs-remote-filt-wrapper): New functions.
+
+	* code/clisp-unix.lisp (with-input-from-program): Macro changed
+	to include debug tracing of the invoked command.
+
+2003-04-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (read-word-hash): Convert each token to a simple
+	string object. This can save a lot of memory when large numbers
+	of files have to be analyzed.
+
+2003-04-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mapping.lisp (mapping-read): Provide a restart for
+	file errors, which lets the user interactively substitute an
+	empty map if the file can't be read. This is intended to handle
+	the case when MCVS/MAP is missing; for example, the user
+	updated to a sticky date for which no revision of the MAP
+	exists. The effect of continuing will be that all files 
+	will disappear.
+
+2003-04-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Revamped the synchronization logic. Synchronization now happens
+	in a specific direction.  For example, if we are doing a diff,
+	we just need to push changes from the tree to the MCVS directory,
+	not the other way around. Or: before an update or commit, we push from
+	the tree to MCVS, then after the update, in the other direction.
+
+	* code/update.lisp (mcvs-update): The before update is done
+	in the :left direction only, and the after update in the :right.
+
+	* code/move.lisp (mcvs-move): The just-in-case sync is done
+	in the :left direction only.
+
+	* code/link.lisp (mcvs-link): Likewise.
+
+	* code/remove.lisp (mcvs-remove): Likewise.
+
+	* code/add.lisp (mcvs-add): Get rid of mapping-synchronize call;
+	it's completely unnecessary, since the new files are not even
+	in the MAP-LOCAL, and the add logic explicitly links them into
+	the MCVS directory.
+
+	* code/generic.lisp (mcvs-generic): New keyword parameter, 
+	need-sync-before. Before-synchronization done in :left direction,
+	after-synchronization in :right direction. Before-synchronization
+	is now not done by default; need-sync-before must be specified.
+	(mcvs-commit-wrapper): Specify before and after sync.
+	(mcvs-diff-wrapper, mcvs-status-wrapper, 
+	mcvs-edit-wrapper): Explicitly specify before sync.
+	(mcvs-tag-wrapper, mcvs-annotate-wrapper): Implicitly specify no sync.
+	(mcvs-unedit-wrapper): Add before sync.
+
+	* code/sync.lisp (synchronize-files):  New key parameter :direction,
+	values can be :left, :right or :either. Default is :either.
+	If the value is :left or :right, then a sync is done only in that
+	direction, otherwise the value :no-sync is returned.
+	Behavior change: if the left file is missing (F- file in MCVS
+	directory) it is not re-created, but rather :no-sync is returned.
+	Also, if both files exist, have the same timestamp, and are
+	distinct objects, if the direction is :left or :right, then
+	the appropriate restart is automatically chosen. So this will
+	do the right thing on filesystems where link() is performed by
+	copying, without bothering the user with the error.
+
+	* code/mapping.lisp (mapping-synchronize): New :direction key
+	parameter, passed down to synchronize-filed. The new :no-sync
+	return value from synchronize-files is handled.
+	(mapping-update): Select the :right direction for synchronizing
+	moves, adds or rollbacks.
+
+2003-04-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/posix.lisp (execute-program-xargs): Fix again: perform
+	all of the split command lines, even if some of them fail.
+	The returned status is a logical AND combination; if all of the
+	subcommands succeeded then it's T, otherwise NIL.
+
+
+2003-03-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/posix.lisp (execute-program-xargs): Bugfix: if program 
+	execution fails, then bail out of the entire function, not just
+	the inner loop. Otherwise the program is wrongly run again,
+	on a bogus file list.
+
+2003-03-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/update.lisp (mcvs-update): Simplified restart code.
+
+2003-03-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/restart.lisp (parse-restart-case-keywords): New function.
+	(super-restart-case-expander): Some logic factored out
+	into new function.
+
+2003-03-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mapping.lisp (mapping-update): Rewrite restart-bind
+	block using super-restart-case.
+      
+2003-03-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/restart.lisp (super-restart-case-expander): Roll the
+	functionality of :report-format into :report.
+	(super-restart-case): Slight rearrangement of the tagbody
+	to eliminate the skip around the out-code.
+
+2003-03-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/restart.lisp (super-restart-case-expander): New function.
+	(super-restart-case): New macro.
+
+	* code/create.lisp (mcvs-create): Rewrite a restart-bind
+	construct more succinctly using super-restart-case.
+
+2003-02-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/create.lisp (mcvs-create): After the TYPES file is
+	edited, scan the MCVS directory for unexpected files.
+	The intent is to detect text editor backups. If any are
+	found, some interactive error handling lets the user acknowledge
+	their deletion. If they are not deleted, then cvs import will
+	bring them into the repository. This behavior was discovered
+	by Johannes Grødem who suggested that it could be handled.
+
+2003-02-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/unix-bindings/wrap.c (mcvs_spawn): One more waitpid() bug!
+	The SIGCHLD signal handler was being set in the child process only,
+	so although we fixed the waitpid() behavior in the CVS child
+	process, we did not fix it in the Meta-CVS process. The ECHILD
+	problem was sporadically reproduced by Johannes Grødem on a fast
+	Athlon machine; it requires CVS to exit before Meta-CVS reaches
+	the waitpid() call.
+
+2003-02-24  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/options.lisp (format-opt): Some one-argument options of
+	CVS must appear as one command parameter, with no separation
+	between the option letter and the argument characters.
+	For example, ``cvs log -r foo::bar'' is invalid, it must
+	be ``cvs log -rfoo::bar''.  The format-opt function now
+	formats *all* one-letter options that have one argument 
+	as one string.
+
+2003-02-23  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*usage*): Add help text for --up option.
+
+
+2003-02-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fix remaining occurences of SIG_IGN action for SIGCHLD being
+	passed to child processes.
+
+	* code/unix-bindings/unix.lisp (unix-funcs:default-sigchld): New call
+	out function.
+
+	* code/clisp-unix.lisp (with-input-from-program, 
+	with-output-to-program): Call the new default-sigchild function
+	to set SIGCHILD signal handler to SIG_DFL just before creating
+	the pipe.
+
+	* code/unix-bindings/wrap.c (mcvs_default_sigchld): New function.
+
+2003-02-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New --up option added for escaping out of nested sandboxes.
+
+	* code/mcvs-main.lisp (*cvs-options*): Added "up" 1 arg option.
+
+	* code/options.lisp (*nesting-escape-option*): New global,
+	default value 0.
+	(filter-mcvs-options): Filter new option, parse out and validate
+	integer argument.
+
+	* code/mapping.lisp (mcvs-locate): When searching for MCVS
+	directory, skip N matches, where N is the value of
+	*nesting-escape-option*.
+
+2003-02-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*cvs-options*): Constant renamed 
+	to *global-options*.
+
+2003-02-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/unix-bindings/wrap.c (mcvs-spawn): In the child process,
+	reset the signal handler for SIGCHLD to SIG_DFL before exec-ing
+	the new image. This is needed because CLISP set it to SIG_IGN,
+	which causes child reaping problems in spawned programs.
+	This should fix the ``No child processes'' problem when running
+	CVS from Meta-CVS.
+ 
+2003-02-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/memoize.lisp (remove-key-aux-rest, strip-lambda-list,
+	extract-tests, remove-tests, memoize-expander, factor-memo-labels,
+	define-memoized-function, memoized-labels): Documentation strings
+	added to this cryptic code.
+
+2003-02-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Make tag command work on whole tree if no arguments are given,
+	just like commit.
+
+	* code/generic.lisp (mcvs-generic): no-fix-empty-filelist keyword
+	parameter renamed to global-if-empty-file-list, which more closely
+	reveals the purpose.
+	(mcvs-commit-wrapper): Use new keyword name.
+	(mcvs-tag-wrapper): Specify T value for :global-if-empty-filelist 
+	argument, so the whole project is tagged by default if no arguments
+	are given.
+
+2003-02-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/unix-bindings/wrap.c (impl_spawn): Try waitpid again in a loop
+	while it returns -1, and errno is EINTR. 
+	Reported by Johannes Grødem <johs@copyleft.no>.
+
+2003-01-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/posix.lisp: Move some (declaim inline) to the correct
+	location, before the function to be inlined.
+
+	* code/clisp-unix.lisp: Likewise.
+	* code/cmucl-unix.lisp: Likewise.
+	* code/mapping.lisp: Likewise.
+
+2003-01-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/unix-bindings/wrap.c (mcvs_getcwd): If getcwd() returns
+	NULL, it only means that the buffer is too small if errno is also
+	set to ERANGE. This second condition was not being tested.
+	Reported by Johannes Grødem <johs@copyleft.no>.
+
+	* code/clisp-unix.lisp (getcwd-error): New condition.
+	(initialize-instance (getcwd-error)): New method.
+	(getcwd): Raise getcwd-error condition if unix-funcs::getcwd
+	returns NIL.
+
+2003-01-15  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/unix-bindings/impl.c: File renamed to wrap.c.
+	(impl_null_pointer_p, impl_get_errno, impl_set_errno, impl_readdir,
+	impl_readlink, impl_stat, impl_lstat, impl_fstat, impl_getcwd,
+	impl_spawn): Prefix changed from ``impl_'' to ``mcvs_''.
+
+	* code/unix-bindings/link.sh, code/unix-bindings/Makefile,
+	code/unix-bindings/unix.lisp: Updated accordingly.
+
+2003-01-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Support -k CVS option in merge and remerge commands.
+	Reported by Jamie Wellnitz.
+
+	* code/mcvs-main.lisp (*merge-options*, *remerge-options*): Add
+	one argument -k option.
+
+	* code/merge.lisp (mcvs-merge): Support extra argument for passing
+	command options. Pass them down to mcvs-update.
+	(mcvs-merge-wrapper, mcvs-remerge-wrapper): Don't ignore command
+	options but pass them to mcvs-merge.
+
+2003-01-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/install.sh: More fail-safe way to locate library directory;
+	works even when clisp executable is a symlink.  Thanks to Sam
+	Steingold, CLISP maintainer, for tip.
+
+2003-01-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Hard link sync optimization.
+
+	* code/mapping.lisp (mapping-synchronize): New optional parameter,
+	specifies map to use instead of reading *map-local*.
+
+	* code/mcvs-generic.lisp (mcvs-generic): Pass extra parameter to
+	mapping-synchronize to only sync the selected subset of files.
+
+2003-01-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/unix-bindings/impl.c (impl_spawn): For Cygwin, re-implemented
+	this function as a wrapper for the spawnvp function. The combination
+	of fork + execvp + waitpid does not work because waitpid is broken;
+	it waits for thep rocess, but then returns -1 and sets errno
+	to ECHILD.
+
+2002-12-27  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/options.lisp (process-cvs-options): The version number
+	now has three components.
+
+2002-12-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/install.sh: Now works under CLISP installations which
+	call the CLISP executable lisp.exe rather than lisp.run.
+	This is the case under Cygwin as of CLISP 2.30 or so.
+
+2002-12-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/sync.lisp (synchronize-files): Call exec-check using
+	file info object, rather than file name. This cuts in half
+	the number of calls to stat().
+	
+2002-12-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Discontinuing use of CLISP's ext:run-program function in favor
+	of a new workalike which doesn't rely on the shell interpreter.
+
+	* code/unix-bindings/unix.lisp (unix-funcs:spawn): New C call out
+	function (unix-funcs:run-program): New function, implemented using
+	spawn.
+
+	* code/unix-bindings/impl.c (impl_spawn): New function; wraps
+	up fork, execvp and waitpid.
+
+	* code/clisp-unix.lisp: Switch from ext:run-program to
+	unix-funcs:run-program.
+
+2002-11-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Some security fixes.  Funny I didn't think of this sooner!
+
+	* code/types.lisp (types-read): Make sure *read-eval* is bound to 
+	nil when calling READ.
+
+	* code/mapping.lisp (mapping-read-raw-map, displaced-path-read):
+	Likewise.
+ 
+
+2002-11-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/posix.lisp (invoke-editor-on): Honor the CVSEDITOR and VISUAL
+	environment variables, not just EDITOR.
+
+2002-11-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/link.lisp (mcvs-link): Revamped link command to behave properly
+	when the destination object is a directory. It must create the link in
+	that directory, rather than try to create a link with that name.
+	Plus handles various tricky cases. Trailing slash in destination name,
+	destination that is a directory within target directory, attempted
+	link creation in MCVS etc.
+
+2002-11-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	More support for -n option.
+
+	* code/mcvs-main.lisp (*usage*): Document -n option.
+
+	* code/move.lisp (mcvs-move-wrapper): Remove bogus error check
+	for presence of global options.
+
+	* code/options.lisp (honor-dry-run): New macro for conditionally
+	not executing some forms if it's a dry run, and logging some
+	debugging information.
+
+	* code/sync.lisp (synchronize-files): Honor dry run.
+
+	* code/mapping.lisp (mapping-synchronize, mapping-update): Likewise.
+
+2002-11-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Start of support for global option -n (dry run).
+
+	* code/options.lisp (*dry-run-option*): New boolean variable.
+	(process-cvs-options): Look for -n and set *dry-run-option*.
+
+	* code/types.lisp (types-write): Do not write file if *dry-run-option*
+	is true.
+
+	* code/types.lisp (mapping-write): Likewise.
+
+	* code/add.lisp (mcvs-add): When calling types-let-user-edit,
+	temporarily disable the dry run option, so that TYPES-NEW can
+	be written. When the dry run option is in effect, do not try
+	to cvs add the TYPES file.
+
+2002-11-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/branch.lisp (*branch-help*): New string constant.
+
+	* code/mcvs-main.lisp (*mcvs-command-table*): *branch-help* hooked in.
+
+2002-11-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main (*args*, *options*): Unused variables removed.
+	(mcvs-execute): Global option processing code removed.
+
+	* code/options.lisp (*print-usage*): New boolean variable; tells
+	mcvs-execute to print usage and terminate.
+	(filter-mcvs-options): New function. Does the job that
+	filter-global-options did.
+	(process-cvs-options): Does the global option processing that
+	was previously in mcvs-execute.
+	(filter-global-options): Now just calls filter-mcvs-options,
+	process-cvs-options.
+
+2002-11-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* INSTALL: Include caveat about GCC 3 problems.
+
+2002-10-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/prop.lisp (mcvs-prop): If there are no options specified, 
+	don't do anything.
+
+2002-10-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/unix-bindings/unix.lisp: Rewrote defpackage to take only
+	selected symbols from CLISP's FFI package rather using the whole
+	thing. FFI, and the packages it uses, are moving targets.
+	The symbol def-c-call-out is interned in unix-funcs.
+	(unix-funcs:def-c-call-out): New internal macro. CLISP says that
+	ffi:def-c-call-out is obsolescent.
+
+	* code/unix-bindings/Makefile: The ``clean'' target removes
+	unix.lib, not only unix.fas.
+
+2002-10-27  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Bugfix to the directory restructuring code. A clobbering
+	file add was not actually removing the clobbered file, but leaving
+	it up to the synchronization algorithm, so the time-stamp would
+	decide whether the local file gets clobbered by the repository one,
+	or whether it wins.
+
+	* code/mapping.lisp (mapping-update): Logic for handling added
+	file ensures that a clobbered local file is removed first.
+
+2002-10-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New link command for creating symlinks.
+
+	* mcvs-main.lisp (*link-options*): New option constant.
+	(*mcvs-command-table*): Entries for new command added.
+	(*usage*): Help text added.
+
+	* link.lisp: New file.
+	(mcvs-link, mcvs-link-wrapper): New functions.
+
+2002-10-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (*grab-help*): Rewritten.
+
+	* code/checkout.lisp (*export-help*): Formatted for 80 columns.
+
+2002-10-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*usage*): Expand tabs to spaces.
+
+	* code/add.lisp (*add-help*): Likewise.
+
+	* code/remove.lisp (*remove-help*): Likewise.
+
+	* code/create.lisp (*create-help*): Likewise.
+	
+2002-10-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/purge.lisp (mcvs-purge): Get rid the processing of the
+	nonexistent -n option from purge code.  The global option -n does an
+	adequate job of implementing a dry run.
+
+2002-10-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mapping.lisp (mapping-removed-files): Skip over the MCVS/CVS 
+	directory, which can contain CVS-generated files with F- names and a ,t
+	suffix. These trip up the algorithm.
+
+2002-10-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Add help to move command.
+
+	* code/mcvs-main.lisp (*mcvs-command-table*): Added *move-help*.
+
+	* code/move.lisp (*mcvs-help*): New constant.
+
+2002-10-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fix broken ``filt -r''.
+
+	* code/mapping.lisp (mapping-read-raw-map): New function; reads
+	map from stream and does sanity check.
+	(mapping-read): Argument can be a filename or stream. Call to
+	mapping-read-raw-map to factor out common code for both cases.
+
+	* code/filt.lisp (filt-select-map): This was still just
+	reading the raw structure from the cvs coprocess, which worked under
+	the old map format, when the internal and external representations
+	were the same. Now it calls mapping-read on the stream.
+
+2002-10-19  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* UPGRADE-EXISTING: New file.
+
+2002-10-19  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp: Clear out *modules* list before requiring 
+	modules. This is needed so that mcvs-upgrade works, because there
+	is already a populated list in the Lisp image.
+
+2002-10-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Detect failure to start text editor.
+
+	* code/posix.lisp (*editor*): Change name to *mcvs-editor*, due
+	to name-clash with a CLISP extension!
+
+	* code/mcvs-main.lisp: Likewise.
+
+	* code/types.lisp (types-let-user-edit): Provide an individual
+	restart-case block around the invocation of the text editor,
+	which lets the user re-try the editor.
+
+2002-10-14  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Compiler warning fix.
+
+	* code/posix.lisp (*argument-limit*): Constant moved here.
+
+	* code/clisp-unix.lisp (*argument-limit*): Constant removed.
+
+	* code/cmucl-unix.lisp (*argument-limit*): Likewise.
+
+2002-10-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/install.sh: generate a script called mcvs-upgrade.
+
+2002-10-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/prop.lisp (mcvs-prop): Read *mcvs-map*, not *mcvs-map-local*.
+
+2002-10-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*watchers-options*): New constant.
+	(*edit-options*): Likewise.
+	(*unedit-options*): Likewise.
+	(*editors-options*): Likewise.
+	(*mcvs-command-table*): Added watchers, edit unedit, and editors
+	commands.
+	(*usage*): Updated.
+
+	* code/generic.lisp (mcvs-watchers-wrapper, mcvs-edit-wrapper,
+	mcvs-unedit-wrapper, mcvs-editors-wrapper): New functions.
+
+2002-10-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*usage*): Describe export and watch commands.
+
+2002-10-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*watch-options*): New constant.
+	(*mcvs-command-table*): New entry for watch command.
+
+	* code/watch.lisp: New file.
+
+2002-10-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*export-options*): New constant.
+	(*mcvs-command-table*): New entries for export command.
+
+	* code/checkout.lisp (mcvs-checkout): New keyword to specify export
+	behavior.  This causes cvs export to be run instead of checkout,
+	and the MCVS directory to be deleted after.
+	(mcvs-checkout-wrapper): Common function factored out into a flet.
+	(mcvs-export-wrapper): New function. Verifies that one of -D and -r
+	options is present, then runs mcvs-checkout, specifying export
+	behavior.
+
+2002-10-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*update-options*): Added -C option.
+
+	* code/update.lisp (mcvs-update): Fall back on the mcvs-generic
+	if --metaonly or --nometa is specified to run CVS on specific
+	files.
+
+2002-10-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/filt.lisp (mcvs-filt): Do not filter F- names if
+	immediately preceded by MCVS/ prefix.
+
+2002-10-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/clisp-unix.lisp (execute-program): Provide debug traces
+	for command execution.
+
+2002-10-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/add.lisp (*add-help*): Remove spurious text cut and pasted from
+	checkout help.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/prop.lisp (mcvs-prop): Result of real-to-abstract-path
+	must be canonicalized.
+
+	* code/remove.lisp (mcvs-remove): Likewise.
+
+	* code/generic.lisp (mcvs-generic): Likewise.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/move.lisp (move-guts, mcvs-move): Canonicalize the destination
+	path in mcvs-move, rather than mcvs-guts.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/create.lisp (mcvs-create): Add the DISPLACED filename
+	to the .cvsignore file.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/posix.lisp (path-prefix-equal): Handle empty strings.
+	
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/move.lisp (move-guts): If an error occurs for each 
+	source in a multiple move, and the user skips each source,
+	generate the error that all sources were skipped.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/move.lisp (source-check): Generate error if a move
+	of the sandbox root is attempted.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/remap.lisp (mcvs-remap): Preserve property lists of
+	mapping entries, and pick up changes in execute permission.
+
+	* code/mapping.lisp (mapping-convert-out): If the mapping entry's
+	executable flag is nil, then remove the :exec entry from the property
+	list.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mapping.lisp (equal-filemaps): Repair completely broken
+	function.
+
+	* code/move.lisp (mcvs-move): Added little hack for turning
+	no-op moves into errors. Without this the behavior is confusing,
+	since the program appears to do nothing.
+
+2002-10-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/add.lisp (mcvs-add): Provide a continue restart around
+	the code that builds up the expanded-paths for each iteration of the
+	loop. Without this, errors in that code cause the program to bail, even
+	though errors in the rest of the loop body are continuable.
+
+2002-10-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/dirwalk.lisp (dirwalk): If the argument is not a directory,
+	the callback must still be invoked. This was done prior to
+	a 2002-05-20 commit. I can't quite remember why it was changed; 
+	but I seem to recall thinking about the new dirwalk-skip catch,
+	and how it must be always visible to the callback closure, so
+	that the (skip) mechanism works.
+
+2002-10-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/add.lisp (mcvs-add): Reshuffle restart to a higher nesting
+	level, so that an error on one item won't abort the whole operation.
+
+2002-10-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/convert.lisp (mcvs-convert): Maintenance so that this tool
+	at least runs, even though it doesn't do anything resembling a
+	reasonable conversion job.
+
+2002-10-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/clisp-unix.lisp (guid-gen): Changes for Cygwin broke the
+	case when /dev/urandom is available.
+
+2002-10-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/find-bind.lisp (find-bind): Allow empty variable list, as
+	described by the documented syntax. 
+
+2002-10-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/error.lisp (mcvs-error-handler): Simplify roundabout way
+	of printing error message.
+
+	* code/mapping.lisp (mapping-write): Incorporate the low level error
+        message into the more informative error message.
+
+2002-10-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Error messages no longer specify prefixes like "mcvs:" or
+        "mcvs-remove:". 
+
+	When no restarts are available, the error handler now adds the "mcvs:"
+	prefix when dumping the error text to the standard error stream,
+	and also adds a terminating newline.
+
+	The inability to write to the MAP file is converted to a more
+	informative error message.
+
+	New --debug option is supported to set the chatter level to 3.
+
+	* code/chatter.lisp: Use the symbolic constant when defining the
+	default chatter level value.
+
+	* code/mcvs-main.lisp (*cvs-options*, mcvs-help, mcvs-execute): Added
+	support for --debug option, and removed of prefixes from error
+	messages.
+
+	* code/options.lisp (filter-global-options): Support --debug.
+	(parse-opt): Removed prefixes from error messages.
+
+	* code/mapping.lisp (mapping-rename-files, mapping-dupe-check,
+	mapping-convert-in, mapping-synchronize, mapping-update): Removed
+	prefixes from error messages.
+	(mapping-write): Trap write error and convert to more informative
+	error message.
+
+	* code/error.lisp (mcvs-error-handler): In the case when no restarts
+	are available, format the error message by adding the mcvs: prefix
+	and a terminating newline.
+
+	* code/purge.lisp (mcvs-purge): Removed prefixes from error messages.
+
+	* code/restore.lisp (mcvs-restore): Likewise.
+
+	* code/move.lisp (move-guts, mcvs-move): Likewise.
+
+	* code/grab.lisp (mcvs-grab): Likewise.
+
+	* code/prop.lisp (mcvs-prop): Likewise.
+
+	* code/filt.lisp (filt-select-map, mcvs-filt): Likewise.
+
+	* code/branch.lisp (where-is-the-repository, mcvs-branch,
+	cvs-make-or-advance-tag, mcvs-merge, mcvs-list-branches,
+	mcvs-switch-wrapper): Likewise.
+
+	* code/add.lisp (mcvs-add, mcvs-add): Likewise.
+
+	* code/remove.lisp (mcvs-remove): Likewise.
+
+	* code/convert.lisp (classify-tags, mcvs-convert): Likewise.
+
+	* code/checkout.lisp (mcvs-checkout): Likewise.
+
+	* code/generic.lisp (mcvs-generic, mcvs-diff-wrapper): Likewise.
+
+	* code/create.lisp (mcvs-create, mcvs-create): Likewise.
+
+	* code/remap.lisp (mcvs-remap, mcvs-remap): Likewise.
+
+2002-09-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Minimal changes for building on Cygwin.
+
+	* code/install.sh (space_check, dash_check): Function definitions
+	modified to conform to bash2.
+
+	* code/clisp-unix.lisp (*have-dev-random*, *mcvs-random-state*):
+	New special variables.
+	(guid-gen): Rewritten to fall back on the Common Lisp random
+	function if /dev/urandom is not available.
+
+2002-09-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*options*): New variable. Gives
+	scripts access to to some global options.  The *args* variable now
+	holds only the remaining arguments after the options.
+	(mcvs-execute): Sets up *args* and *options* accordingly.
+	No longer parses out the --error-continue and --error-terminate
+	options.
+
+	* code/options.lisp (filter-global-options): The handling of
+	--error-continue and --error-terminate is done here. This is
+	the place to handle options that must be removed (not passed
+	down to CVS) and which do not trigger immediate actions in
+	mcvs-execute.
+ 
+2002-09-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*args*): New global variable. Gives
+	scripts access to command line.
+
+2002-09-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*cvs-options*): Add -i parameter which
+	takes the name of a script to invoke.
+	(*usage*): Updated to describe new option.
+	(mcvs-execute): Parse out -i option and load the specified file.
+
+2002-09-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/install.sh: Don't specify -K full option when running
+	specific, generated CLISP image already. When generating mcvs.mem,
+        load the compiled version mcvs-main, rather than mcvs-main.lisp.
+
+2002-09-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/install.sh: Check that the installation target path won't
+	look like a command line option to shell commands.
+
+2002-09-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*mcvs-command-table*): Added help for remove.
+
+	* code/remove.lisp (*remove-help*): New string constant.
+
+2002-09-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (mcvs-grab): Inspect the execute permissions
+	of stable and moved files, and update the :EXEC propery of
+	their mapping entries accordingly. In other words, grab changes
+	in execute permissions properly.
+
+2002-09-18  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/restore.lisp (mcvs-restore): Was still generating old-style
+	mapping entries.
+
+	* code/clisp-unix.lisp (executable-p (string)): New method for
+	executable-p generic function that takes a filename.
+
+2002-09-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/install.sh: Check that the installation target path
+	does not contain any spaces. It cannot, because it is used
+	in the #! line of an interpreter script. As a consequence of
+	this check, whitespace precautions in the expansion of $TARGET,
+	$TARGET_LIB and $TARGET_BIN have been removed.
+
+2002-09-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/checkout.lisp (mcvs-checkout): If a subdirectory path
+	is specified, verify that it is relative, and that it points
+	within the module.
+
+2002-09-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*checkout-options*): Removed -A and -N
+	options.
+	(*mcvs-command-table*): Added help for checkout and add.
+
+	* code/checkout.lisp (*checkout-help*): New string constant.
+
+	* code/add.help (*add-help*): Likewise.
+
+	* code/create.lisp (*create-help*): Mention interactive file
+	type specification.
+
+2002-09-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (*mcvs-command-table*): Add *grab-help*.
+
+	* code/grab.lisp (*grab-help*): New string constant.
+	
+2002-09-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/clisp-linux.lisp: File removed.
+
+2002-09-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Implement help text for create command.
+
+	* code/mcvs-main.lisp (mcvs-help): Fixes.
+	(*mcvs-command-table*): Add *create-help*.
+
+	* code/create.lisp (*create-help*): New string constant.
+
+2002-09-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Revamping help system to support more detailed help
+	for individual commands.
+
+	* code/mcvs-main.lisp (mcvs-help): New function.
+	(*help-options*): New constant.
+	(*mcvs-command-table*): New entry in each sublist element;
+	this is either nil, or a string containing help text.
+	(mcvs-execute): Update to use new table structure.
+
+2002-09-10  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/filt.lisp (mcvs-filt): Bugfix: was trying to
+	use NIL as if it were a mapping-entry struct after an unsuccessful
+	gethash.
+
+2002-09-10  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fix installation braindamage. The problem is that
+	the linkkit material is architecture specific; it was
+	wrong to copy that from CLISP.
+
+	* code/install.sh (CLISP_PATH, CLISP_ROOT, CLISP_LIB): New
+	variables, dynamically computed from clisp's location.
+	The script now runs the clisp-link under $CLISP_LIB rather
+	than using a replica, and uses $CLISP_LIB/linkkit rather
+	than a replica linkkit.
+	(CLISP): Variable renamed to LISPRUN.
+
+	* code/clisp-link: File removed.
+	* code/linkkit/modules.d: Likewise.
+	* code/linkkit/modules.c: Likewise.
+	* code/linkkit/clisp.h: Likewise.
+
+2002-09-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fix mistake dating back to April. 
+
+	* code/branch.lisp (mcvs-merge): Symbol T was being invoked 
+	as function in the case that merge is invoked on a sandbox
+	that is sticky to a non-branch tag.
+
+2002-09-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Another stupid error.
+
+	* code/create.lisp (mcvs-create): Fix use to unbound
+	variable file-info which should be fi.
+
+2002-09-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fix stupid error.
+
+	* code/mcvs-main.lisp (*move-options*): New constant.
+	(*mcvs-command-table*): Fix broken entry for "move" and "mv".
+
+2002-09-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Eliminate inappropriate pluralization in messages.
+
+	* code/grab.lisp (mcvs-grab): Use ~:p to substitute a 's'
+	if the parameter is other than 1.
+
+	* code/options.lisp (parse-opt): Likewise.
+
+2002-09-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/prop.lisp (mcvs-prop): Support --value option to
+	associate an arbitrary value with a property indicator.
+
+	* code/mcvs-main.lisp (*usage*): Describe --value and
+	clarify syntax.
+
+2002-09-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Unify command option parsing, and enable it to handle options with 
+	any number of required parameters.
+
+	* code/options.lisp (parse-opt): Function rewritten. Argument
+	syntax and semantics have changed. Options are specified
+	as an association list whose member are string-integer
+	pairs. The string is the option name, the integer specifies
+	the number of required parameters.
+	(option-spec-expand): New function.
+	(option-spec): New macro.
+	(define-option-constant): New macro.
+
+	* code/mcvs-main.lisp (*cvs-options-arg*): Constant removed.
+	(*cvs-options*, *create-options*, *grab-options*, *checkout-options*,
+	*add-options*, *remove-options*, *update-options*,
+	*switch-options*, *commit-options*, *diff-options*, *tag-options*,
+	*log-options*, *status-options*, *annotate-options, *filt-options*,
+	*convert-options*, *branch-options*, *merge-options*,
+	*remerge-options*, *list-branches-options*, *remap-options*,
+	*purge-options*, *restore-options*, *prop-options*): Constant
+	definitions refactored using define-option-constant macro.
+	(*mcvs-command-table*): Use , rather than ,@ to insert 
+	option specs.
+	(*usage*): Suggest cleaner syntax for prop options.
+	(mcvs-execute): Switch to new parse-opt.
+
+2002-09-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New prop command for manipulating property lists.
+
+	* code/mcvs-main.lisp (*prop-options*): New constant.
+	(*mcvs-command-table*): New entry.
+	(*usage*): Update.
+
+	* code/mapping.lisp (mapping-entry-parse-plist): Just unconditionally
+	set execute slot based on :exec property.
+
+	* code/prop.lisp: New file.
+
+2002-09-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Be transparent with respect to mapping entry property lists:
+	preserve unrecognized indicators and values.
+
+	* code/mapping.lisp (mapping-entry): New slot, raw-plist,
+	records raw property list from external mapping representation.
+	(mapping-entry-parse-attributes): Renamed to mapping-entry-parse-plist.
+	Argument dropped; parses raw-plist slot instead.
+	(mapping-convert-in): Set raw-plist slot to value of fourth list
+	element of :FILE entry, or fifth list element of :SYMLINK entry.
+	(mapping-convert-out): Unify any slot values that are represented as
+	properties into raw-plist, and insert any non-empty plists into
+	external representation.
+
+2002-09-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Low level support for versioning executable bit.
+
+	* code/unix-bindings/unix.lisp (unix-funcs:chmod): New callout 
+	function.
+
+	* code/clisp-unix.lisp (executable-p, make-executable,
+	make-non-executable): New generic functions.
+	(executable-p (file-info), make-executable (file-info),
+	make-executable (string), make-non-executable (file-info),
+	make-non-executable (string)): New methods.
+
+	* code/add.lisp (mcvs-add): Record whether new file is
+	executable or not, by setting executable slot in mapping-entry.
+
+	* code/create.lisp (mcvs-create): Likewise.
+
+	* code/sync.lisp (synchronize-files): New parameter, 
+	should-be-executable, tells function which way to set
+	permissions after synchronizing files.
+
+	* code/mapping.lisp (mapping-entry): New slot, executable.
+	(mapping-entry-parse-attributes): New function, parses
+	new optional property list from :FILE entries in a mapping.
+	(mapping-convert-in): Parse property list that may be present in fourth
+	list element of a :FILE entry.
+	(mapping-convert-out): Write out executable flag as
+	:EXEC property, if true.
+	(mapping-synchronize): Pass executable flag down to synchronize-files.
+
+2002-09-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (determine-moved-files): Rename local
+	variable for clarity.
+	(determine-moved-symlinks): Actually compute what symlinks
+	are moved.  Takes one more argument, the stable-files list.
+	(mcvs-grab): Fix small destructuring-bind bug in symlink
+	moving code. Also, read the targets of moved symlinks into
+	the map, like it is already done with stable symlinks.
+
+2002-09-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (mcvs-grab): Iterate over stable symlinks,
+	and incorporate changed targets into the mapping. In other
+	words, notice and incorporate retargetted symlinks.
+
+2002-08-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Merging new symbolic link support from symlink-branch.
+
+	* code/mapping.lisp (mapping-update): Resolve merge conflict.
+	The branch fixed the 2002-08-24 bug also.
+
+2002-08-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (move-candidates): Function renamed to
+	determine-moved-files.
+	(determine-moved-symlinks): New function, doesn't do anything
+	yet.
+	(mcvs-grab): Updated to process symlinks and use new
+	mapping-entry structure.
+
+2002-08-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/remap.lisp (mcvs-remap): Use new mapping entry structure.
+	For now, preserve symbolic link entries as they are, processing only
+	files.
+
+	* code/mapping.lisp (equal-mapping-entries, equal-mappings): New
+	functions.
+
+2002-08-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/clisp-unix.lisp (initialize-instance link-error): Make
+	error message less confusing about which path refers to the
+	object being created, and which path refers to what it links to.
+
+	* code/mapping.lisp (mapping-rename-files): Bugfix: destructuring-bind
+	appeared in place of with-slots.
+	(mapping-synchronize): When creating symbolic link, ensure that
+	its directory exists.
+	(mapping-update): Likewise.
+
+2002-08-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/add.lisp (mcvs-add): Change to new mapping-entry data structure
+	and handle symbolic links.
+
+	* code/create.lisp (mcvs-create): Likewise.
+	
+	* code/filt.lisp (make-filt-hash, mcvs-filt): Change to new 
+	mapping-entry data structure. Filt does not care about symlinks.
+
+	* code/types.lisp (types-remove-ignores, types-make-cvs-adds): 
+	Change to new mapping-entry data structure.
+
+	* code/mapping.lisp (mapping-generate-name): Renamed to
+	mapping-generate-id. Interface changes slightly.
+	(mapping-extract-kind): New function, factored out from mcvs-generic.
+	(mapping-update): Unlink existing symbolic link before
+	re-linking it.
+
+	* code/convert.lisp (mcvs-convert): Use new name and interface
+	of mapping-generate-name function.
+
+	* code/create.lisp (mcvs-create): Likewise.
+
+	* code/generic.lisp (mcvs-generic): Code to extract :file 
+	entries from map factored out to mapping-extract-kind.
+
+
+2002-08-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/generic.lisp (mcvs-generic): Use new mapping-entry data structure.
+	Filter out mapping entries which are other than of the :file type, so
+	we don't pass to CVS things it doesn't know about, like symbolic
+	links.
+
+2002-08-24  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Support for symbolic links added to the mapping module.  The format of
+	the map file has changed to accomodate this.  The new format of the
+	list entries is (:keyword "id" "path" ...) where the keyword is either
+	:file or :symlink (for now, extensible obviously), "id" is a unique
+	identifier (for regular files, it is their MCVS/F-* name) and "path" is
+	the sandbox path. Other things can follow; for symlinks, there is a
+	string representing the symlink target.  Internally, a new data type
+	called mapping-entry is used; this is a struct. So the functions which
+	read and write maps now convert between the struct format and the above
+	format.
+
+	* code/unix-bindings/unix.lisp (unix-funcs:readlink): New function.
+
+	* code/unix-bindings/impl.c (impl_readlink): New function.
+
+	* code/clisp-unix.lisp (readlink-error): New condition.
+	(initialize-instance readlink-error): New method for
+	initialize-instance generic function, specialized for readlink-error.
+	(readlink): New function.
+
+	* code/mapping.lisp (mapping-entry): New struct, with slots
+	file, id, path and target.
+	(mapping-same-object-p): Renamed to mapping-same-id-p.
+	(mapping-object-lookup, mapping-moved-p): Unused functions removed.
+	(mapping-extract-paths, mapping-lookup, mapping-prefix-lookup,
+	mapping-prefix-matches, mapping-same-path-p, mapping-rename-files,
+	mapping-removed-files): Functions updated to use the new data
+	structure.
+	(mapping-dupe-checks): Rewritten for new data structure, and to
+	use hashes rather than silly sorting.
+	(mapping-convert-old-style-in, mapping-convert-in,
+	mapping-convert-out): New functions.
+	(mapping-read): Handle new and old style representations,
+	handle conversion to internal representation.
+	(mapping-write): Convert to new-style external representation
+	before writing out.
+	(mapping-synchronize): Handle symbolic links. If a link is missing,
+	create it. If it's present but different from what it should be,
+	erase it and re-create it.
+	(mapping-update): Use new data structure. Handle symbolic links.
+
+	* code/remove.lisp (mcvs-remove): Refer to new function
+	name, mapping-same-id-p.
+
+2002-08-24  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-update): Bugfix 
+	in logic which prints clobbering moves. The functions
+	abstract-to-real-path and second were applied in the wrong order.
+
+2002-08-23  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/clisp-unix.lisp (link-error): New slot, kind. Holds
+	the string "symbolic" or "hard".
+	(initialize-instance link-error): Use new slot in constructing
+	message.
+	(link): Specify "hard" value for :kind slot of condition.
+	(symlink): New function.
+
+	* code/clisp-linux.lisp: Likewise.
+
+2002-08-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/posix.lisp (execute-program): Function removed.
+	* code/clisp-linux.lisp (execute-program): Function added. Works
+	in terms of CLISP's run-program function rather than the shell
+	function, thus eliminating the need to build a command string
+	and escape shell characters.
+	* clisp-unix.lisp (excecute-program): Likewise.
+
+2002-08-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/posix.lisp (edit-file): Function renamed to invoke-file-on,
+	because this name clashes with a standard Common Lisp symbol.
+	* code/types.lisp (types-let-user-edit): Updated to use new name.
+  
+2002-08-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Use getcwd to to implement mcvs-locate.
+
+	* code/unix-bindings/unix.lisp (getcwd): New call out,
+	invokes impl_getcwd.
+
+	* code/unix-bindings/impl.c (impl_getcwd): New function,
+	use getcwd() to obtain current working directory, resizing dynamic
+	buffer if necessary to get the entire path.
+
+	* code/clisp-unix.lisp (getcwd): New wrapper function.
+
+	* code/dirwalk.lisp (go-up): Function removed.
+
+	* code/mapping.lisp (mcvs-locate): Rewritten to obtain
+	path using getcwd, then try looking for MCVS directory
+	in successively shorter prefixes of that path.
+
+2002-08-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Working back support for CLISP 2.27.
+
+	* code/install.sh: Bogus *null-pointer* hack is no longer added
+	to the generated mcvs script, since we have our own FFI functions for
+	doing the test.
+
+	* code/unix-bindings/unix.lisp (unix-funcs:null-pointer-p): New
+	function, tests a C pointer for null, returns T or NIL.
+	* code/unix-bindings/impl.c (impl_null_pointer_p): New function,
+	C implementation of unix-funcs:null-pointer-p.
+
+	* code/clisp-unix.lisp (pointer-null): New macro, uses 
+	ffi:foreign-address-null under CLISP 2.28 or greater, or
+	unix-funcs:null-pointer-p, under an older CLISP.
+
+2002-08-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fixes to get clean build from fresh checkout.
+
+	* code/unix-bindings/link.sh: Remove test for presence of unix.c;
+	this was causing the failure to add the unix module to the module
+	list, which caused it to generate an empty modules.h file under
+	code/unix-bindings-linking-set, resulting in a bad build of lisp.run.
+
+	* code/unix-bindings/Makefile: Add ``clean'' target, so we
+	can do a make clean here.
+
+2002-08-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Retargetting CVS with new system call bindings that are not GNU/Linux
+	specific.
+
+	* code/install.sh: The way Meta-CVS is installed changes now.
+	The argument is now a prefix above a bin and lib directory.
+	Invokes clisp-link to build a new CLISP linking set in the
+	directory code/unix-bindings-linking-set. The lisp executable
+	(lisp.run) is copied to $TARGET/lib/clisp/meta-cvs/ and the Meta-CVS
+	memory image is also copied there under the name lispinit.mem.
+	The mcvs script is then generated in $TARGET/bin, correctly referring
+	to these images.
+
+	* code/system.lisp: Choose the new clisp-unix module, if running
+	under a CLISP image which has the new bindings loaded. Otherwise fall
+	back on the old clisp-linux, which uses the linuxlibc6 module.
+
+	* code/clisp-unix.lisp: New file, closely based on clisp-linux.lisp,
+	but targetting new bindings in the unix-funcs package.
+
+	* code/clisp-link: New file. Script borrowed from CLISP distribution,
+	needed for building CLISP executables with custom modules added.
+
+	* code/linkkit: New directory. This is needed by by clisp-link.
+	* code/linkkit/modules.c: Borrowed file from CLISP, needed 
+	by clisp-link.
+	* code/linkkit/clisp.h: Likewise.
+	* code/linkkit/modules.d: Likewise.
+
+	* code/unix-bindings: New directory. This is a module kit used
+	by clisp-link to extend the Lisp executable and memory image
+	with new C functions.
+
+	* code/unix-bindings/link.sh: Definitions of variables needed
+	by clisp-link.
+
+	* code/unix-bindings/unix.lisp: The glue module which defines the Lisp
+	interface to the external C functions. Most of the functions call
+	directly into the system's C library, but a few call to wrapper
+	functions.  Compiling unix.lisp produces a unix.c file which is
+	compiled and linked into the CLISP executable, and a unix.fas which
+	contains the Lisp interface bits that are loaded as part of the Lisp
+	image.
+
+	* code/unix-bindings/Makefile: Rules for compiling the module, invoked by clisp-link.
+
+	* code/unix-bindings/impl.c: Some special functions that help
+	implement the binding.
+
+2002-07-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	More changes to syntax of grab command. Now -A must be
+	specified to do a grab onto main trunk.
+
+	* code/mcvs-main.lisp (*grab-options*): -A option added.
+	
+	* code/grab.lisp (mcvs-grab): Test for presence of -A 
+	option. Check that either -A or -r is present, but not both.
+
+2002-07-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Syntax of grab command changed. The branch is no longer
+	specified as an argument after the module name. Rather,
+	it is specified using the -r option.
+
+	* code/mcvs-main.lisp (*grab-options*): -r added to list.
+
+	* code/grab.lisp (mcvs-grab, mcvs-grab-wrapper): Argument 
+	syntax change, support -r option.
+
+	* INSTALL: Instructions change, since building the GNU/Linux libc
+	into CLISP is no longer required.
+
+2002-07-27  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* docs/meta-cvs.latex: Rewrote most of Introduction.
+
+2002-07-27  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New scripts for building LaTeX document. These do the right thing
+	to minimize the number of times latex is run. Make proved useless.
+
+	* docs/generate.sh: New file.
+	* docs/cleanup.sh: New file.
+
+2002-07-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* INSTALL: Revising CLISP installation instructions to the
+	easier method using --build. 
+
+2002-07-18  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* README: Renaming file to QUICK-GUIDE.
+
+2002-07-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/generic.lisp (mcvs-generic): Support new keyword, 
+	:no-fix-empty-file-list. Specifies that if no files are passed,
+	and the --metaonly option is not present, the CVS command is to be
+	executed without any file arguments.
+	(mcvs-commit-wrapper): Specify :no-fix-empty-file-list t when
+	calling mcvs-generic. Thus commit now has the behavior that
+	when it is passed no file arguments, it does a true global commit.
+
+2002-07-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/restore.lisp (mcvs-restore): Work properly with
+	partial sandboxes; that is, move things to lost+found
+	directory at the top of the partial sandbox, rather than
+	the abstract root.
+
+2002-07-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/mcvs-main.lisp (usage): Updated to describe restore
+	command.
+
+2002-07-14  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/grab.lisp (mcvs-grab): If there are only added files
+	or only removed files, don't bother scanning any files,
+	since there are no moves to compute.
+
+2002-07-14  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* code/find-bind.lisp (vector-bind): New macro, binds symbols
+	to elements of a vector. 
+	(find-bind-extract-vals): Rewrite using vectors. Fixes
+	a bug: the old version was not handling duplicate keys
+	properly.
+	(find-bind): Integrate with new find-bind-extract-vals.
+
+2002-07-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Directory structure rearrangement; source files are moved
+	under code/ subdirectory. A documentation directory is added.
+ 
+2002-07-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* move.lisp (move-guts): When moving multiple sources to
+	a target directory, provide a restart to skip a bad source.
+
+2002-07-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* seqfuncs.lisp (intersection-difference): Support a new
+	keyword parameter :squash-nil.
+
+	* mapping.lisp (mapping-difference): Filter non-moved pairs
+	directly in intersection-difference call using :squash-nil, 
+	eliminating the need to do a second remove-if pass.
+
+2002-07-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-difference): Rewrite using
+	intersection-difference.
+
+2002-07-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* grab.lisp (added-removed): Function removed.
+	(mcvs-grab): Use new intersection-difference function
+	instead of added-removed.
+
+2002-07-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* seqfuncs.lisp (intersection-difference): New function.
+
+2002-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* grab.lisp (mcvs-grab): Upgraded to work with partial sandbox.
+	Extra parameter added to specify subdirectory. File analysis
+	is only done on visible files.
+	(mcvs-grab-wrapper): Take optional parameter to specify 
+	subdirectory.
+
+2002-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-update): If no-delete-removed is
+	true, nevertheless print the ``* removing...'' messages
+	to show that removal from the mapping is going on.
+
+2002-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* remap.lisp (mcvs-remap): Remap only the visible sandbox,
+	and combine resulting map with the invisible portion.
+
+2002-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* remove.lisp (mcvs-remove): Added path conversions to support
+	partial sandboxes.
+
+2002-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* generic.lisp (mcvs-generic): Added path conversions to support
+	partial sandboxes.
+
+2002-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* add.lisp (mcvs-add): Added path conversions to support
+	partial sandboxes.
+
+2002-07-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* grab.lisp (mcvs-grab): Bugfix: determination of common words
+	was failing on small file sets because the min function was
+	used instead of the max to compute the threshold.
+
+2002-07-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* move.lisp (source-check): Use real source path for checking
+	against MCVS/ area.
+	(mcvs-move): Ditto for destination path.
+
+2002-07-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-update): Make sure only those files
+	are processed which are visible in the sandbox. If a file
+	is moved out of or into visibility, this is indicated in the
+	diagnostic output.
+
+2002-07-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (real-path-exists): Use path-prefix-equal, because
+	that handles all the tricky cases.
+	(abstract-to-real-path): Handle the case when abstract path
+	is the same as the path prefix, with or without the trailing
+	slash.
+
+2002-07-05  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Start of experimental ``partial sandbox'' work.
+
+	* mapping.lisp (*mcvs-displaced-name*, *mcvs-displaced*): New
+	constants, hold name of administrative file MCVS/DISPLACED which stores
+	the displaced path prefix.
+	(*displaced-path-prefix*): New special variable, holds displaced
+	path prefix read from MCVS/DISPLACED.
+	(*displaced-path-length*): New special variable, holds length
+	of string stored in *displaced-path-prefix*.
+	(real-path-exists, abstract-to-real-path, real-to-abstract-path):
+	New functions for mapping between actual sandbox path, and 
+	the abstract sandbox path stored in the mapping.
+	(in-sandbox-root-dir): Macro modified to read *mcvs-displaced*
+	administrative file, and set up the new special variables.
+	(mapping-synchronize): Only operate on files that are present
+	in the sandbox; i.e. that have real paths corresponding to their
+	abstract paths. Convert to the real path when calling lower
+	level file manipulation functions.
+	(mapping-update): Likewise, but this conversion is not complete.
+	(displaced-path-read, displaced-path-write): New functions for
+	reading and writing MCVS/DISPLACED.
+
+	* checkout.lisp (mcvs-checkout): One extra optional parameter.
+	Specifies the subdirectory for executing a partial checkout.
+	(mcvs-checkout-wrapper): Parse out optional parameter.
+
+	* grab.lisp (mcvs-grab): For now, when calling mcvs-checkout,
+	specify the new parameter as nil. Eventually, grab will work
+	over partial checkouts.
+
+	* move.lisp: Upgraded to work with partial sandboxes.
+	(source-check): Convert source parameter to real path for
+	existence check.
+	(move-guts): Convert destination parameter to real path before
+	invoking (stat ...) on it.
+	(mcvs-move): Map all path arguments to abstract paths.
+
+2002-07-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* find-bind.lisp (find-bind-extract-vals): Rewrite for
+	efficiency. No impact on Meta-CVS, just done for the sake of improving
+	the quality of this highly reusable code. There is specialized
+	code now depending on whether the input sequence is a list or
+	a vector. A single pass is made over the sequence, with multiple
+	passes over the search values. The sequence could be large,
+	whereas the list of search values is typically going to be small.
+	(find-bind): Modified to reflect slight interface change
+	in find-bind-extract-vals.
+
+2002-07-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-main.lisp (*usage*): Describe --meta and --metaonly options.
+
+2002-07-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* purge.lisp (mcvs-purge): Factor out code for computing
+	deleted files.
+
+	* mapping.lisp (mapping-removed-files): New function, contains
+	code factored from mcvs-purge. 
+
+	* restore.lisp: New file.
+	(mcvs-restore, mcvs-restore-wrapper): New functions.
+
+2002-07-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout): Don't delete the MCVS directory
+	of an existing checkout.
+	
+2002-07-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Adding purge command.
+
+	* mcvs-main.lisp (*purge-options*): New constant.
+	(*mcvs-command-table*): New entry.
+	(*usage*): Update.
+
+	* purge.lisp: New file.
+	(mcvs-purge, mcvs-purge-wrapper): New functions.
+
+2002-07-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Grab no longer synchronizes to recreate deleted files immediately
+	before blowing them away.
+
+	* grab.lisp (mcvs-grab): Specify :no-sync t when calling mcvs-remove.
+
+	* remove.lisp (mcvs-remove): Support new no-sync keyword. This tells
+	mcvs-remove that the files being removed from the mapping,
+	don't exist in the sandbox. So it's not necessary to call
+	mapping-synchronize, and mapping-update can be told via 
+	:no-delete-removed t not to try to remove deleted files.
+
+	* mapping.lisp (mapping-update): New no-delete-removed keyword
+	parameter.
+
+2002-06-29  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* create.lisp (mcvs-create): Take out vendor branch parameter,
+	use "Created-by-Meta-CVS" as the vendor tag.
+	(mcvs-create-wrapper): Take out vendor branch parameter.
+
+2002-06-29  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* generic.lisp (mcvs-tag-wrapper): This one needs to include
+	meta files by default.
+
+2002-06-29  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Moving toward sane, user-friendly handling of meta-files.
+	Two new options are added --meta and --metaonly.
+	All reporting commands---diff, log, annotate---default to
+	not including the meta files. The update command remains special.
+	It does not include meta files if given filename arguments.
+	If invoked with no arguments, it does a global CVS up.
+	The commit command defaults to including the meta files.
+	The three options simply override default behavior.
+
+	* options.lisp (*nometa-option*): Eliminated useless docstring.
+	(*meta-option*): New variable.
+	(*nometa-option*): New variable.
+	(filter-global-options): Clean rewrite using find-bind.
+
+	* generic.lisp (mcvs-generic): New keyword parameters
+	default-include-meta-files, need-update-after. Implements new logic
+	related to the new options. Performs (mapping-update) if
+	need-update-after is true and metafiles were subject to cvs update.
+	(mcvs-commit-wrapper): Calls mcvs-generic with 
+	:default-include-meta-files t.
+
+	* update.lisp (mcvs-update): No longer overrides the *nometa-option*
+	special variable. Passes :need-update-after t to mcvs-generic.
+
+	* mcvs-main.lisp (*cvs-options*): New options entered into list.
+
+2002-06-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* memoize.lisp (memoize-expander): Use ordinary hash for memoizing
+	monadic functions.
+
+2002-06-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Word comparisons are case-insensitive in mcvs grab now.
+	Also, common words are determined and eliminated from the correlation.
+	Common words are those that appear in at least 5 of the
+	added or removed files, or 20% of them, whichever is greater.
+
+	Noticed some unnecessary use of string-lessp on F-file names in
+	mapping.lisp.
+
+	* grab.lisp (read-word-hash): Use #'equalp test for case-insensitive
+	string comparisons.
+	(added-removed): Use string< instead of string-lessp for comparing
+	paths.
+	(determine-common-words, eliminate-common-words): New functions.
+	(move-candidates): Acceptance threshold reduced to 30%, since
+	elimination of common words reduces the similarity correlation.
+	(mcvs-grab): Use string< instead of string-lessp when sorting paths.
+	Do the common words computation.
+	
+	* mapping.lisp (mapping-dupe-check, mapping-write, 
+	mapping-difference): Use string< instead of string-lessp.
+
+2002-06-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* memoize.lisp (factor-memo-labels): New function, rips apart
+	functions generated by memoize-expander, in order to factor
+	out the multi-hash defining let blocks.
+	(memoized-labels): Interface corrected. Also, use new function to
+	generate a labels block that allows for mutually recursive memoized
+	functions which preserve hash contents across arbitrarily mutually
+	recursive calls. This is done by enclosing the functions in one big
+	let block which binds all the hashes.
+
+2002-06-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* seqfuncs.lisp (lcs-list): Specify #'eq test for memoization 
+	parameters.
+
+2002-06-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Adding some cool code: a multi-hash datatype which implements
+	multi-dimensional sparse arrays using a tree of hash tables,
+	and a function memoizer which uses multi hash to index on 
+	function arguments.
+
+	* multi-hash.lisp (multi-hash): New class.
+	(initialize-instance): New method on multi-hash.
+	(multi-hash-common-code): New macro.
+	(get-multi-hash, set-multi-hash): New functions.
+
+	* memoize.lisp (define-memoized-function,
+	memoized-labels): New macros.
+	(remove-key-aux-rest strip-lambda-list, extract-tests,
+	remove-tests, memoize-expander): New functions.
+
+	* seqfuncs.lisp (lcs-list): Function is now correctly
+	memoized using define-memoized-function.
+
+2002-06-26  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* grab.lisp (read-word-hash): Memory use optimizations: use smaller
+	initial size for tokens; re-use the same token object when the
+	hash already contains a duplicate.
+	(correlate): Renamed to correlate-word-hashes.
+	(correlate-paths): New function; computes a confidence-reducing
+	factor based on the differences between two paths.
+	(move-candidates): Use correlate-paths to lower the confidence
+	for distant moves. This could help sort out ambiguities when
+	projects contain very similar or duplicate files which are subject
+	to parallel moves.
+
+	* seqfuncs.lisp (lcs-list, lcs-vector, 
+	longest-common-subsequence): New functions.
+
+2002-06-25  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New feature: grab command. Takes snapshot of code and imports
+	it to a branch, trying to determine which of the added and
+	removed files are actually moves.
+
+	* grab.lisp: New file.
+	(read-word-hash, word-hash-file, correlate, added-removed,
+	move-candidates, mcvs-grab, mcvs-grab-wrapper): New functions.
+
+	* mcvs-main.lisp (*grab-options*): New constant.
+	(*mcvs-command-table*): New entry.
+	(*usage*): New text.
+
+	* checkout.lisp (mcvs-checkout): Write out MAP-LOCAL even
+	if :no-generate t is specified.
+
+2002-06-24  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout): New key parameter, no-generate.
+	Tells the checkout function not to unpack the MCVS directory.
+	This will be useful when mcvs-checkout is used as a subfunction
+	of the new grab command. Failed CVS call is now turned into
+	an error. The MCVS subdirectory is *always* deleted, even if the
+	checkout did not create the checkout directory.
+
+2002-06-24  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* dirwalk.lisp (dirwalk-fi): Bugfix: top call was not
+	passing down keyword parameters to recursive call.
+
+2002-06-23  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* posix.lisp (canonicalize-path): Use concatenate-string 
+	instead of format.
+
+2002-06-23  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* posix.lisp (parse-posix-namestring): Clean rewrite.
+
+2002-06-23  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	The ``import'' command is renamed to ``create''.
+
+	* mcvs-main.lisp (*create-options*): Renamed to *import-options*.
+	(*mcvs-command-table*): Updated.
+	(*usage*): Updated.
+
+	* import.lisp: File renamed to create.lisp.
+	(mcvs-import): Renamed to mcvs-create; some arguments renamed.
+	(mcvs-import-wrapper): Renamed to mcvs-create-wrapper.
+	
+	* README: Updated.
+
+2002-06-22  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* split.lisp (split-fields): Optimized to extract tokens directly
+	from the input string using subseq rather than construct them
+	character by character.
+
+2002-06-22  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* find-bind.lisp (find-bind): Use #'values instead of #'(lambda (x) x).
+
+2002-06-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* clisp-linux.sh (:clisp-old): Added to *features*
+	for CLISP 2.28 or higher.
+	(*null-pointer*): Only defined when :clisp-old is present.
+	(pointer-null): Use new ffi:foreign-pointer-null if :clisp-old
+	feature is not present.
+
+	* install.sh: Don't do *null-pointer* workaround hack 
+	unless :clisp-old feature is present in the memory image.
+
+2002-06-21  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* types.lisp (types-make-cvs-adds): Serious bugfix. Forgot
+	to strip MCVS/ prefix from those F- files which don't match
+	any type entries.  This caused cvs add to fail for unsuffixed
+	files.
+
+2002-06-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* types.lisp (types-to-import-wrapper-args): Don't use backquote
+	template to generate a list that will be destructively catenated
+	by mapcan.
+
+2002-05-22  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout): If a checkout directory is
+	created and then the CVS checkout fails, the directory is
+	then removed.
+
+2002-05-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* find-bind.lisp (find-bind-extract-vals, find-bind): Process default 
+	values in find-bind-extract-vals, instead of in the expansion of
+	find-bind, thereby reducing some macro bloat.
+
+2002-05-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* remap.lisp (mcvs-remap): Loads MAP as well as MAP-LOCAL.
+	If it the mappings differ, an error is signaled.  The user can choose
+	to ignore the error, in which case MAP is clobbered.
+
+2002-05-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Adding mcvs remap command.
+
+	* dirwalk.lisp (dirwalk-fi, dirwalk, for-each-file-info): Default
+	behavior is now preorder (visit directory before its entries).
+	A keyword is provided to select the old postorder behavior.
+	A catch is provided in dirwalk-fi that allows the caller to 
+	skip processing the currently traversed directory. The for-each-*
+	macros provide a local function called (skip) to do this.
+	(delete-recursive): This function depends on postorder behavior
+	in for-each-file-info, so it explicitly selects it now.
+
+	* mcvs.lisp (*remap-options*): New constant.
+	(*mcvs-command-table*): Add entry for new function.
+	(*usage*): Describes new function.
+
+	* remap.lisp: New file.
+	(mcvs-remap, mcvs-remap-wrapper): New functions.
+
+2002-05-15  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* sync.lisp (synchronize-files): Signal an error when the two files
+	to be synchronized have the same time stamp. Provide two restarts
+	for doing the synchronization either way.
+
+2002-05-06  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (in-sandbox-root-dir): Fix symbol macro 
+	sandbox-down-path; it was referring to the (quote #:DOWNPATH-NNN)
+	rather than #:DOWNPATH-NNN.
+
+2002-05-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* import.lisp (mcvs-import): Specify -I ! argument to cvs import
+	so that it does not ignore any F- files.
+
+2002-05-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-update): Provide restart that allows
+	user to ignore file removal error.
+
+2002-04-19  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Porting to CMUCL.
+
+	* system.lisp: Conditionally load new module cmucl-unix.
+
+	* mapping.lisp (mapping-dupe-check, mapping-write, 
+	mapping-difference): Fixes related to sort function; we were
+	relying on CLISP's preservation of the cons cell order.
+
+	* cmucl-unix.lisp: New file.
+
+2002-04-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout): Allow -d to specify current
+	directory as the checkout directory. Do not complain if the
+	target directory exists, just try to use it anyway, 
+	unless it is the root of an existing Meta-CVS sandbox. Use
+	the mapping-update function to update the sandbox.
+	These changes allow a Meta-CVS sandbox to blend with an existing
+	directory structure, a useful feature.
+
+2002-04-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* generic.lisp (mcvs-generic): Change how empty file argument list
+	is handled. Rather than rewriting it to '(".") we do a proper
+	map-prefix-lookup. Synchronizing and invoking CVS is elided
+	if the resulting list of files to process is empty and the --nometa
+	option is specified.
+
+2002-04-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* branch.lisp (parse-sticky): New function.
+	(read-cvs-entries): New function.
+	(same-tag-check): New function.
+	(what-tag-are-we-on): Renamed to what-are-we-sticky-to. Calls
+	parse-sticky to return structured tag.
+	(mcvs-merge): Make use of structured tags.
+	(mcvs-list-branches): Make use of structured tags. Indicate
+	when sandbox is inconsistently sticky.
+
+2002-04-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* remove.lisp (mcvs-remove): Corrected careless bracketing 
+	introduced on 2002-03-15 that rendered this function ineffective.
+
+2002-04-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Absolute paths resolved against sandbox root.
+
+	* posix.lisp (path-absolute-p): New function. Predicate to
+	test whether a path is absolute.
+
+	* mapping.lisp (in-sandbox-root-dir): sandbox-translate-paths
+	function detects absolute path, and treats it as relative to 
+	sandbox root.
+
+2002-04-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New switch command added, plus sticky tag related
+	bugfixes and enhancement of mcvs list-branches.
+
+	mcvs-main.lisp (*switch-options*): New constant.
+	(*mcvs-command-table*): New entries.
+	(*usage*): New help text.
+
+	branch.lisp (what-branch-are-we-on): Function renamed to 
+	what-tag-are-we-on. Tests the first letter which is T or N; if
+	it is not T, then it's not a branch tag. If there is a tag,
+	it returns two values; the second value is NIL if it is not
+	a branch tag, T otherwise.
+	(mcvs-merge): Modified to use what-tag-are-we-on.
+	(mcvs-list-branches): Show additional information about the
+	current sticky tag.
+	(mcvs-merge-wrapper): Fix wrong parenthesization introduced
+	earlier today.
+	(mcvs-switch-wrapper): New function.
+
+2002-04-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* branch.lisp (branch-tag-check): Check reserved symbol HEAD.
+
+2002-04-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New command to list branches.
+
+	* mcvs-main.lisp (*list-branches-options*): New constant.
+	(*mcvs-command-table*): Entries for new command added.
+	(*usage*): Help text added.
+
+	* branch.lisp (mcvs-list-branches, 
+	mcvs-list-branches-wrapper): New functions.
+
+2002-04-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* branch.lisp (where-is-the-repository): New function.
+	(cvs-make-or-advance-tag): Pass down CVSROOT to cvs rtag using
+	the -d global option.
+
+2002-04-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* branch.lisp (what-module-is-this): New function.
+	(cvs-make-or-advance-tag): Use rtag rather than tag for tagging
+	the branch being merged. This fixes the failure to merge added files.
+	(mcvs-merge): Use mcvs-update rather than directly using cvs.
+
+2002-04-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Implemented remerge command; redo a merge without moving
+	around any tags.
+
+	* branch.lisp (mcvs-merge): New keyword parameter remerge-p 
+	to indicate that a re-merge should be done, plus logic for
+	doing so.
+	(mcvs-remerge-wrapper): New function.
+
+	* mcvs-main.lisp (*remerge-options*): New constant.
+	(*mcvs-command-table*): New entry for remerge command.
+
+2002-04-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	First cut at implementing more automated branching and merging.
+
+	* mcvs-main.lisp (*branch-options*, *merge-options*): New constants.
+	(*mcvs-command-table*): New entries for branch and merge commands.
+	(*usage*): New help text.
+
+	* branch.lisp: New file.
+	(*branch-char*): New constant.
+	(tags-from-cvs-log, what-branch-are-we-on, branch-tag-check,
+	mcvs-branch, mcvs-branch-wrapper, cvs-make-or-advance-tag, mcvs-merge,
+	mcvs-merge-wrapper): New functions.
+
+2002-04-01  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	checkout.lisp (mcvs-checkout): Emit informational message 
+	when checkout completes, because it's not obvious what directory
+	was just created.
+
+2002-02-38  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Error checking added to mcvs move: verifies that all
+	sources exist and are known to Meta-CVS.
+
+	* move.lisp (source-check): New function.
+	(simple-rename, simple-move-to-dir): Use new function.
+
+2002-03-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* rcsparse.lisp: File renamed to rcs-utils.lisp.
+	(rcs-delta): New slot, delta-hash.
+	(rcs-make-delta-hash): New function.
+	(rcs-parse): Calls rcs-make-delta-hash to set up new slot.
+
+	* convert.lisp: require changed to match file rename.
+
+2002-03-20  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Some new macros for slot access.
+
+	* slot-refs.lisp: New file.
+	(with-slot-refs): New macro.
+	(with-multi-slot-refs): New macro.
+
+	* rcsparse.lisp (rcs-parse-newphrases, rcs-parse-admin,
+	rcs-parse-delta): Replace uses
+	of symbol-macrolet by with-slot-refs and with-multi-slot-refs.
+
+2002-03-19  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Adding delta parsing to RCS parser.
+
+	* rcsparse.lisp (rcs-delta): New struct.
+	(rcs-file): New slot, deltas.
+	(rcs-parse-newphrases): New function, factors out parsing of
+	``newphrases'' syntactic element out of rcs-parse-admin.
+	(rcs-parse-admin): Use rcs-parse-newphrases.
+	(rcs-parse-delta, rcs-parse-deltas): New functions.
+	(rcs-parse): Parse both admin and deltas; store deltas in new 
+	rcs-file slot.
+
+2002-03-18  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* posix.lisp (parse-posix-namestring): New function. Converts POSIX
+	path to CL Path object.
+
+	* rcsparse.lisp: New file, implements RCS version file parser.
+	(rcs-admin, rcs-file, rcs-token, rcs-token-stream): New structs.
+	(rcs-peek-token, rcs-read-token): New generic functions.
+	(rcs-extract-id-sym-or-num, rcs-extract-string,
+	rcs-match-optional, rcs-match-token, rcs-parse, rcs-parse-admin,
+	rcs-special-p): New functions.
+
+	* convert.lisp (classify-tags): Work with association list rather
+	than raw strings.
+	(mcvs-convert): Use rcs-parse to extract tags. Fix call to
+	mapping-generate name. Use parse-posix-namestring when opening
+	version file. Generate informative chatter.
+
+2002-03-15  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* remove.lisp (mcvs-remove): More detailed error checking. 
+	Checks for remove attempts against MCVS/ area, removes of local
+	files not versioned under Meta-CVS, and nonexistent files.
+
+2002-03-15  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* add.lisp (mcvs-add): Error message changed to tell user to use
+	-R to add directory.
+
+	* remove.lisp (mcvs-remove): New generalized boolean parameter
+	indicates to do a recursive remove. This is controlled by the
+	-R option which already exists. Behavior changed to not act
+	on directories unless recursion is explicitly requested.
+	(mcvs-remove-wrapper): Extract "R" option, pass down new boolean
+	to mcvs-remove.
+
+2002-03-15  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* remove.lisp (mcvs-remove-wrapper): Remove bogus error check.
+
+2002-03-14  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout): Bugfix: must use checkout-dir, not
+	module, when testing whether directory exists or was created properly.
+
+2002-03-14  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Update takes file arguments now.
+
+	* update.lisp (mcvs-update): If filename arguments are given, then
+	just call mcvs-generic to do the work, but suppress the operation on
+	meta files. If no filename arguments are given, then update everything.
+	If the -p option is present, no synchronization is needed, before or
+	after.
+	(mcvs-update-wrapper): Pass command arguments down to mcvs-update.
+
+	* mcvs-main.lisp (*update-options*): Add "p" option.
+
+	* generic.lisp (mcvs-generic): New keyword parameter need-sync-after,
+	a generalized boolean which can tell the function to do a 
+	mapping-synchronize after executing the CVS command.
+
+2002-03-14  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* filt.lisp (filt-select-map): Do allow a date and revision to be
+	specified; the revision could be a branch tag.
+
+2002-03-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (malformed-map): New function.
+	(mapping-dupe-check): Perform extra error checks when reading
+	mapping, and turn them into a condition with a ``nice'' error message.
+
+2002-03-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-filt.lisp (filt-select-map): Handle error gracefully
+	when reading map. It's easy to give CVS is a nonexistent tag.
+
+2002-03-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	The filt command takes arguments to select alternate revision
+	of map.
+
+	* mcvs-main.lisp (*filt-options*): New constant.
+	(*mcvs-command-table*): Updated with new options.
+	(mcvs-debug-shell): Restart name changed during debugging of filt
+	changes.
+
+	* filt.lisp (filt-select-map): New function. Loads either the
+	local mapping, or retrieves an alternate mapping from CVS based
+	on command line options.
+	(mcvs-filt): Use filt-select-map rather than mapping-read.
+
+2002-03-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* generic.lisp (mcvs-generic): Add .cvsignore to the list of
+	metafiles.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* import.lisp (mcvs-import): Create a .cvsignore file for ignoring
+	MAP-LOCAL.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fix trailing slash bug in mcvs mv.
+
+	* move.lisp (simple-move-to-dir): Canonicalize path after catenating
+	destination and file base name. This nukes a double slash if 
+	we move to a name with a trailing slash.
+	(move-guts): Treat a destination name that has a trailing slash 
+	as a directory, unless it exists already as a non-directory.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-main.lisp (*cvs-options*): Added "error-terminate" and
+	"error-continue".
+	(*usage*): Update and reformat help text.
+	(mcvs-execute): Process "error-terminate" and "error-continue"
+	options.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-update): Messages related to moving,
+	adding or removing files promoted to terse level, so only -Q
+	can suppress them.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* update.lisp (mcvs-update): Changing level of chatter messages.
+	* move.lisp (mcvs-move): Likewise.
+	* add.lisp (mcvs-add): Likewise.
+	* remove.lisp (mcvs-remove): Likewise.
+	* checkout.lisp (mcvs-checkout): Likewise.
+	* generic.lisp (mcvs-generic): Likewise.
+	* import.lisp (mcvs-import): Likewise.
+	* mapping.lisp (mapping-dupe-check): Likewise.
+	(mapping-update): Likewise.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Support for -q, -Q and -e global options.
+
+	* posix.lisp (*editor*): New special variable.
+	(edit-file): Check *editor* variable; if not nil, use it.
+
+	* mcvs-main.lisp (*usage*): Update help text.
+	(mcvs-execute): Set *mcvs-chatter-level* according to -q or -Q.
+	Set *editor* if -e is specified.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-main.lisp (*cvs-options*): Remove obsolete "a".
+	(*cvs-options-arg*): Add missing "r".
+	(*usage*): New constant, help text.
+	(mcvs-execute): Process help and version command line options.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* options.lisp (parse-opt): Make error messages more consistent.
+
+2002-03-12  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* find-bind.lisp (find-bind): Make rem-var optional; sometimes
+	the user might not care about the remaining unmatched list.
+
+2002-03-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* find-bind.lisp (find-bind): Documentation string change. Clarify
+	that default values are substituted whenever a variable would
+	otherwise be bound to the value NIL, even through an explicit
+	match.
+
+2002-03-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Sane filtering of -d option in checkout.
+
+	* find-bind.lisp (find-bind): Variable bindings can specify
+	a third element, which provides a default value for any variables
+	that turn out NIL.
+
+	* checkout.lisp (mcvs-checkout): Filter out the -d dir option,
+	and use it to override the name of the checkout directory,
+	the way CVS checkout does it. 
+
+2002-03-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Bugfix: mcvs add was not processing existing :ignore's in MCVS/TYPES.
+
+	* add.lisp (mcvs-add): Use old types as well as new types
+	to filter for ignores.
+
+2002-03-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* find-bind.lisp: New file.
+	(find-bind-extract-vals): New function.
+	(find-bind): New macro.
+
+	* error.lisp (restart-destructure): Macro removed.
+	(mcvs-error-handler): Uses generic find-bind instead of
+	restart-destructure.
+ 
+2002-03-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* filt.lisp (mcvs-filt): Bugfix: do not stop processing line
+	if F- file name is not found in hash table.
+
+2002-03-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Commit is handled through mcvs-generic, so it can take
+	filename arguments, and honor --nometa.
+
+	* commit.lisp: File removed.
+	(mcvs-commit): Function removed.
+	(mcvs-commit-wrapper): Moved to generic.lisp.
+
+	* generic.lisp (mcvs-commit-wrapper): Moved from commit.lisp,
+	changed to invoke mcvs-generic.
+	(mcvs-generic): Only add TYPES file to list if it actually
+	exists.
+
+2002-03-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	New --nometa command line option.
+
+	* mcvs-main.lisp (*cvs-options*): Add "nometa" to list.
+	(mcvs-execute): Filter global options to recognize
+	Meta-CVS-specific ones.
+
+	* options.lisp (*nometa-option*): New special variable.
+	(filter-global-options): New function.
+
+	* generic.lisp (mcvs-generic): Honor *nometa-option* special
+	variable.
+
+2002-03-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* generic.lisp (mcvs-generic): Make sure TYPES file is
+	included in list of files.
+
+2002-03-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-main.lisp (*add-options*): Support -R option for add.
+	Thus, recursive add works now.
+
+2002-03-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Fix mcvs filt so it handles suffixed F- files properly.
+
+	* filt.lisp (make-filt-hash): New function.
+	(mcvs-filt): After matching hex digits, also check for
+	a suffix match.
+
+2002-02-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Support for file type keyword treatment under mcvs add.
+
+	* add.lisp (mcvs-add): Restructured to build up list of new file
+	suffixes, allow the user to edit the file which determines how
+	they are treated, filter out ignored files and pass -k options
+	to multiple cvs adds.
+
+	* types.lisp (*mcvs-new-types*): New constant.
+	(*types-comments*): Constant moved here from import.lisp.
+	(types-remove-ignores): New function. Code factored out from
+	mcvs-import.
+	(types-let-user-edit): Likewise.
+	(types-make-cvs-adds): New function.
+
+	* import.lisp (*types-comments*): Constant removed. Moved to
+	types.lisp
+	(mcvs-import): Code factored out to new functions in types.lisp, which
+	are also used by add.lisp.
+
+2002-02-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* print.lisp: New file.
+	(print-assoc-list): New function.
+	* types.lisp: Use print-assoc-list to nicely print the types.
+	* import.lisp (mcvs-import): Don't bother getting user to 
+	edit the types if the type list is empty. In fact, don't
+	even create the file.
+
+2002-02-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* add.lisp (mcvs-add): Use new form of mapping-generate-name.
+
+2002-02-17  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* import.lisp (mcvs-import): Fix broken restart for re-editing
+	the types file.
+	(*types-comments*): Drastically shorten the help text.
+
+2002-02-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Support for filetypes in import.
+
+	* posix.lisp (suffix): Separator character parameter is optional;
+	multiple occurences of character lead to one big suffix like
+	".tar.gz" instead of ".gz".  A leading dot means it's not a suffix but
+	a hidden file like ".exrc".
+	(edit-file): New function, brings up text editor for specified file.
+	
+	* clisp-linux.lisp (env-lookup): New function for environment
+	variable lookup.
+
+	* types.lisp: New source file.
+	(*mcvs-types-name*, *mcvs-types*): New constants for TYPES filename.
+	(types-read, types-write, types-sanity-check,
+	types-to-import-wrapper-args): New functions.
+
+	* import.lisp (*types-comments*): New constant.
+	(mcvs-import): Restructured to build up list of file suffixes,
+	allow the user to edit the file which determines how they
+	are treated, filter out ignored files and pass -W options to cvs import
+	to handle the rest. Failed cvs import is turned into restartable
+	condition.
+
+	* mapping.lisp (mapping-generate-name): Takes a suffix parameter.
+	The F-files now carry a suffix obtained from the original file,
+	because I have concluded that this was the only reasonable way
+	to integrate with CVS.
+
+2002-02-16  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* add.lisp (mcvs-add): Last change completely broke add due
+	to not breaking out of the retry loop.
+
+2002-02-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* move.lisp (mcvs-move): If the mapping-update operation returns
+	nil, or terminates by a non-local jump, restore the filemap.
+	* mapping.lisp (mapping-update): When returning normally, 
+	return t. When returning after doing a rollback, return nil.
+
+2002-02-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* error.lisp (mcvs-error-handler): Bugfix. We were closing over
+	a binding of the iteration variable of a dolist, which has only
+	one binding over the entire loop.
+
+	* mapping.lisp (mapping-update): Gathers up info all local
+	clobbered files, and then throw the error. Provides restart
+	which allows user to print the list of clobbered files, and
+	a restart which allows the user to have those files clobbered.
+
+2002-02-13  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout-wrapper): Bugfix for last bugfix.
+
+2002-02-11  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout-wrapper): Bugfix for bad
+	destructuring-bind if there are no arguments.
+
+2002-02-10  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-difference): Reformatted documentation string.
+	(mapping-update): Implemented a continue restart which rolls back
+	the changes done to the local filesystem.
+
+2002-02-10  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* error.lisp (mcvs-error-handler): Rearranging the menu, 
+	so "T" is clumped with the main options, and any special restarts
+	are clearly separated. Changed wording.
+
+2002-02-10  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* update.lisp (mcvs-update): Re-print the "Invoking CVS" chatter
+	if the user re-tries the error.
+
+	* add.lisp (mcvs-add): CVS failure is now a restartable error;
+	user can decide whether to roll back the effects or retry the
+	CVS add, or terminate to keep the effects anyway despite 
+	the failed add.
+
+2002-02-10  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* install.sh: Stop the script if there are compilation errors.
+
+2002-02-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* error.lisp (*mcvs-errors-occured-p*): New special variable.
+	(mcvs-error-handler): Set *mcvs-errors-occured-p* to T.
+	* mcvs-main.lisp (mcvs): Take *mcvs-errors-occured-p* into
+	account in computing termination status.
+
+2002-02-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* update.lisp: Remove spurious newlines from error messages.
+	* add.lisp: Likewise.
+	* options.lisp: Likewise.
+	* mapping.lisp: Likewise.
+
+2002-02-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Adding some restarts around cvs update.
+
+	* posix.lisp (execute-command-xargs): Bail with nil return
+	value if any command line fails.
+
+	* update.lisp (mcvs-update): Tests return value of execute-program
+	and signal condition if it's nil. Provides a continue restart
+	as well as a retry restart to try the command again.
+
+	* error.lisp (mcvs-error-handler): Show retry restarts as
+	a special menu item "R".
+
+2002-02-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Added a much improved error handling routine in anticipation
+	of better use of restarts.
+
+	* error.lisp: New file
+	(restart-destructure): New macro.
+	(*mcvs-error-treatment*): Special variable, moved here from
+	mcvs-main.
+	(mcvs-error-handler): New function.
+
+	* mcvs-main.lisp (mcvs-top-error-handler): Function removed.
+	(mcvs-execute): Bind error to new mcvs-error-handler instad
+	of mcvs-top-error-handler.
+      
+2002-02-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-main.lisp (*mcvs-command-table*): The "stat" abbreviation
+	for status command added.
+
+2002-02-09  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Hooking conversion tool into command structure.
+
+	* mcvs-main.lisp (*convert-options*): New constant.
+	(*mcvs-command-table*): New entry for mcvs-convert-wrapper.
+	* convert.lisp (mcvs-convert): Fix reference to nonexistent variable.
+	(mcvs-convert-wrapper): New function.
+
+2002-02-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Beginning work on repository conversion utility.
+
+	* convert.lisp: New file. Contains conversion utility 
+	to make an Meta-CVS repository from an ordinary CVS repository,
+	while preserving all history, tags and branches.
+	(remove-attic-component, classify-tags, read-tags, 
+	mcvs-convert): New functions.
+
+	* posix.lisp (suffix): New function. Computes suffix of file.
+	(execute-program-xargs): New optional parameter, for specifying
+	fixed part added at the end of each generated command line.
+
+	* mapping.lisp (*mcvs-map-name*, *mcvs-local-map-name*): New constants.
+	(*mcvs-map*, *mcvs-map-local*): Redefined in terms of new constants.
+	(mapping-generate-name): New key parameter no-dir for not adding
+	the directory prefix.
+
+2002-02-08  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* checkout.lisp (mcvs-checkout): Ensure local mapping is
+	sorted when written out, for easier comparisons.
+
+2002-02-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* sync.lisp (synchronize-files): Return :dir symbol when either
+	argument is a directory.
+	* mapping.lisp (mapping-synchronize): Chatter output messages
+	are shorter. Handles :dir return value from synchronize-files.
+	(mapping-update): New sanity checks for moved and added
+	files, to avoid clobbering local files. Removed redundant
+	call to ensure-directories-exit in move logic, because
+	synchronize-files will do it anyway. Chatter messages reordered
+	to occur before their corresponding action is done.
+
+2002-02-07  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Improve error handling, and builtin ``debug shell''.
+
+	* mcvs-main.lisp (*mcvs-error-treatment*): Special variable
+	can have new domain value, namely :decline.
+	(mcvs-top-error-handler): Print error message when terminating
+	non-restartable error. Handle new :decline treatment by
+	simply returning.
+	(mcvs-debug-shell): Set *mcvs-error-treatment* to :decline
+	so that errors are caught by debugger.
+
+2002-02-04  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-sort): Removed function.
+	(mapping-write): Sort written map by F- file names,
+	not by path names. This is far better for merging, because
+	files stay in the same place when they are renamed.
+
+2002-02-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Added status, log and annotate.
+
+	* mcvs-main.lisp: (*log-options*, *status-options*, 
+	*annotate-options*): New constants.
+	(*mcvs-command-table*): Add new entries.
+
+	* generic-lisp (mcvs-log-wrapper, mcvs-status-wrapper,
+	mcvs-annotate-wrapper):  New functions.
+
+2002-02-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Added tag command.
+
+	* diff.lisp: File renamed to generic.lisp.
+	(mcvs-diff): Function renamed to mcvs-generic.
+
+	* generic.lisp (mcvs-generic): Function no longer dedicated to
+	diffing only; takes CVS command to execute as an argument,
+	also takes arguments and files as separate lists.
+	(mcvs-diff-wrapper): Modified to invoke mcvs-generic properly.
+	(mcvs-tag-wrapper): New function, uses mcvs-generic to implement
+	tag command.
+
+	* mcvs-main.lisp (*tag-options*): New constant.
+	(*mcvs-command-table*): New entry for tag command.
+
+2002-02-03  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Added workaround for operating system argument passing limitations,
+	resembling the Unix xargs utility. Also, trimmed some fat
+	from the basename function.
+
+	* clisp-linux.lisp: (*argument-limit*): New constant added.
+	(arglist-to-command-string): Function removed.
+	(execute-program): Function removed.
+	(shell-interpreter): New function, wrapper for CLISP's shell
+	function, turns exit status into T (success) or NIL (failure).
+
+	* diff.lisp (mcvs-diff): Uses execute-program-xargs instead
+	of execute-program.
+
+	* posix.lisp (basename): Does not canonicalize path name. This
+	turns out to be an unnecessary performance hit in some cases.
+	(arglist-to-command-string): New function. Similar to what was
+	removed from clisp-linux, but this one properly escapes all
+	shell metacharacters.
+	(execute-program): New function, calls shell-interpreter.
+	(execute-program-xargs): New function. Takes two argument lists.
+	Forms one or more command lines by combining the first argument list
+	with one or more pieces of the second argument list, and
+	executes each command. The length of the pieces is determined
+	by the argument passing limit.
+
+	* dirwalk.lisp (ensure-directories-gone): Add use of
+	canonicalize-path because basename doesn't do it.
+
+2002-02-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Algorithmic efficiency improvements. No longer using
+	abstract set operations to update file structure or find
+	duplicates in the maps. Could still streamline the sorting.
+
+	* mapping.lisp (mapping-sort): Express more succinctly using key.
+	(mapping-dupe-check): Rewrite using loop over sorted lists.
+	(mapping-difference): New function for computing mapping change.
+	(mapping-update): Modify to use mapping-difference.
+
+2002-02-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-update): When moving files, ensure
+	that the target is unlinked if it exists.
+
+	* move.lisp (simple-rename): No longer do target unlinking
+	here. Also bugfix: it wasn't handling renames of directories
+	containing just one file.
+
+2002-02-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mapping.lisp (mapping-dupe-check): New function for
+	detecting duplicate objects or paths in a mapping.
+	(mapping-sane-p): Function removed.
+	(mapping-read): Use mapping-dupe-check to verify a map
+	when asked by the sanity-check keyword.
+	(mapping-update): Specify sanity check when reading MCVS/MAP.
+
+	* checkout.lisp (mcvs-checkout): Checkout also performs
+	sanity check.
+
+2002-02-02  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-main.lisp (mcvs): Use CLISP's exit function correctly
+	to establish proper termination status.
+
+2002-01-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* mcvs-main.lisp (mcvs-execute): Parse command-specific options
+	properly based on knowledge of each command's set of options.
+	(parse-args): Function removed.
+
+	* options.lisp (parse-opt): Correctly process long options with
+	arguments. Argument is part of the string, separated by = symbol.
+
+2002-01-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* options.lisp (parse-opt): When multiple options characters are
+	bunched up into one argument, and one of them other than the
+	last one takes an argument, then the remaining ones are
+	considered to constitute a string which is an argument to that
+	option. For instance -y32 means -y 32, not -y -3 -2, assuming
+	that y is an option that requires an argument.
+
+2002-01-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Top level handler terminates by non-local exit back to 
+	mcvs function, rather than by calling (exit).
+	
+	* mcvs-main.lisp (mcvs-top-error-handler): Restructured
+	to call (throw 'mcvs-exit t).
+	(mcvs-execute): Ensure that NIL is returned by normal exit.
+	(mcvs): Catches 'mcvs-exit throw, and calls (exit 0) or (exit 1)
+	accordingly.
+
+
+2002-01-31  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Renamed all ``filemap-'' functions to ``mapping-'' prefix.
+
+	* mapping.lisp (filemap-generate-name, filemap-sort,
+	filemap-extract-paths, filemap-lookup, filemap-prefix-lookup,
+	filemap-prefix-matches, filemap-object-lookup,
+	filemap-same-object-p, filemap-same-path-p, filemap-moved-p,
+	filemap-rename-files, filemap-sane-p): Old names removed.
+	(mapping-generate-name, mapping-sort,
+	mapping-extract-paths, mapping-lookup, mapping-prefix-lookup,
+	mapping-prefix-matches, mapping-object-lookup,
+	mapping-same-object-p, mapping-same-path-p, mapping-moved-p,
+	mapping-rename-files, mapping-sane-p): New names created.
+	(mapping-read, mapping-write, mapping-synchronize, 
+	mapping-update): Edit calls to renamed functions.
+	* add.lisp (mcvs-add): Likewise.
+	* diff.lisp (mcvs-diff): Likewise.
+	* filt.lisp (mcvs-filt): Likewise.
+	* import.lisp (mcvs-import): Likewise.
+	* move.lisp (simple-rename, simple-move-to-dir, move-guts): Likewise.
+	* remove.lisp (mcvs-remove): Likewise.
+
+2002-01-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	Factored out repeated code for reading and writing of the MAP and
+	MAP-LOCAL files.
+
+	* mapping.lisp (mapping-read, mapping-write): New functions.
+	(mapping-synchronize, mapping-update): Use new functions.
+	* move.lisp (mcvs-move): Likewise.
+	* filt.lisp (mcvs-filt): Likewise.
+	* add.lisp (mcvs-add): Likewise.
+	* remove.lisp (mcvs-remove): Likewise.
+	* checkout.lisp (mcvs-checkout): Likewise.
+	* diff.lisp (mcvs-diff): Likewise.
+	* import.lisp (mcvs-import): Likewise.
+
+2002-01-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* filt.lisp (mcvs-filt): use *mcvs-dir* variable instead of 
+	hard coding "MCVS" string.
+
+2002-01-30  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* MCVS-PAPER: Renamed to Meta-CVS-PAPER
+
+	* README: Change all references to MCVS to Meta-CVS, the
+	new official name of the program.
+	* add.lisp: Likewise
+	* chatter.lisp: Likewise
+	* checkout.lisp: Likewise
+	* clisp-linux.lisp: Likewise
+	* commit.lisp: Likewise
+	* diff.lisp: Likewise
+	* dirwalk.lisp: Likewise
+	* filt.lisp: Likewise
+	* import.lisp: Likewise
+	* INSTALL: Likewise
+	* mapping.lisp: Likewise
+	* mcvs-main.lisp: Likewise
+	* Meta-CVS-PAPER: Likewise
+	* move.lisp: Likewise
+	* options.lisp: Likewise
+	* posix.lisp: Likewise
+	* RELEASE-NOTES: Likewise
+	* remove.lisp: Likewise
+	* restart.lisp: Likewise
+	* seqfuncs.lisp: Likewise
+	* split.lisp: Likewise
+	* sync.lisp: Likewise
+	* system.lisp: Likewise
+	* update.lisp: Likewise
+
+2002-01-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* move.lisp (move-guts): test the actual filesystem as well
+	as the map for existence of a directory or file. This makes
+	the move operation behave better. Files can be moved to an
+	existing directory that is not known to MCVS, and a file
+	can properly clobber a target file that is not known to MCVS.
+
+	* clisp-linux.lisp (directory-p, regular-p, symlink-p): define
+	methods for these generic functions for a NIL argument, such
+	that they return NIL.
+
+2002-01-28  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* move.lisp (simple-move-to-dir): eliminated a bunch of code
+	with the result that mcvs mv now works more like the Unix mv
+	when moving a directory to another directory.
+
+	* mcvs-main.lisp (mcvs-execute): fix bogus error message
+	when options are given but no command.
+
+	* README: don't use -z3 in example because this style of
+	specifying an argument to an option doesn't work.
+
+2002-01-27  Kaz Kylheku  <kaz@ashi.footprints.net>
+
+	* add.lisp (mcvs-add): Remove bogus test for NIL or T; allow 
+	recursivep to be a generalized boolean variable. This allows
+	mcvs add -R to work properly.
+	
+	* mcvs-main.lisp (*cvs-command-options-arg*): add support
+	for -u parameter, useful in cvs diff.
+	(*mcvs-command-table*): Add "fi" shorthand for "filt".

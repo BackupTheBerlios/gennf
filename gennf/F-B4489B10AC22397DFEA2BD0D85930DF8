@@ -1,0 +1,165 @@
+                    A Quick Guide to Using Meta-CVS
+
+                              Kaz Kylheku
+                            January 25, 2002
+
+        "Anything you can do, I can do meta." -- origin unknown
+
+
+  Contents
+
+    1. Introduction  . . . . . . . . . . . . . . . . . . . . . . Line 15
+    2. Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+    3. Filtering F- Names to Readable Names  . . . . . . . . . . . .  65
+    4. Getting Started  . . . . . . . . . . . . . . . . . . . . . . .
+    4.1  Creating a Module . . . . . . . . . . . . . . . . . . . . .
+    4.2  Checking Out a Module  . . . . . . . . . . . . . . . . . . .
+
+  1. Introduction
+
+      This is a guide toward using Meta-CVS. It assumes familiarity with
+      version control concepts and in particular with the CVS software.
+      In particular, it is assumed that you have hands-on experience
+      with CVS and that you have read the Cederqvist manual.
+
+      In principle, Meta-CVS could be understood as a version control
+      tool independently of CVS; in practice it helps to know CVS,
+      particularly because Meta-CVS is relatively new software, and
+      because it is not intended to perfectly hide CVS from the user.
+
+      It is also assumed that you have successfully installed Meta-CVS.
+      For installation instructions see the file INSTALL.
+
+      To gain some understanding of how Meta-CVS represents your data
+      and how it works, read Meta-CVS-PAPER.
+
+
+  2. Overview
+
+      Meta-CVS has a command syntax that is deliberately similar to the
+      CVS command syntax. In general, a Meta-CVS command looks like
+      this:
+
+        mcvs [ mcvs-options ] command [ command-options ] [ arguments ]
+
+      Most of the options are simply passed through to CVS, when
+      appropriate. So for example,
+
+        mcvs -z3 update -A
+
+      will pass through the -z3 and -A options down to CVS when invoking
+      it, so that CVS ends up being called as:
+
+        cvs -z3 update -A
+
+      This passing through of options makes it easy to use Meta-CVS for
+      users who are familiar with CVS, and is also straightforward to
+      deal with in the bowels of Meta-CVS.
+
+      Not all options are passed through to CVS, and there are some that
+      are entirely Meta-CVS-specific. Think of Meta-CVS as implementing
+      an intelligent filter over the CVS options. For example, if you
+      invoke ``mcvs --version'', you don't want ``cvs --version'' to be
+      called. Similarly, if you invoke ``mcvs -Q'', you want Meta-CVS
+      as well as CVS to operate silently, so -Q has to be processed in
+      Meta-CVS as well as passed to CVS.
+
+
+  3. Filtering F- Names to Readable Names
+
+      The Meta-CVS representation brings a readability problem: the
+      cryptic F- names appear in the output produced by CVS, making it
+      difficult to understand what file the output pertains to.  For
+      this reason, Meta-CVS includes a filtering command (``mcvs filt'')
+      which can be used in a pipe to filter out the cryptic names and
+      replace them with the paths that they map to. For example:
+
+        mcvs diff | mcvs filt
+
+      produces a human-readable diff.
+
+      The filter works by looking for character sequences consisting of
+      the prefix ``F-'' followed by exactly 32 hex digits.  If such a
+      sequence is mapped in the MAP-LOCAL file, then it is replaced by
+      its mapping. Anything which doesn't match or doesn't map is passed
+      through unchanged. F- files can also have suffixes after the 32
+      hex digits; there has to be an exact match on a suffix.
+
+
+  4. Getting Started
+
+  4.1  Creating a Module
+
+      The only way to create a Meta-CVS module is to have an existing set
+      of files, or an empty directory, and invoke the create command
+      in the top level directory.
+
+      1. Change to the topmost directory of the file tree that you want to
+         place under Meta-CVS.
+
+      2. Invoke 
+
+           mcvs create <module-name> <release-tag>
+
+         The <module-name> specifies what your module will be called; it
+         need not be the same as the name of the top level directory.
+         When later you check out the module, you will have to specify that
+         name, and by default a directory of that name will be created.
+
+	 The <release-tag> is a symbolic revision that is applied to
+	 the newly created file revisions; it will come in handy if
+	 you ever have to refer to this original baseline.
+
+   (!)   Note that CVS vendor branches do not work in Meta-CVS;
+	 each mcvs create operation creates a new unique set of files, so doing
+	 multiple imports over the same Meta-CVS module will *not* work like it
+	 does in CVS. Do not ever run mcvs create on the same module.
+	 Meta-CVS has a feature that is superior to CVS vendor branches;
+	 this feature is the ``mcvs grab'' command, which takes a snapshot
+	 of code onto a normal branch, and handles renamed files.
+
+      3. If your file tree contains any files whose names have suffixes,
+         Meta-CVS will gather a list of these suffixes and bring up a text
+         editor. You are expected to edit the information, save it and
+         exit the editor. This gives you an opportunity to set the CVS keyword
+         expansion mode for each file type. The association is represented
+         as Lisp association list. For example, if your file tree contains
+         C source and header files, you will probably see something like this:
+
+           (("c" :DEFAULT)
+            ("h" :DEFAULT))
+
+          This is a list of sublists. Each sublists contains two elements,
+          a string representing the file suffix, and a Lisp keyword (a colon
+          followed by identifier). The keyword represents how files of that
+          type will be handled, simply edit the keyword. There is helpful 
+          comment text at the top of the file which explains what keywords
+          are available and what CVS expansion modes they correspond to.
+
+      4.  Now CVS is invoked to do the import. CVS will also bring up a text
+          editor so that you can specify an import comment. This part should
+          be familiar to the CVS user.
+
+      5.  The module should now be created, and is ready to be checked out.
+
+      Note that Meta-CVS does not store empty directories at all. This behavior
+      differs from CVS in a subtle way. With CVS, you can create an empty
+      directory structure, and import it. The corresponding structure will be
+      created in the CVS repository, and you can check out that structure
+      (unless you specify prune with -P, or pruning is otherwise implicit).
+      Under Meta-CVS, a directory is treated a filesystem artifact that arises
+      from multi-part path names.  Two files appear in the same directory by
+      virtue of having common path components; that directory only exists
+      because those two files exist. Refer to the Meta-CVS-PAPER.
+
+      Thus, if you wish to create a new empty project, don't bother making a
+      multi-level directory tree. Just create one empty directory with no
+      subdirectories, and invoke mcvs create in that directory. It will be
+      easy to add directories later. Under Meta-CVS, the add command is
+      recursive if you specify -R, unlike under CVS which requires directories
+      to be added individually, and then files. The Meta-CVS add command also
+      identifies any new file suffixes and prompts you to edit how they 
+      will be handled, similarly to the create command.
+
+
+  4.2  Checking Out a Module

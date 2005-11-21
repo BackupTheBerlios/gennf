@@ -1,0 +1,502 @@
+\documentclass{article}
+\usepackage{makeidx}
+\usepackage[margin=1.0in]{geometry}
+
+\def\cvsrelease$#1: mcvs-#2-#3 ${#2.#3}
+\def\cvsdate$#1: #2/#3/#4 #5 ${#2-#3-#4}
+
+\def\indexcommand#1
+{\index{#1@{\tt #1} command}
+ \index{commands!#1@{\tt #1}}}
+
+\def\indexglobalopt#1
+{\index{#1@{\tt #1} option}
+ \index{global options!#1@{\tt #1}}}
+
+\def\indexcommandopt#1#2
+{\index{#2 option@{\tt #2} option!of #1@of {\tt #1}}
+ \index{#1 command@ !#2 option@{\tt #2} option}} 
+
+\title{Version Control with Meta-CVS \cvsrelease$Name:  $}
+\date{\cvsdate$Date: 2005/11/21 15:19:19 $}
+\author{Kaz Kylheku}
+\makeindex
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+Greetings, reader!  You are about to become a user of version control software
+called Meta-CVS.  The primary function of version control software is to store
+multiple versions of a group of documents, such as the source files of a
+computer program. As programmers make changes to the program, they generate
+new versions of source files, which are retained in the version control system.
+They may also add files, delete files, rename files, reshape the directory
+structure of the project; the history of these changes is also retained,
+just are the changes to the contents of the files themselves.
+
+In addition, to be useful, a version control system must not only store file
+versions but it must be able to identify groups of related versions, so that an
+old version of the entire project can be retrieved as a unit.  For example,
+when the programmers decide to release the program, they must be able to assign
+a symbolic name to the release, and that name must be associated with a
+particular version of every file. This will allow the release to be later
+retrieved using its symbolic name as a retrieval key.
+
+Secondly, a version control system must allow developers to make changes in
+parallel to the same line (or {\it stream}) of development, and merge their
+changes.
+\index{stream}
+It must identify conflicting changes so that they can be resolved. In must also
+allow for multiple parallel lines of development---independent version
+histories known as branches. Branches are useful for stabilizing software prior
+to the current release, while allowing new development to happen on the
+next release.  They are useful for going back to an old release and fixing
+errors. They are also useful for isolating risky, experimental work. When such
+work involves many changes or more than one developer, it can take place on its
+own branch. A good version control system makes it easy to create branches, and
+to merge new changes from the branch back to the original stream.
+
+Meta-CVS is not a fully self-contained version control system.  It uses another
+version control system called CVS to store documents, and also to store
+additional information about documents which allows it to provide useful
+behaviors that do not exist in CVS.  Effectively, Meta-CVS acts as an agent
+between you and CVS, which is easier to use and more capable than CVS.
+
+I wrote Meta-CVS because I was frustrated by the inability of CVS to treat the
+directory structures of my projects as a versioned entity.  At the same time, I
+did not want to rewrite everything that already works well in CVS, such as
+client-server operation, maintaining file version histories, and branching,
+merging and conflict identification. Instead, I decided to write a software
+layer which uses CVS as a foundation. That software layer would not only do
+completely new things, like directory structure versioning, but also to
+automate certain tedious tasks which are normally performed with great
+difficulty by the users of CVS.
+
+Meta-CVS does not, and is not intended to, entirely shield you from knowing
+anything about CVS.  Firstly, Meta-CVS requires the CVS software and a CVS
+repository. Users who want to use Meta-CVS have to know how to obtain and
+install CVS and create a repository.  Moreover, from time to time it is useful
+or necessary to bypass Meta-CVS and invoke a CVS operation directly.  This
+guide does not teach CVS; you are strongly encouraged to read {\it Version
+Management with CVS\/} by Per Cederqvist et al.  \index{Cederqvist}
+
+If you do not have a CVS repository to experiment with, please read enough of
+the Cederqvist manual to find out how to create one. Set your {\tt CVSROOT}
+environment variable to point to your repository and you are ready to
+explore Meta-CVS.
+\index{CVSROOT@{\tt CVSROOT}}
+
+In this guide, a few typographic conventions are used. Text which
+is stored into or produced by the computer is written in {\tt typewriter}
+font. The first mention of any special terms is {\it italicized}. Such terms
+are, for your convenience, gathered into a glossary in the appendix.
+
+\section{Tutorial}
+
+In this section, you will learn how to place a directory tree of files under
+version control, check out that tree to create a working copy (also called a
+{\it sandbox}), make changes in the sandbox and store the changes in the
+repository. A directory of files independently versioned under Meta-CVS
+is called a {\it module}, because it is represented as a CVS 
+module.\footnote{But note that unlike CVS, Meta-CVS does not support 
+the model of combining modules.}
+\index{sandbox}
+\index{module}
+\index{mcvs program@{\tt mcvs} program}
+\index{working copy|see {sandbox}}
+
+Meta-CVS has a command line interface which is deliberately similar to that of
+CVS. The program's name is {\tt mcvs}. The {\tt mcvs} program takes a 
+variety of arguments. The first argument is usually a word which specifies
+a command. Oft used commands have two-letter abbreviations. For example the
+{\tt update} command, whose abbreviation is {\tt up}, 
+causes material in the repository to be integrated into the working copy.
+
+Before the first argument, one may type special options. These are called
+global options, and they influence the behavior of many commands in a similar
+way.  For example, when communicating with a remote repository over a slow
+network, the {\tt -z} option may be used to specify a compression level.
+\indexglobalopt{-z}
+
+\subsection{Creating a Module}
+\indexcommand{create}
+
+The only way to create a module is to start with an existing directory 
+containing files and subdirectories, and invoke the {\tt create} command.
+Suppose that your project is a compiler for a scripting language called Blorg,
+and you want your module to be called {\tt blorg}. First, change to
+the directory containing your latest Blorg sources:
+\index{Blorg}
+\begin{verbatim}
+    cd blorg-devel
+\end{verbatim}
+Then, invoke the command:
+\begin{verbatim}
+    mcvs create blorg blorg-initial-version
+\end{verbatim}
+The {\tt create} command requires two additional arguments: the name of
+the module, and a symbolic name which will identify the baseline of
+newly versioned files. This name is known as a {\it tag}: more specificaly, a
+{\it version tag}. Here, we have chosen the tag {\tt blorg-initial-version}.
+Tags are very useful when one makes a module from a specific version of an
+existing program. Suppose that you didn't write Blorg yourself; rather, you
+have a copy of the Blorg 2.3 sources and would like to begin your own
+independent stream of development. It would then behoove you, when creating the
+module, to use a tag like {\tt blorg-2-3}. This tag could prove to be very
+important later on; for example, when you want to create a branch from the 2.3
+baseline, which will accept a new snapshot from the Blorg developers.
+\index{tag}
+\index{baseline}
+
+The first action that the {\tt create} command takes is to scan the current
+working directory, and, recursively, all of its subdirectories. It forms
+a list of all regular files and symbolic links, ignoring any other
+types of files such as sockets, devices, pipes and the like. Having thus
+gathered a list of the files, it identifies all of their {\it suffixes} and
+collates them to form a list. 
+
+If none of the files have suffixes, the creation procedure skips to the next
+step. Otherwise, a text editor is invoked in order to allow you to make
+alterations to a specification which tells how files having these various
+suffixes are to be treated when they are stored into and retrieved from CVS.
+The specification is written in the {\it Lisp\/} language, and may look
+something like this:
+\index{Lisp}
+\begin{verbatim}
+    (("c" :DEFAULT)
+     ("lisp" :DEFAULT)
+     ("png" :DEFAULT)
+     ("txt" :DEFAULT))
+\end{verbatim}
+This is the notation for a list of four elements, as indicated by the
+outermost parentheses which enclose the whole thing. Each of the four
+elements is itself a list containing a string like {\tt "c"} and the
+symbol {\tt :DEFAULT}. The string represents a file suffix, and the
+symbol indicates how files having that suffix are to be treated.
+Above the list, you should see a comment explaining the
+various keywords which are supported.  The greatest concern is to
+identify what files are binary. For example, in the above definition,
+the treatment of the suffix {\tt .png} should be modified to {\tt :BINARY}
+\index{binary@{\tt :binary}}
+\index{default@{\tt :default}}
+because most likely this suffix indicates a computer graphics image
+in the Portable Network Graphics format, which is a binary format
+that must not be subject to line ending conversions, nor to keyword expansion.
+When you are done editing, save and quit; Meta-CVS will then proceed.
+If you create a syntax error, for example by introducing an unbalanced
+parenthesis, Meta-CVS will prompt you with an error message, and you will
+be given an opportunity to correct the error in a new text editing session.
+\index{png files@{\tt png} files}
+
+Note that the symbols may be typed in any mixture of upper and lower
+case---{\tt :Binary}, {\tt :binary}, {\tt :BiNaRy}, and so forth. These
+all mean the same thing.  However, the leading colon is required.\footnote{In
+case you are interested, that colon is a special Lisp notation which indicates
+that the following name refers to a symbol in the {\tt KEYWORD} package.}
+
+Finally, Meta-CVS invokes CVS to create a new module in the repository.
+CVS also starts a text editor. This time you are expected to enter
+a log message which will be added to version 1.1 of every new document.
+You are, in fact, interacting with {\tt cvs import}.
+\index{CVS!import command@{\tt import} command}
+
+\subsection{Checking out a Module}
+
+Like CVS, and some other version control systems, Meta-CVS is based on sandbox
+model. Under this model, documents are copied from a central repository, and users
+work with copies of documents. Obtaining a copy is called checking out.
+The Meta-CVS command for checking out is {\tt checkout}, abbreviated {\tt co}.
+\indexcommand{checkout}
+It takes one argument. Continuing with our Blorg example:
+\begin{verbatim}
+    mcvs co blorg
+\end{verbatim}
+After a log of messages scrolls by in the terminal window, there should
+now exist the subdirectory {\tt blorg}, and in that subdirectory there
+should appear the project's source files. This is a working copy, or a sandbox.
+You can check out more than one sandbox; sometimes that is convenient to do
+when one needs to work on several completely unrelated tasks in the same
+project. The CVS repository doesn't know anything about your sandbox; rather,
+each sandbox contains information which points back to the repository from
+which it was checked out. It is safe to move the sandbox by applying the {\tt
+mv} command to its root directory.
+\index{moving!a sandbox}
+
+\subsection{Anatomy of a Sandbox}
+
+In the root directory of the sandbox, as you will probably notice, there is a
+subdirectory called {\tt MCVS}. This is where Meta-CVS stores its local
+administrative files as well as versioned metadata. It is also where your
+documents are checked out from CVS; effectively, this directory doubles as a
+CVS sandbox.
+\index{MCVS subdirectory@{\tt MCVS} subdirectory}
+
+All your files have been assigned machine-generated names by Meta-CVS.
+These names begin with the characters {\tt F-} followed by thirty-two
+hexadecimal digits and an optional suffix. In Meta-CVS jargon, they are called
+{\it F-files}.  These files are connected to the directory structure of
+the sandbox through {\it hard links}. 
+\index{hard link}
+That is to say, each of the F-files 
+which appears under the {\tt MCVS} directory  also exists in some other
+directory within your sandbox. This arrangement is possible because your
+operating system allows a file object to be referenced by more than one
+directory entry. Directories are nothing more than lists which link names to
+file objects. The same file can be known as {\tt
+MCVS/F-0AA69D7C8A0A864345D90F45C18B8B58} as well as {\tt source/lib/hash.c}. In
+order to delete the file from your filesystem, you have to delete both
+directory entries.\footnote{This is why the POSIX system function for doing
+this is called {\tt unlink}. Deleting a directory entry doesn't necessarily
+mean that a file is gone, only that a link, possibly not the last remaining
+link, has been erased.  \index {unlink system function@{\tt unlink} 
+system function}}
+\index{F-file}
+
+When you check out a module, Meta-CVS calls upon CVS to retrieve
+copies of F-files from the repository. Then it re-creates the directory
+structure of the sandbox, inserting these files in the appropriate places
+in that structure under their familiar names. This insertion is not done
+by copying the F-files, but rather by creating links to them, which
+is very efficient. 
+
+How does Meta-CVS remember the familar names of the F-files so that it can
+construct the sandbox? This association is recorded in a file called {\tt MAP}
+under the {\tt MCVS} directory, represented in Lisp notation.  You are going
+to have to understand the {\tt MAP} file sooner or later, because at times it
+is necessary to manually edit that file.  For example, it can happen that
+several programmers independently change the mapping in a way that creates a
+conflict. Resolving the conflict means loading the file into a text editor, and
+manually sorting out the problem.
+\index{MAP file@{\tt MAP} file}
+
+Why does Meta-CVS assigns its own internal names to files,  and stores
+the user-assigned names in a special versioned document? The reason
+is to make it possible to perform directory structure versioning,
+which means that the directory structure of a module is versioned just
+like the contents of its files. Changing the name or location of
+a file is effectively just another edit that is commited to the repository.
+
+Symbolic links are represented purely as special entries in the {tt MAP} file;
+their contents are not versioned in CVS as independent objects.
+
+\subsection{Making Changes}
+
+Now that you have a working copy checked out, you are probably eager
+to make some changes.  This is quite easy; simply edit any of the
+files to your satisfaction. The version control system knows that you
+have edited the files; when you are ready, you can instruct
+the software to publish your changes to the repository. Publishing
+changes is known as {\it committing\/} and is performed using the {\tt commit}
+command, abbreviated {\tt ci}:\footnote{This stands for check in,
+which means the same thing as commit in the jargon of the RCS version control
+system. RCS has a {\tt ci} command, and this abbreviation survived into
+CVS.\index{RCS}}
+\indexcommand{commit}
+\begin{verbatim}
+    mcvs ci
+\end{verbatim}
+A text editor starts up, and you are expected to enter a commit comment.
+You are interacting with CVS at this point; the procedure is exactly the
+same as for CVS commits. However, there is one notable difference. The file names
+you see listed in the usual comment lines which begin with {\tt CVS:} and which
+will be removed are the F-file names, rather than the human-readable
+names. Alas, CVS doesn't know about the mapping, and this text
+is prepared within the innards of CVS! Meta-CVS has a solution, though not an entirely
+satisfactory one, in the form of a text filtering command which
+reads arbitrary text on standard input, and copies it to standard output,
+filtering F-file names to their human-readable counterparts. This command
+is {\tt filt}, abbreviated~{\tt fi}. 
+\indexcommand{filt}
+Decent text editors allow portions of the text to be easily filtered through
+an external command. For example, in the vi editor, the command 
+{\tt :\%!mcvs fi} command will apply the Meta-CVS filter to the entire edit
+buffer. It's trivial to bind this this command to a control character, and
+store this definition in the editor's personal configuration file, so that the
+action can be repeated by typing one or two keystrokes.
+
+\subsection{Adding Files}
+
+Some kinds of changes require special steps to inform Meta-CVS of
+your intent. For example, if you decide to add some files, Meta-CVS
+will not automatically incorporate them into the module. For obvious
+reasons, a sandbox is allowed to contain a mixture of local files and
+versioned files; there is no certain way to tell which local files ought
+to be versioned.  An object file which results from compiling source
+code almost certainly does not belong under version control, whereas a
+new source file probably does. Or does it? It may be a temporary module
+introduced for debugging, or some experimental code. Only the programmer
+knows whether it ought to be published to the repository.  Every file that
+is added under version control initially starts out as a local file. An
+explicit {\tt add} command must be invoked to cause a local file to become
+versioned. The effect of {\tt add} is a local change until it is committed to
+the repository.
+
+\indexcommand{add}
+The add command requires additional arguments which specify what files are to
+be added.  For exaple, to add the local files {\tt macros.lisp} and {\tt
+README}, issue the command:
+\begin{verbatim}
+    mcvs add macros.lisp README
+\end{verbatim}
+Unlike CVS, Meta-CVS allows you to add entire subdirectories at a time.
+The arguments can be any mixture of files and subdirectories; however,
+subdirectories are only added if the {\tt -R} option is specified.
+For example, to add the directories {\tt sources}, {\tt documentation}
+and the file {\tt INSTALL}.
+\begin{verbatim}
+    mcvs add -R sources documentation INSTALL
+\end{verbatim}
+\indexcommandopt{add}{-R}
+Like the {\tt create} command, the {\tt add} command scans the files and
+symbolic links to be added, and computes a list of the suffixes of the files.
+If any hitherto unknown suffixes are discovered, a text editor will
+be invoked to allow you to specify the treatment of these files.
+The effect of {\tt mcvs add} is local; the files aren't incorporated
+into the repository until a commit takes place.
+
+\subsection{Reviewing Changes}
+
+Before committing local changes, one usually wants to review what those changes
+are; to find out what files have been added, removed, moved or modified, and to
+view the differences in modified files. The {\tt status}, or {\tt stat}
+command, invoked without any arguments, produces a listing of all modified
+files in the current directory and its subdirectories. To include the
+meta-data files such as {\tt MAP}, use the {\tt --meta} global option.
+\indexglobalopt{--meta}
+\indexcommand{status}
+\index{MAP file@{\tt MAP} file}
+The output of {\tt status} contains F-file names, so the {\tt filt} command
+comes in handy. And of course the {\tt grep} utility is useful in reducing
+the output to include information only about locally modified files:
+\index{grep} 
+\begin{verbatim}
+    mcvs --meta status | grep Modified | mcvs fi         # list modified files
+    mcvs status | grep Added | mcvs fi                   # list added files
+\end{verbatim}
+The {\tt status} command takes optional filename and directory arguments.
+The status of a directory means all of the files in its tree.
+
+Another useful command is {\tt diff} which views differences between revisions,
+or between the locally modified files and their closest repository revisions.
+Like {\tt stat}, {\tt diff} responds to the {\tt --meta} global option,
+works on the current directory by default, and takes optional file name or
+directory arguments. It supports a large number of options which affect
+the way the differences are computed and presented. The two most useful are
+{\tt -u} which produces a more readable, so-called ``unified'' diff,
+and {\tt -b} which suppresses differences in whitespace, which is particularly
+useful when a few small coding changes in a program gives rise to a big
+change in indentation. For example,
+\indexcommand{diff}
+\indexcommandopt{diff}{-u}
+\indexcommandopt{diff}{-b}
+\begin{verbatim}
+    mcvs diff -ub driver.c
+\end{verbatim}
+shows the modifications in driver.c as a unified diff, treating lines
+that differ only in the amount of whitespace as identical.
+
+\subsection{Error Recovery}
+
+The execution of a Meta-CVS command can encounter a problem situation,
+or error. For example, suppose that one user adds and commits a file
+called {\tt parser.c} and then another user performs an update to pull
+the latest material from the repository. Suppose that the other user
+already has a local file called {\tt parser.c}. This is identified
+by Meta-CVS as a problem. There are at least two ways of dealing with
+this problem. One is to defer the problem: do nothing at all and
+just terminate, leaving the effect of the update operation incomplete.
+The next time {\tt mcvs up} is invoked, it will run into the problem again, if
+the local file still exists. The user has a chance to rename the file
+``out of the way'' and re-try the update. A possible resolution is to 
+overwrite the local file with the one from the repository.
+
+Errors are divided into two categories: terminating errors and continuable
+errors. When a terminating errors occurs, Meta-CVS display as error message,
+and terminates. Termination is always graceful; if some operation is partially
+done, the partial effects are undone.  A continuable error, by contrast,
+causes Meta-CVS to prompt the user with a menu of choices.
+
+
+\appendix
+
+\section{Glossary}
+
+\paragraph{baseline} A crosscut through a collection of version-controlled
+documents, which selects a specific version of each document.
+\index{baseline}
+
+\paragraph{basename} The short name of a file, excluding the full path,
+if any.  For example, the basename of {\tt src/lib/lexer.c} is {\tt lexer.c}.
+\index{basename}
+
+\paragraph{commit} To publish local changes to the repository, thereby
+permanently integrating them into the project history. Commited changes
+can be picked up in other sandboxes by {\it update}.
+
+\paragraph{CVS} Concurrent Versions System. A popular freeware version control
+suite widely used by free software projects. CVS started as a set of shell
+scripts written by Dick Grune, who posted the software to Usenet in 1986.
+Grune's CVS scripts used RCS; they provided higher-level functionality over
+RCS, automating and simplifying the use of RCS by for instance applying version
+control operations such as merging to entire sets of files at once.
+Eventually, CVS was rewritten in C, and directly incorporated the algorithms
+from RCS while remaining compatible with the RCS file format. 
+\index{CVS}
+
+\paragraph{F-file} A user document stored by Meta-CVS, in CVS, having a
+machine-generated name consisting of the characters {\tt F-} followed
+by thirty-two hexadecimal digits and an optional suffix.
+\index{F-file}
+
+\paragraph{hard link} An association connecting a directory entry to a file
+object.
+\index{hard link}
+
+\paragraph{Lisp} {\bf 1.} The standard computing language {\it ANSI Common
+Lisp}. {\bf 2.} Printed notation, conforming to the ANSI Common Lisp syntax,
+expressing a potentially complex, nested data structure.  {\bf 3.} Program code
+resulting from the reinterpretation of Lisp data structures as programming
+language constructs.
+\index{Lisp}
+
+\paragraph{module} An independent set of documents managed as a unit using
+Meta-CVS.
+\index{module}
+
+\paragraph{sandbox} The working copy of a module.
+\index{sandbox}
+
+\paragraph{stream} An independent line of development, represented in
+the version control system as an independent history of changes.
+In Meta-CVS, there is a main history known as the trunk. Secondary histories
+are called branches.
+\index{stream}
+
+\paragraph{suffix} The trailing portion of a {\it basename} which is separated
+from the rest of the name by a period (.) character. If there are two or
+more such characters, then it is the longest such portion. If the basename
+contains no periods, then it has no suffix. If the basename begins with a
+period, the rest of that entire name is a suffix. Examples:
+the suffix of {\tt lint.tar.gz} is {\tt tar.gz}; that of {\tt .xshell.rc}
+is {\tt xshell.rc}; the suffix of {\tt foo.} is the empty string; and neither
+{\tt .clisprc} nor {\tt README} have a suffix.
+\index{suffix}
+
+\paragraph{tag} A symbolic revision which identifies a {\it baseline}.  Tags
+are used by disciplined developers, or configuration managers, to label
+software releases so that it is possible to later retrieve the exact baseline
+of any given release.
+\index{tag}
+
+\paragraph{update} In CVS parlance, to retrieve a version of one or more
+documents from the repository, merge it with local changes made to the sandbox
+copy, if any, and then replace that copy. Updating is not only used to
+incorporate the latest changes from the repository into a sandbox, while
+preserving any outstanding local modifications, but it is also used for
+``navigating'' to old versions and switching among branches.
+
+\index{renaming|see {moving}}
+\printindex
+\end{document}

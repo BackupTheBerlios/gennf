@@ -1,0 +1,716 @@
+                       Release Notes for Meta-CVS
+
+Release 1.0.13, 2004-03-12:
+
+  The ``mcvs convert'' command now creates the TYPES and .cvsignore files.
+
+Release 1.0.12, 2004-01-31:
+
+  Fixes various bugs in ``mcvs convert'', so that it is
+  actually useable now, albeit still far from a perfect CVS
+  migration tool.
+
+  The remap command can now purge the MAP of entries that refer to non-existent
+  F- files, which is useful for cleaning up after the convert algorithm,
+  if necessary.
+
+Release 1.0.11, 2004-01-28:
+
+  Fixes breakage of list-branches command introduced in last release.
+
+  Fixes failures in grab command when pulling new baseline over
+  partial sandbox. Renamed symlinks, and execute permissions of files
+  were being accessed using abstract instead of real path.
+
+Release 1.0.10, 2004-01-09:
+
+  Builds on CLISP 2.32. The lb command no longer produces bogus warning 
+  when working copy is sticky to a version tag.
+
+Release 1.0.9, 2003-11-24:
+
+  Failures to open terminal for reasons other than non-existence 
+  of the object are handled (e.g. ``no such device'', etc).
+
+  The --nometa option now works properly in those commands that 
+  operate on the whole project when no file arguments are given
+  (tag, update, commit). Also, these commands no longer implicitly 
+  include the meta files when file arguments *are* given. 
+  These files can be included explicitly with the --meta global option.
+
+Release 1.0.8, 2003-06-03:
+
+  The Cygwin /dev/tty problem is partially addressed. The program
+  won't fail if /dev does not exist, but emits a warning message,
+  and disables interactive error handling. The workaround is to use
+  ``mkdir /dev''. This is a CLISP issue; its OPEN function expects the
+  full path to a file to actually exist, but on Cygwin, there are fake
+  /dev/* paths even though /dev does not exist.  If a real /dev directory
+  does in fact exist, it does not interfere with these magic paths.
+
+  The ``mcvs fi'' command no longer performs expansion on F- names
+  that are preceded by a slash.
+
+Release 1.0.7, 2003-04-23:
+
+  New commands sync-to-cvs and sync-from-cvs expose the hard link
+  synchronization algorithm.
+
+  Revamped error recovery logic. To continue in an error situation now
+  consistently means ``take the bold action that may erase data''
+  or ``proceed in the most obvious way to finish the specified job''.
+  It never means ``roll back the operation and bail'', which was
+  confusing.
+
+  Termination is no longer unsafe; the `T' menu command, and the
+  equivalent --error-terminate global option perform all necessary
+  restoration and cleanup.
+
+  Errors that have more information to print, like a list of files or
+  whatever, now indicate it in a standard way which translates to the
+  `I' menu command.
+
+  Chatter output goes to standard error rather than standard output,
+  as do all error messages.
+
+  The interactive error menu now talks to the user using the controlling
+  tty, meaning that it will work even if the input or output of the
+  mcvs command are redirected. If no controlling tty is available,
+  then interactive error handling is disabled; the default behavior
+  is then like --error-terminate but can of course be overridden by
+  --error-continue.
+
+Release 1.0.6, 2003-04-14:
+
+  The create command detects the existence of text editor backup files (or
+  other junk) in the MCVS directory after the editor is invoked on the
+  TYPES file. The user is prompted regarding their removal. If these files are
+  not removed, cvs import will bring them into the repository.
+
+  When Meta-CVS has to split a large CVS command into two or more
+  invocations with shorter argument lists, it now does not stop when one of
+  these invocations is unsuccessful; it does all of them, and combines
+  their termination indications by a logical AND. There was a bug in this
+  logic also which caused, upon termination failure, a cvs command to be
+  repeated for the same list of files.
+
+  Synchronization logic has been revamped. Unnecessary synchronizations
+  have been removed, which will make some commands run faster.
+  Synchronizations now have specific directions; for instance before
+  a CVS commit or update, changes are pushed from the directory tree to the MCVS
+  directory only, and after the CVS operation, in the reverse direction only.
+  
+  Meta-CVS will no longer re-create missing F- files by linking from the
+  directory tree. Doing this causes two problems. One is that if a user
+  manually removes a F- file and do ``mcvs up'', she wants CVS to fetch a clean
+  copy and push it into the tree. She does not want the file to be restored
+  from the tree prior to the CVS update. Secondly, sometimes CVS itself
+  removes files. If we re-create the files, CVS will consider them to
+  be ``in the way''.
+
+  Failures to read from the MAP or MAP-LOCAL files are treated as interactive,
+  continuable errors. By continuing, the user agrees that the behavior will
+  be as if an empty map were read.
+
+  The grab command uses less memory for performing move analysis.
+
+Release 1.0.5, 2003-02-25:
+
+  Bugfix: some one-argument command line options of CVS must be
+  specifies as a single parameter, with no separation between the
+  option letter and the argument characters. For example:
+
+    cvs log -r rev-1::rev-2      # invalid
+    cvs log -rrev1::rev2         # correct
+
+  Meta-CVS accepts either syntax, but it was generating the first form
+  when calling CVS. Now, *all* one-letter options that have an argument
+  are formatted in the second manner.
+
+  Bugfix: one more waitpid() issue was fixed; on fast machines, under
+  Linux, it was observed that from time to time Meta-CVS would get 
+  a -1/ECHILD when waiting for the CVS process.
+
+Release 1.0.4, 2003-02-20:
+
+  Fix remaining occurences of the CVS ``No child processes'' abort
+  problem, affecting the list-branches command, merge command
+  and the -r option of the filt command.
+
+Release 1.0.3, 2003-02-12:
+
+  ! THIS RELEASE IS WITHDRAWN. It was accidentally created from the
+  ! experimental main trunk of the Meta-CVS codebase, rather than
+  ! the 1.0 branch. But 1.0.4 does contain all of the changes
+  ! described here.
+
+  Fix for the CVS ``No child processes'' abort problem. It turns out
+  that CLISP sets the signal handling action for the SIGCHLD signal 
+  to SIG_IGN, which is inherited by child processes across the 
+  fork() and execvp() calls used in our mcvs_spawn() function. 
+  We correct the problem by resetting the signal handler to SIG_DFL
+  just before executing the new process image.
+
+  New feature, --up option. The argument is a nonnegative integer value
+  (default is zero) which specifies how many sandbox nesting levels to
+  escape out of when locating the sandbox root. This helps work with
+  nested Meta-CVS sandboxes.
+
+Release 1.0.2, 2003-02-10:
+
+  Bugfix in waitpid logic in the C library for running external processes;
+  we were not dealing with an interrupted waitpid.
+
+  Behavior of mcvs tag is changed: when there are no filename arguments,
+  the whole tree is tagged including the metafiles. In other words, it
+  now works like the commit command.
+
+Release 1.0.1, 2003-01-30:
+
+  Hard link sync optimization: update of a subset of files, commit, and
+  other operations like log and diff don't need to synchronize all
+  hard links, just the ones operated on.
+
+  The merge and remerge commands support -k option for overriding
+  CVS keyword expansion mode.
+
+  Fixes to getcwd error handling.
+
+  Improvement in install.sh script's logic for locating CLISP installation
+  directory.
+
+Release 1.0, 2003-01-01:
+
+  NOTE: It's not possible to upgrade to this release via mcvs-upgrade,
+  because it adds some new C functions to the Lisp executable.
+
+  Security fix: read-time evaluation was not suppressed when reading
+  structured data, like MCVS/MAP and MCVS/TYPES. This means that it
+  was possible for Alice to check in something that would execute
+  arbitrary code on Bob's computer.
+
+  Optimization: use fork and exec to launch CVS rather than CLISP's
+  run-program function, which indirects through the shell interpreter.
+  (On Cygwin, the spawnvp function is used).
+
+  Performance fix: stat() was being called superfluously by the 
+  hard synchronization code, twice for each file.
+
+  Build fix: install.sh works when CLISP executable is called ``lisp.exe'',
+  which is the case under Cygwin with newer CLISP releases.
+
+Release 0.99, 2002-11-17:
+
+  New link command for creating symbolic links.
+
+  Global option -n (dry run---don't modify filesystem) is processed
+  internally now, not just passed to CVS.
+
+  Failure to invoke text editor is handled.
+
+  The -r option of filt is fixed; it has been broken since the change to the
+  new MAP format, because it was reading the raw map representation, not
+  passing it through the right conversion steps that are needed now.
+
+  Bugfix to purge and remap commands: they were fooled by CVS-generated
+  files in the MCVS/CVS directory. Specifically, files having F- names, and a
+  the suffix ,t.
+
+  Bugfix to add logic in directory restructuring: there was the possibility
+  of mistakingly taking a clobbered local file to be a new local version of
+  the added file, instead of replacing it. This could happen if the local
+  file had a future timestamp relative to the one coming from the repository.
+
+  The prop command does not synchronize or write out map if no options are
+  specified.
+
+  Help text added for move and branch commands. Help text for grab rewritten.
+
+  The CVSEDITOR and VISUAL environment variables are now checked, not 
+  only EDITOR.
+
+Release 0.98, 2002-10-13:
+
+  The prop command was mistakenly reading from MAP-LOCAL and writing to MAP,
+  which could cause information loss if the two differ. It now reads from MAP
+  and writes to MAP. (The property changes propagate to MAP-LOCAL by the
+  update operation invoked by prop, as before).
+
+  Invocation of external programs included in debug trace.
+
+  The filt command does not filter F- names if they are immediately preceded by
+  the MCVS/ prefix; such occurences are clearly concrete, sandbox-relative
+  references to the actual F- links, rather than abstract references.
+
+  The update command now supports the -C option, to fetch the repository
+  copy, throwing away local changes. It also now honors the --metaonly
+  and --nometa options.
+
+  The export command has been added, for checking out documents without creating
+  a working copy (no MCVS directory in the root of the checkout).
+
+  The watch command has been added. Note that its syntax differs from that 
+  of CVS.
+
+  The watchers, editors, edit, and unedit commands have been added.
+
+  A script called mcvs-upgrade is now included, and installs alongside the mcvs
+  script.  This allows the Meta-CVS Lisp image to recompile and patch itself,
+  giving users of binary distributions an easy way to upgrade from source
+  code.  
+
+Release 0.97, 2002-10-06:
+
+  Meta-CVS now builds and runs on Microsoft Windows, under Cygwin
+  (www.cygwin.com). It still relies on hard links, which requires
+  Windows 2000 or XP, and the NTFS filesystem. It probably won't
+  work over FAT.
+
+  New --debug option for verbose output.
+
+  Cleaned up of error messages. Error messages don't specify prefixes like
+  ``mcvs-add:'' or ``mcvs-grab:'' any more. Rather, the error handler adds the
+  ``mcvs:'' prefix when printing the messages in a situation when the error is
+  not continuable.
+
+  Fixed bug introduced in release 0.13: mcvs add -R was adding only
+  directories, effectively ignoring arguments that are regular files.
+  The error-continuation behavior of mcvs add has been revised.
+
+  Trying to rename an object onto itself, or to move the sandbox root
+  directory are no longer silent no-ops, but produce an error.
+
+  The remap command now preserves property lists, and picks up changes
+  in executable permission.
+
+  The grab command now notices when a file changes from having execute
+  permission to not having execute permission.
+
+  Operations on the path . now work in a partial sandbox.
+
+Release 0.96, 2002-09-21:
+
+  The restore command was left broken during the change to the new
+  filemap format. It is now fixed.
+
+  The grab command now handles execute permission bits properly.
+
+  Some more commands have detailed help.
+
+  There is now a global option -i which specifies a script to be
+  executed. This allows Meta-CVS to be scripted using Lisp. For
+  instance suppose you have the following script and call it
+  list-matching:
+
+    #!/usr/local/bin/mcvs -i
+    (in-sandbox-root-dir
+      (let ((mapping (mapping-read *mcvs-map*))
+            (test-func (eval (read-from-string (pop *args*)))))
+        (dolist (entry mapping)
+          (with-slots (path raw-plist) entry
+            (when (funcall test-func raw-plist)
+              (format t "~a~%" path))))))
+
+  Then to list the names of files whose "importance" property is
+  a value greater than two, run:
+
+    ./list-matching '(lambda (plist)
+                       (let ((imp (getf plist :importance)))
+                         (and imp (> imp 2))))'
+
+  WARNING: Scripting accesses the guts of Meta-CVS directly, so scripts may
+  break as Meta-CVS is maintained. There is currently no published set of
+  stable interfaces.
+
+Release 0.95, 2002-09-16:
+
+  The install.sh script no longer uses a borrowed copy of the clisp-link script
+  or the linkkit directory; these have been removed.  These materials
+  are available at every CLISP installation; install.sh now finds them
+  and uses them.  Users of non-x86 machines ran into problems because of this
+  because linkkit/clisp.h contains architecture-dependent information.
+
+  A bug in mcvs filt was fixed; it wasn't handling F- names that aren't found
+  in the map.
+
+  A more detailed help system now exists, though it's not complete.  The ``mcvs
+  help'' command acts just like ``mcvs --help'' without any arguments. If given
+  an additional parameter which specifies a Meta-CVS command, it produces more
+  detailed documentation for that comand. Help exists already for a few
+  commands.
+
+  The release number is being warped to 0.95, which means that Meta-CVS is now
+  in beta. It is only five updates away from a 1.0 release.
+
+Release 0.24, 2002-09-08:
+
+  The mapping entries for both symlinks and files have extensible property
+  lists now. These are stored in the optional fourth and fifth list elements,
+  respectively of the :FILE and :SYMLINK map entries.
+
+  Versioning of the execute permission of files is supported, represented as
+  the :EXEC property of a :FILE mapping entry.
+
+  Some lame syntax is provided for manipulating properties:
+
+    mcvs prop --set foo --clear bar --remove baz main.c list.c
+  
+  will set the property FOO to true, set the property BAR to false,
+  and remove the property BAZ, in the files main.c and list.c.
+  The execute permission is represented by the property EXEC.
+
+Release 0.23, 2002-09-02:
+
+  Bugfix: the grab command notices edited symlinks and incorporates the
+  changes into the mapping.
+
+  The grab command now figures out moved symlinks. Moved symlinks are those
+  whose pathname has changed, but which continue to point to the same object
+  (which may also have been moved).
+
+Release 0.22, 2002-08-31:
+
+  Symbolic links are now versioned objects. The format of the MAP file
+  changes to accomodate this; the new Meta-CVS will read old MAP
+  files; when it writes it will write the new format. Old Meta-CVS won't
+  read the new format.
+
+  When a new module is created from an existing file tree, symbolic
+  links will be recognized and added. The add command will also add
+  symbolic links. Symbolic links can be renamed and moved; this does
+  nothing with their contents. They can point outside of the sandbox
+  using relative or absolute paths.
+
+  TODO:
+
+  There doesn't exist yet a special command to create symbolic links, nor to
+  retarget them; retargetting a link can be done manually by editing MCVS/MAP
+  and updating. Retargetting a link using the ln -s command, won't
+  backpropagate to the MAP file; an update will clobber the link.
+
+  The grab command does not yet compute symbolic link moves; a moved symbolic
+  link is treated as a remove and add.  This will be easy to fix.
+
+  The remap command ignores symlinks.
+
+Release 0.21, 2002-08-04:
+
+  Syntax of grab command changed. The branch is no longer specified as an
+  argument, but using the -r command option. If no revision is specified with
+  -r, then a -A must be specified to make the grab go to the main trunk. This
+  is a safety feature, since grabbing foreign snapshots to the trunk is almost
+  always wrong, though it could be useful during backup recovery, or for fixing
+  mistakes.
+
+  The way operating system functions are targetted has changed. Instead of
+  relying on the ``linuxlibc6'' module provided by CLISP, Meta-CVS now
+  has its own module for calling foreign functions. This module is portable;
+  it does not depend on the layout of glibc data structures. So Meta-CVS
+  is in theory now portable to other Unixes (provided they have /dev/urandom).
+
+Release 0.20, 2002-07-27:
+
+  The commit command does a true global commit when given no file or directory
+  parameters, and not given the --metaonly option.  This means commiting all
+  changes in the MCVS directory, even if they are in F-files that are not
+  currently mapped.
+
+Release 0.19, 2002-07-16:
+
+  When moving multiple files or directories to a subdirectory, a
+  restart is now provided to skip over bad ones and continue.
+
+  Grab no longer scans files if there are only added files, or only removed
+  files. There are no moves to deduce in that case.
+
+  Restore properly creates lost+found at the root of a partial sandbox,
+  rather than at the abstract root of the module.
+
+  Some other algorithmic improvements made. 
+
+  The first few sections of a user guide have been written.
+
+Release 0.18, 2002-07-07:
+
+  Cool new feature: checkout takes an extra argument, which specifies a
+  subdirectory of the project. Specifying a subdirectory results in a ``partial
+  sandbox'', whose root directory is the specified subdirectory of the larger
+  project. The rest of the project is ``invisible'' to that sandbox.  A
+  subdirectory argument can also be given to mcvs grab, which will cause it to
+  integrate the new source tree against a subtree of the Meta-CVS project
+  rather than the entire project. The subtree doesn't have to exist; in
+  that case you get an empty sandbox. Adding files to this sandbox will cause
+  the tree to exist in the project.
+
+  Bugfix: mcvs grab was not computing moves properly over small file sets,
+  wrongly treating them as removes and adds.
+
+Release 0.17, 2002-07-02:
+
+  The create command no longer takes a vendor branch. Instead the symbol
+  ``Created-by-Meta-CVS'' is used as the vendor tag to satisfy CVS.
+
+  The grab command no longer does useless synchronization on files that
+  are about to be deleted.
+
+  New purge command; does ``cvs rm'' on deleted files, that is to say, F- files
+  that have no mapping.
+
+  New restore command; re-enters deleted files into the mapping, under
+  the ``lost+found'' directory, using their F- names as sandbox names.
+
+  Bugfix: when a checkout bails because it is requested over top of an existing
+  working copy, it must not delete that working copy's MCVS sub directory.
+
+Release 0.16, 2002-06-29:
+
+  Added new heuristics to grab command. Paths are analyzed to determine
+  move distance. Greater distances reduce the confidence in a move.
+  These rules help sort out grabs in a project where similar or 
+  duplicate files are subject to parallel moves, the ambiguity being
+  resolved by favoring shorter moves. Word comparisons are case-insensitive
+  now. Common words (those that appear in many files) are ignored when
+  comparing files.
+
+  New options, --meta and --metaonly. This area of Meta-CVS is cleaned
+  up a little bit. Most reporting commands like log or diff no longer
+  operate on meta files by default; they must be explicitly told to do
+  so with --meta or --metaonly. Only the commit command implicitly includes
+  metafiles by default, and so if this is not wanted, --nometa must be
+  selected.  The update command remains special; if it is given file
+  arguments, it does not include meta files. If given no arguments, it
+  does a global CVS up across the entire project.
+
+Release 0.15, 2002-06-25:
+
+  Optimized a string splitting routine which is used heavily for processing
+  paths; the result is a noticeable performance improvement in some commands
+  that process large numbers of files.
+
+  Renamed ``import'' command to ``create''.
+
+  Bugfix: checkout and create showed errors when removing directory, due to
+  broken :postorder support in directory walking function.
+
+  Bugfix: on failure, checkout was failing to delete the MCVS directory when
+  the checkout was directed to an existing directory.
+
+  New feature: ``mcvs grab'' command imports third-party snapshots to a
+  branch. This is invoked in the root directory of the source tree to import.
+  It determines what files have been added and removed in the snapshot, and
+  tries to compute which removes and adds are actually moves. This is done by
+  analyzing the actual contents of the files according to a crude algorithm to
+  do fuzzy comparisons, so that even files which were modified as well as moved
+  are discovered.
+
+Release 0.14, 2002-06-21:
+
+  Bugfix: mcvs add was broken for files that have no suffix, causing
+  the underlying cvs add to fail. This was broken in 0.7 when type
+  handling was added.
+
+Release 0.13, 2002-06-06:
+
+  Sandbox synchronization now handles the case of two files having
+  the same timestamp. An error is signaled, with interactive resolution
+  to synchronize either way, or do nothing.
+
+  If a file must be deleted on update, and this cannot be done, it
+  is now a continuable error.
+
+  Bugfix: pass -I ! to cvs import so that it won't ignore some F- files
+  whose suffix is one of the ones cvs ignores by default.
+
+  New command: mcvs remap. The user can move or delete files directly without
+  going through Meta-CVS. When mcvs remap is invoked, it will hunt down the
+  moves and deletions, and reconstruct the mapping accordingly; that is,
+  it remaps the new structure. This command uses inode numbers to identify
+  files; if a file is copied and then the original is deleted, that won't
+  be recognized as a move.
+
+Release 0.12, 2002-04-18:
+
+  Bugfix: remove was broken in 0.10, fixed now.
+
+  Bugfix: status, diff, etc. work in empty project rather than complaining
+  ``. not known to Meta-CVS''.
+
+  The checkout operation now can now populate an existing directory, including
+  the current working directory (mcvs co -d . modulename).  Of course, the
+  target directory cannot be an existing Meta-CVS sandbox.
+  This is a useful feature, which allows sandboxes to blend with an
+  existing directory structure.
+
+  Checkout now uses the same function for generating the sandbox
+  structure as does update. This is now necessary, because local files
+  can be clobbered by the checkout.
+
+Release 0.11, 2002-04-12:
+
+  Bugfix: when branch invokes rtag, it now takes the CVSROOT information
+  from CVS/Root and passes it via -d. This is necessary because rtag does not
+  look at a local CVS subdirectory for this information, only the 
+  -d option or the environment variable.
+
+  Command for listing branches added (list-branches or lb). Also shows
+  what sticky tag the sandbox is updated to.
+
+  Command for switching branches added (switch or sw).
+
+  Merge detects that working copy is on non-branch tag and bails.
+
+  Absolute paths can now be specified as file arguments. These are 
+  based from the root directory of the sandbox, not the actual filesystem root
+  directory.
+
+Release 0.10, 2002-04-03:
+
+  Automatic merging implemented. Branch is created using branch command,
+  and merging from another branch is done using simple merge command.
+  Meta-CVS maintains the tags to keep track of what has been merged
+  from what branch to what branch.
+
+  Bugfix: checkout -d foo bar was complaining about directory bar already
+  existing, even though it should only care about foo.
+
+  The remove command now requires explicit -R option to recursively remove
+  a directory. It has more detailed error reporting.
+
+  The move command has better error reporting.
+
+Release 0.9, 2002-03-14:
+
+  Bugfix: the .cvsignore file is now subject to tagging, status, etc,
+  (unless --nometa is specified, of course).
+
+  The mcvs filt command takes -r <revision> or -D <date> parameters.
+  This means to retrieve the MAP file as of the specified revision or
+  date and use that mapping to perform the filtering translation, 
+  rather than using MAP-LOCAL.
+
+  The mcvs update command takes filename arguments now and also 
+  supports the -p option.
+  
+Release 0.8, 2002-03-13:
+
+  Bug fixed in mcvs add; it was not ignoring files that are already 
+  listed as :ignore in MCVS/TYPES.
+
+  Bug fixed in mcvs move: a target with a trailing slash is now treated
+  as a directory (if it does not already exist and is a non-directory).
+
+  The -d option of mcvs checkout can now be used to override the checkout
+  directory, which is normally the same as the module name.
+
+  The global options --version, --help, -q, -Q and -e are now supported.
+
+  New global options --error-continue and --error-terminate to disable
+  interactive error handling in two different ways.
+
+  Log level of many messages has changed; many messages have been 
+  relegated to debug level.
+
+  The import command now creates a .cvsignore file containing the name
+  MAP-LOCAL.
+
+Release 0.7, 2002-03-09:
+
+  The import command collects a list of the file suffixes and brings up
+  a text editor to allow the user to edit their CVS keyword expansion
+  behavior. This information is kept in a new metafile called TYPES. The
+  add command also updates TYPES; it identifies any suffixes which are new,
+  and brings up an editor. The F- files now carry suffixes, which
+  simplifies interfacing with CVS, and also allows cvswrappers to work.
+
+  Recursive add works (mcvs add -R ...).
+
+  New command line option --nometa allows metafiles to be excluded from
+  diff, tag, and other commands; without the option they are inserted
+  into the list of files to be processed.
+
+  The commit option now takes an optional list of files or directories,
+  just like tag, diff, and others.
+
+Release 0.6, 2002-02-16:
+
+  The add operation was horribly broken in 0.5, it is fixed.
+
+  User can interactively select whether to clobber local files or leave
+  everything alone. Effects on the mapping file of a mcvs move are undone,
+  if the restructuring is rolled back, or raises a condition that leads
+  to termination.
+
+  Meta-CVS now keeps a new meta-file called MCVS/TYPES. This is created
+  during import, and specifies the CVS keyword expansion mode for files
+  having given suffixes, and can also tell Meta-CVS to ignore certain files
+  when importing or adding.
+
+Release 0.5, 2002-02-10:
+
+  Much improved error handling.  Filesystem rearranging code performs
+  sanity checks to prevent adds and moves from accidentally clobbering
+  local files. A rearranging gone bad can be rolled back. Effects
+  of a failed mcvs add can also be rolled back.
+
+  MAP-LOCAL is now sorted in the same way as MAP.
+
+Release 0.4, 2002-02-04:
+
+  CVS is invoked using internal function resembling the xargs utility,
+  which ensures that multiple command lines are generated if necessary to
+  avoid surpassing the operating system limit on argument and environment
+  vector size. This is important when someone wants to diff or stat a
+  subdirectory, which requires Meta-CVS to pick out the individual files
+  at the CVS level.
+
+  The tag, log, status and annotate commands are now available.
+
+  The MAP file is sorted on F- file names now, not path names. This
+  improves merging, since files do not move within the file when
+  they are renamed.
+
+Release 0.3, 2002-02-02:
+
+  Process termination done is properly in top level handler, by a nonlocal
+  exit. The program properly indicates failed termination when it exits
+  due to an error condition.
+
+  Corrections are made in the command line option processing. If z is an
+  option that takes an argument, and the argument is -zx, then x is
+  treated as the argument to the option. Long options arguments are
+  recognized properly, according to the --opt=arg convention. The option
+  processing is restructured. Most of the commands now take the
+  appropriate cvs command-specific options.
+
+  The update algorithm performs dupe checking over the map, which could
+  happen during a merge.
+
+  Some more bugfixing has been done to the move command.  It was still not
+  handling right some cases of an unversioned file being clobbered. Also,
+  it wasn't renaming a directory containing just one file.  
+
+  I did some performance investigation for larger file sets, and
+  ended up rewriting the code that computes filesystem restructuring
+  changes and map duplicates.
+
+Release 0.2, 2002-01-30:
+
+  Changed official name from MCVS to Meta-CVS.  The move command now
+  performs some filesystem tests so it does the right thing when a versioned
+  file is moved over a non-versioned file, or when a file is moved into
+  a directory not known to Meta-CVS.  Factored out reading and writing of
+  map files into functions.
+
+Release 0.1, 2002-01-28:
+
+  Support for mcvs diff -u added. The -R option works for mcvs add command.
+  Bug fixed in mcvs mv command; it wasn't working analogously to the Unix
+  mv command when copying a directory to an existing directory.
+
+Release 0.0, 2002-01-27:
+
+  This is alpha software. It is not complete, and lacks documentation.
+  However, it is already usable in its present state and is being used for
+  version control by its author.  If you can program in Common Lisp and would
+  like to help, take a look through the TODO file.  Send me patches, ideas,
+  feature requests. 

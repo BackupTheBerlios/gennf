@@ -1,0 +1,25 @@
+				Upgrading Meta-CVS
+
+If you already have an installation of Meta-CVS which includes the mcvs-upgrade
+command, then you can upgrade the program from the source code, even if you
+installed a binary distribution of Meta-CVS, and don't have any tools required
+to build it.
+
+Meta-CVS carries with it the Lisp compiler that is used to compile it, as well
+as the custom Lisp executable with some C code. The upgrade method assumes that
+the new Meta-CVS source code does not rely on any new C functions added the
+lisp.run executable. If the new version of the code needs new C functions, then
+this upgrade method will not work.
+
+The procedure is simple. Run the ``mcvs-upgrade'' command, giving it a single
+argument---the name of the directory where your Meta-CVS source code resides.
+This should be that directory in which the file mcvs-main.lisp is found, wich
+is currently the code/ subdirectory of the Meta-CVS source tree.
+
+Upgrading will produce a lot of warnings, because it works by loading new
+versions of code into an existing Lisp image, causing functions and variables
+to be replaced with new ones. Just ignore the warnings, and pay attention to
+the last message, which states whether or not the upgrade succeeded.
+
+After that when you run ``mcvs --version'' it should show the new version
+number.

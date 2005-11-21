@@ -1,0 +1,23 @@
+# Makefile for CLISP module set unix-bindings
+
+CC =
+CFLAGS =
+INCLUDES=
+
+CLISP =
+
+SHELL = /bin/sh
+
+unix.c : unix.lisp
+	clisp -c unix.lisp
+
+unix.o : unix.c
+	$(CC) $(CFLAGS) -I$(INCLUDES) -c unix.c
+
+wrap.o : wrap.c
+	$(CC) $(CFLAGS) -I$(INCLUDES) -c wrap.c
+
+clisp-module : unix.o wrap.o
+
+clean:
+	-rm unix.o unix.c unix.fas unix.lib wrap.o
