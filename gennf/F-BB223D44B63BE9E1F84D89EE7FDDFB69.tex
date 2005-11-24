@@ -1,11 +1,14 @@
 \documentclass[german, 10pt, a4paper]{article}
 \usepackage{babel}
+\setlength{\parindent}{0pt}
 
 \begin{document}
 \title{\emph{Scratchpad}\\
 {\scshape Infrastructures for Open Source Software Development}\\
 Distributed Version Management System with Code Signing}
 \maketitle
+
+\tableofcontents
 
 \section{Prologue}
 This document is our project's scratchpad accompanying the development
@@ -123,6 +126,10 @@ As we are only very few people, there will probably be meetings once in
 a while (see \ref{schedule} for appointments).
 Day-to-day communication will be done using
 \texttt{ossi@insel.cs.tu-berlin.de} with the subject \texttt{SCM:}.
+
+There is a regular meeting tuesdays at 12 o'clock in the i-caf\'e if
+not announced differently.
+
 \subsection{Schedule \label{schedule}}
 There is no real schedule yet but\ldots
 
@@ -281,6 +288,63 @@ either full blown or just of partly.
 \item \texttt{create-patchset} to produce push and pull patchsets.
 \end{itemize}
 
+\section{Comments on other software}
+
+\subsection{\textsc{dcvs}}
+
+\textsc{dcvs} implements distributed repositories. But it assigns
+responsibilities for certain parts (branches) of the code to
+a particular site which is not so flexible and not what we want, I think.
+They use \textsc{cvsup} to synchronize repositories which might be
+interesting because the problem of how to exchange data without checking
+out all necessary revisions and not touching the repository directly is
+not yet solved.
+ 
+Anyway, \textsc{dcvs} implements a concept of change sets and snapshots.
+Snapshots a hooks into the code at certain point in time and change sets
+are more or less diffs between to snapshots (what others call patchsets).
+In our termninology, the snapshot is the change set and a patchset may
+contain diffs between two or more change sets.
+
+
+\section{Todo and milestones}
+
+\subsection{First milestone}
+The first thing to do is implementing change sets and writing an
+interface to the \textsc{gpgme} library. At this point, we have to decide
+what \textsc{Common Lisp} implementation will be used because calls
+to foreign functions is not included in the ANSI standard.
+Documentation for \textsc{clisp} can be found at
+\texttt{http://clisp.sourceforge.net/impnotes.html#dffi} and the like
+for \textsc{cmucl} at \texttt{http://common-lisp.net/project/cmucl/doc/cmu-user/aliens.html}.
+
+\subsection{Other things}
+\begin{itemize}
+\item \textsc{metacvs} does not support empty directories at the moment.
+We could patch this.
+\item The behaviour when issuing a \textsc{cvs} command not shadowed by
+\textsc{metacvs} is to fire the dbeugger. Perhaps it is sensible to
+just pass those commands to the \textsc{cvs} binary and end up in the debugger
+only if the command is unknown to \textsc{cvs} too.
+\end{itemize}
+
+\section{Logbook}
+
+This section is intended to contain short notes of changes done to the
+project, be it commits to the code base or adding content to this o
+other describtive files.
+
+\subsubsection*{November 24, 2005}
+Added this section to the scratchpad and a to do list and milestones.
+
+Removed the \textsc{metacvs} sources from our repository. The reason is
+that it is bad style to store someone else's complete when not forking.
+Maybe, the project evolves into a fork but at the moment, a patch is
+intended.
+
+Wrote some comment on \textsc{dcvs}.\hfill{\textit{florenz}}
+
+
 \section{References}
 
 \begin{itemize}
@@ -298,5 +362,8 @@ GNU arch project using signed archives
 \item \textsc{hocvs} is an extension to \textsc{metacvs} with change based
 revisions. It is done with \textsc{cvs} tags, I believe, but perhaps worth a
 glance. It can be found at \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
+\item \textsc{dcvs} is a combination of \textsc{cvs} and \textsc{cvsup}
+to support change sets and distributed repositories. It is found
+at \texttt{http://www.elegosoft.com/dcvs/}.
 \end{itemize}
 \end{document}

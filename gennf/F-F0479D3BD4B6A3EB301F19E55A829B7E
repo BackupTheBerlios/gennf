@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+PREFIX=${0%/*}
+OWD=$PWD
+cd $PREFIX
+LD_LIBRARY_PATH=/home/pub/lib ./lisp.run -M lispinit.mem $@
+cd $OWD

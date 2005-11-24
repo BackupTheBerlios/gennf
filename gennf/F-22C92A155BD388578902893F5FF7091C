@@ -1,0 +1,5 @@
+#!/bin/sh
+
+LD_LIBRARY_PATH=/home/pub/lib CLISP_LINKKIT=/home/pub/lib/clisp/linkkit \
+sh /home/pub/lib/clisp/clisp-link add-module-set unix-bindings \
+/home/pub/lib/clisp/base unix-bindings-linking-set

@@ -1,4 +1,9 @@
 ((:FILE
+  "MCVS/F-22C92A155BD388578902893F5FF7091C"
+  "src/make_image"
+  (:EXEC
+   T))
+ (:FILE
   "MCVS/F-3E293DB4FDF7D70F72EC266B13D28C65.txt"
   "doc/description.txt")
  (:FILE
@@ -12,4 +17,9 @@
   "doc/scratchpad.tex")
  (:FILE
   "MCVS/F-E63AF5C74FCD768D115032F86E86B4E6.txt"
-  "doc/proposal.txt"))
+  "doc/proposal.txt")
+ (:FILE
+  "MCVS/F-F0479D3BD4B6A3EB301F19E55A829B7E"
+  "src/unix-bindings-linking-set/clisp_mcvs"
+  (:EXEC
+   T)))
