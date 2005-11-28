@@ -1,5 +1,8 @@
 #!/bin/sh
 
-LD_LIBRARY_PATH=/home/pub/lib CLISP_LINKKIT=/home/pub/lib/clisp/linkkit \
-sh /home/pub/lib/clisp/clisp-link add-module-set unix-bindings \
-/home/pub/lib/clisp/base unix-bindings-linking-set
+CLISP_BASE=/home/pub/lib/clisp  # Where CLISP lives.
+LIB_PATH=/home/pub/lib          # Where libsigsegv lives.
+
+LD_LIBRARY_PATH=$LIB_PATH CLISP_LINKKIT=$CLISP_BASE/linkkit \
+sh $CLISP_BASE/clisp-link add-module-set unix-bindings \
+$CLISP_BASE/base unix-bindings-linking-set
