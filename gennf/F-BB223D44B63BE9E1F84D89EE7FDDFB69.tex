@@ -1,4 +1,4 @@
-\documentclass[german, 10pt, a4paper]{article}
+\documentclass[fleqn, german, 10pt, a4paper]{article}
 \usepackage{babel}
 \setlength{\parindent}{0pt}
 
@@ -246,6 +246,8 @@ audit-part, would be useful.
 \section{Distributed repositories}
 
 \subsection{Outline}
+\emph{(Subsection probably outdated because of the model below.)}
+
 By \emph{distributed repository} we mean support for the following
 features:
 
@@ -266,6 +268,7 @@ to be sent per e-mail for example.
 \end{itemize}
 
 \subsection{Technical issues}
+\emph{(Subsection probably outdated because of the model below.)}
 
 As for the code signing part unique revision numbers for each change have
 to be introduced. I suggest, this will be the first thing to be done anyway.
@@ -288,6 +291,182 @@ either full blown or just of partly.
 \item \texttt{create-patchset} to produce push and pull patchsets.
 \end{itemize}
 
+\subsection{Modelling distributiveness}
+
+In the following section I propose an abstract model for distributed
+repositories and their interaction. It is still incomplete
+exspecially concerning sandbox-repository interaction but gives already
+some implementation hints.
+
+\subsubsection{Basic building blocks}
+
+I propose the notion of a \emph{commit} as the basic change which can
+occur to a repository.
+
+A commit $c$ can be a \emph{change set}, \emph{link set} or
+\emph{merge set}:
+
+\begin{eqnarray*}
+\mathnormal{cset} &=& (n, b, h, f) \\
+\mathnormal{lset} &=& (n, b, h) \\
+\mathnormal{mset} &=& (n, b, h, f, o)
+\end{eqnarray*}
+
+with $n$ being the commit number, $b$ being the \emph{branch identifier},
+$h$ being the hostname where $f$, which is a mapping
+$\mathnormal{file} \rightarrow \mathnormal{revision}$, is stored; $o$
+is itself an $\mathnormal{lset}$.
+
+A repository $r$ is a set of sequences of commits:
+
+\begin{eqnarray*}
+r &=& \{s\ |\ \mathnormal{commit}\ \mathnormal{list} \ \wedge \\
+&&    \mathnormal{ft}\ s\ (\mathnormal{cset} \ \vee \ \mathnormal{lset}) \wedge \\
+&&    \forall c_1, c_2 \in s: \mathnormal{br}\ e_1 = \mathnormal{br}\ e_2 \wedge \\
+&&    \forall c \in s \ \mathnormal{rt}\ s : s\ (\mathnormal{cset} \ \vee
+      \mathnormal{mset})\}
+\end{eqnarray*}
+
+The commit numbers in one repository have to be unique:
+
+\begin{displaymath}
+\forall s_1, s_2 \in r: \forall c_1 \in s_1, c_2 \in s_2: \mathnormal{nu}\ c_
+\neq \mathnormal{nu}\ c_2
+\end{displaymath}
+
+Branch identifiers have to be unique as well:
+
+\begin{displaymath}
+\forall s_1, s_2 \in r: s_1 \neq s_2: \mathnormal{br}\ \mathnormal{ft}\ s_1
+\neq \mathnormal{br}\ \mathnormal{ft}\ s_2
+\end{displaymath}
+
+Only one \emph{main} trunk is allowed:
+
+\begin{displaymath}
+\exists_1 s\in r : \mathnormal{ft}\ s \ \mathnormal{cset}
+\end{displaymath}
+
+Some abbreviations and helper functions are used:
+
+\begin{itemize}
+\item $\uparrow c$ denotes a commit $c'$ such that $\uparrow c = (n, b, h)$
+and $c=(n, b, h, f)$.
+\item $\downarrow c$ denotes a commit $c'$ such that $\downarrow
+c = (n', b', h', f', o)$ with $o = \uparrow c$.
+\item $\mathnormal{nu}:\ \mathnormal{commit} \rightarrow \mathnormal{number}$ \\
+$\mathnormal{br}:\ \mathnormal{commit} \rightarrow \mathnormal{branch}$ \\
+$\mathnormal{ho}:\ \mathnormal{commit} \rightarrow \mathnormal{hostname}$ \\
+$\mathnormal{fi}:\ \mathnormal{commit} \rightarrow (\mathnormal{filename} \rightarrow \mathnormal{revision})$ \\
+$\mathnormal{oi}:\ \mathnormal{commit} \rightarrow \mathnormal{commit}$
+\end{itemize}
+
+\subsubsection{Operations on repositories}
+
+Given a repository $r = \{\langle c_1, c_2, c_3, \ldots, c_n\rangle\}$ 
+important operations on repositories work like this:
+
+\begin{itemize}
+\item \emph{inherit} the whole repository:
+
+$r' = \{\langle c'_1, c'_2, c'_3, \ldots, c'_n\rangle\}$ with
+$c'_i = (n', b', h', f)$ and $c_i=(n, b, h, f)$.
+
+\emph{inherit} parts of the repository:
+
+$r'=\{\langle \uparrow c_k, c'_1, \ldots, c'_{n-k}\rangle \}$ with
+$c'_{i-k}=(n', b', h', f)$ and $c_i=(n, b, h, f)$, $k\le n$ (if $k=n$,
+$r'=\{\langle \uparrow c_n\rangle\}$, no $f$).
+
+\item \emph{branch} from a commit $c_k$:
+
+The resulting repository is
+
+\begin{displaymath}
+r = \{\langle c_1, \ldots, c_n\rangle, \langle \uparrow c_{k-1}, c'_1
+\rangle\}, \qquad c'_1=c_k, \, k\le n
+\end{displaymath}
+
+After doing some commits to the new branch the repository looks like
+this:
+
+\begin{displaymath}
+r = \{\langle c_1, \ldots, c_n\rangle, \langle \uparrow c_{k-1}, c'_1, c'_2, \ldots, c'_m
+\rangle\}
+\end{displaymath}
+
+\item \emph{merge} two branches:
+
+Merging locally looks like
+
+\begin{displaymath}
+r = \{\langle c_1^1, \ldots, c_n^1\rangle, \langle c_1^2, \ldots,
+c_m^2, \downarrow c_n^1\rangle\}
+\end{displaymath}
+
+with $r=\{\langle c_1^1, \ldots, c_n^1\rangle, \langle c_1^2, \ldots,
+c_m^2\}$ before the merge.
+
+It is the same for merging between different sites except that we need two
+repositories:
+
+\begin{eqnarray*}
+r_1 &=& \{\langle c_1^1, \ldots, c_n^1\rangle\} \\
+r_2 &=& \{\langle c_2^1, \ldots, c_m^2\rangle\}
+\end{eqnarray*}
+
+The result of merging $c_m^2$ into the one and only branch in $r_1$ is
+
+\begin{displaymath}
+r_1 = \{\langle c_1^1, \ldots, c_n^1, \downarrow c_m^2\}
+\end{displaymath}
+
+which is the same as for local merges.
+\end{itemize}
+
+\subsection{Looking towards implementation}
+
+Problems to be solved and questions to be answered for implementation
+are
+
+\begin{itemize}
+\item Is it sensible (or even necessary) to use the branching features
+of \textsc{cvs}?
+\item How is the interaction between sandbox and repository? Are merge,
+inherit and branch operating on the repository directly (and the result
+can be enjoyed by a checkout)?
+\item How is data transported between repositories? Using \textsc{cvsup}
+is an option. Another option is using \textsc{remotely} which will be
+slow (because many diffs have to be computed and transceived).
+\item Are branch identifier factored out of sequences of commits (because
+they are the same for all commits)?
+\end{itemize}
+
+The model given in the previous section already hints some implementation
+details:
+
+\begin{itemize}
+\item $f$ should be implemented as a hash map.
+\item Branches are sequences which can either be stored as
+arrays or lists. As it is expected that most work will be done
+either on all commits or the last, lists will proabbly do the job
+pretty well when stored in reversed order.
+\item There should be a map from hostnames to some identifier because
+hostnames (and paths of \textsc{cvs} repositories) may change.
+\item Commits and $\mathrm{[lmc]set}$s will be classes and
+branches sequences of instances of these classes.
+\end{itemize}
+
+\subsection{Nice features to have}
+
+\begin{itemize}
+\item An operation to gather all $\mathnormal{lsets}$s as
+local copies into a repository (ending the distributiveness, perhaps
+for a restart).
+\item A possibility to generate a graph to show the links between
+repositories.
+\end{itemize}
+
 \section{Comments on other software}
 
 \subsection{\textsc{dcvs}}
@@ -308,6 +487,10 @@ contain diffs between two or more change sets.
 
 
 \section{Todo and milestones}
+
+\subsection{Zeroth milestone}
+Specification for commits (or patch sets or however). This includes
+the handling of branches and merges.
 
 \subsection{First milestone}
 The first thing to do is implementing change sets and writing an
@@ -343,6 +526,12 @@ Maybe, the project evolves into a fork but at the moment a patch is
 intended.
 
 Wrote some comment on \textsc{dcvs}.\hfill{\textit{florenz}}
+
+
+\subsubsection*{November 29, 2005}
+
+Written a first specification for the distributiveness along with some
+very basic implementation hints.\hfill{\textit{florenz}}
 
 
 \section{References}
