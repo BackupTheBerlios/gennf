@@ -4,8 +4,14 @@
   (:EXEC
    T))
  (:FILE
+  "MCVS/F-30CE3B42F628E6E185661335E4018306.lisp"
+  "src/gpgme/gpgme.lisp")
+ (:FILE
   "MCVS/F-3E293DB4FDF7D70F72EC266B13D28C65.txt"
   "doc/description.txt")
+ (:FILE
+  "MCVS/F-4A3E7EA0D66193EB3C63340BB6150E24"
+  "src/gpgme/Makefile")
  (:FILE
   "MCVS/F-58D8930AD0215DAF4F30E752A5EF3EA1"
   "doc/Makefile")
