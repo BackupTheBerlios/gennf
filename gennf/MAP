@@ -2,6 +2,9 @@
   "MCVS/F-01BFC84C7B5AA5916B1FC95B481B0DEC.lisp"
   "src/types.lisp")
  (:FILE
+  "MCVS/F-13ACBEE85F44E6335A8A14F12C82ECA9.c"
+  "src/unix-bindings/wrap.c")
+ (:FILE
   "MCVS/F-1474E393BE5A7EE83A4D941FA7F9346D.lisp"
   "src/watch.lisp")
  (:FILE
@@ -64,6 +67,9 @@
   "MCVS/F-5B815906BE2D64E9BC2E48B76242BFF2.lisp"
   "src/sync.lisp")
  (:FILE
+  "MCVS/F-5D53AE4674717BF80056E24988D89A49.lisp"
+  "src/unix-bindings/unix.lisp")
+ (:FILE
   "MCVS/F-6763C87866B0E9BE56C154839D6FAB55.lisp"
   "src/purge.lisp")
  (:FILE
@@ -75,6 +81,9 @@
  (:FILE
   "MCVS/F-7849808E8711BA9FBEB0917F33B12A79.lisp"
   "src/find-bind.lisp")
+ (:FILE
+  "MCVS/F-7FC7BAE8FEAFAA140D1560EE6A936C40.sh"
+  "src/unix-bindings/link.sh")
  (:FILE
   "MCVS/F-8E73F07FB339A6981C69AF06C278B49A.lisp"
   "src/rcs-utils.lisp")
@@ -99,6 +108,9 @@
  (:FILE
   "MCVS/F-A580617EC4FE7BAAC13B25642EF48CAC.lisp"
   "src/add.lisp")
+ (:FILE
+  "MCVS/F-ABFCD555D3597D76F2AE7BB47DAD0C07"
+  "src/unix-bindings/Makefile")
  (:FILE
   "MCVS/F-BB223D44B63BE9E1F84D89EE7FDDFB69.tex"
   "doc/scratchpad.tex")
