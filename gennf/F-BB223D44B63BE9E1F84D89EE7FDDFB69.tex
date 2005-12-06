@@ -303,28 +303,28 @@ some implementation hints.
 I propose the notion of a \emph{commit} as the basic change which can
 occur to a repository.
 
-A commit $c$ can be a \emph{change set}, \emph{link set} or
-\emph{merge set}:
+A commit $c$ can be a \emph{change}, \emph{link} or
+\emph{merge}:
 
 \begin{eqnarray*}
-\mathnormal{cset} &=& (n, b, h, f) \\
-\mathnormal{lset} &=& (n, b, h) \\
-\mathnormal{mset} &=& (n, b, h, f, o)
+\mathnormal{change} &=& (n, b, h, f) \\
+\mathnormal{link}   &=& (n, b, h) \\
+\mathnormal{merge}  &=& (n, b, h, f, o)
 \end{eqnarray*}
 
 with $n$ being the commit number, $b$ being the \emph{branch identifier},
-$h$ being the hostname where $f$, which is a mapping
+$h$ being the \emph{host identifier} where $f$, which is a mapping
 $\mathnormal{file} \rightarrow \mathnormal{revision}$, is stored; $o$
-is itself an $\mathnormal{lset}$.
+is itself an $\mathnormal{link}$.
 
 A repository $r$ is a set of sequences of commits:
 
 \begin{eqnarray*}
 r &=& \{s\ |\ \mathnormal{commit}\ \mathnormal{list} \ \wedge \\
-&&    \mathnormal{ft}\ s\ (\mathnormal{cset} \ \vee \ \mathnormal{lset}) \wedge \\
+&&    \mathnormal{ft}\ s\ (\mathnormal{change} \ \vee \ \mathnormal{link}) \wedge \\
 &&    \forall c_1, c_2 \in s: \mathnormal{br}\ e_1 = \mathnormal{br}\ e_2 \wedge \\
-&&    \forall c \in s \ \mathnormal{rt}\ s : s\ (\mathnormal{cset} \ \vee
-      \mathnormal{mset})\}
+&&    \forall c \in s \ \mathnormal{rt}\ s : s\ (\mathnormal{change} \ \vee
+      \mathnormal{merget})\}
 \end{eqnarray*}
 
 The commit numbers in one repository have to be unique:
@@ -344,7 +344,7 @@ Branch identifiers have to be unique as well:
 Only one \emph{main} trunk is allowed:
 
 \begin{displaymath}
-\exists_1 s\in r : \mathnormal{ft}\ s \ \mathnormal{cset}
+\exists_1 s\in r : \mathnormal{ft}\ s \ \mathnormal{change}
 \end{displaymath}
 
 Some abbreviations and helper functions are used:
@@ -542,7 +542,7 @@ very basic implementation hints.\hfill{\textit{florenz}}
 
 Enabled commit mails. First tried syncmail but this script includes
 diffs in the mails which is not really necessary. Replaced it with
-log_accum.pl from the octopus-project (\texttt{http://www.tddft.org})
+\texttt{log\_accum.pl} from the octopus-project (\texttt{http://www.tddft.org})
 which is originally from FreeBSD.\hfill{\textit{florenz}}
 
 \section{References}
