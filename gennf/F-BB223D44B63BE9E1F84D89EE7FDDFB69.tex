@@ -30,13 +30,13 @@ Development is currently planned to be undertaken by
 
 \section{The goal}
 We want to implement a better version management system based on
-some existing software. 'Better' in this case means that it supports
+existing software. \emph{Better} in a sense that it supports
 code signing and distributed repositories.
 
 Code signing means, that each chunk of code checked into the repository
 has to be signed by the programmer using some public/private key scheme
 to enable other developers or users to verify the origin of the code (as
-long as the keys are trustworthy).
+long as keys are trustworthy).
 
 Distributed means that the repository is not stored on a single server
 but that check ins can be done on several servers and the result be
@@ -122,8 +122,6 @@ into \texttt{\textasciitilde/.emacs}.
 \subsection{Communication}
 Everyone participating in the project is free to mess up this file to
 record relevant thoughts, ideas, \ldots.
-As we are only very few people, there will probably be meetings once in
-a while (see \ref{schedule} for appointments).
 Day-to-day communication will be done using
 \texttt{ossi@insel.cs.tu-berlin.de} with the subject \texttt{SCM:}.
 
@@ -246,14 +244,13 @@ audit-part, would be useful.
 \section{Distributed repositories}
 
 \subsection{Outline}
-\emph{(Subsection probably outdated because of the model below.)}
 
-By \emph{distributed repository} we mean support for the following
+By support for \emph{distributed repository} we mean support for the following
 features:
 
 \begin{itemize}
 \item The possibility to build a new repository from a given a 
-\textsc{metacvs} repository either by replicating the whole history or
+repository either by replicating the whole history or
 by takeing a certain revision as new starting point -- on a per module
 base of course.
 \item Generation of patch sets between two given revisions (for example
@@ -268,13 +265,9 @@ to be sent per e-mail for example.
 \end{itemize}
 
 \subsection{Technical issues}
-\emph{(Subsection probably outdated because of the model below.)}
 
-As for the code signing part unique revision numbers for each change have
+As for the code signing part numbers for each commit have
 to be introduced. I suggest, this will be the first thing to be done anyway.
-\emph{We should agree on a sensible name for this. I suggest changeset number
-to distinguish it from revision number (of a file) and patchset. A changeset
-may be a patchset but has not to be necessarily.}
 
 Generation of one repository out of another one takes part on the backend
 side of the version management. The same is true for the generation
@@ -295,7 +288,7 @@ either full blown or just of partly.
 
 In the following section I propose an abstract model for distributed
 repositories and their interaction. It is still incomplete
-exspecially concerning sandbox-repository interaction but gives already
+especially concerning sandbox-repository interaction but gives already
 some implementation hints.
 
 \subsubsection{Basic building blocks}
@@ -303,60 +296,72 @@ some implementation hints.
 I propose the notion of a \emph{commit} as the basic change which can
 occur to a repository.
 
-A commit $c$ can be a \emph{change}, \emph{link} or
-\emph{merge}:
+A commit $c$ can be a \emph{change}, \emph{link},
+\emph{merge} or \emph{empty}:
 
 \begin{eqnarray*}
-\mathnormal{change} &=& (n, b, h, f) \\
-\mathnormal{link}   &=& (n, b, h) \\
-\mathnormal{merge}  &=& (n, b, h, f, o)
+\mathnormal{change} &=& (n, b, a, f) \\
+\mathnormal{link}   &=& (n, b, a) \\
+\mathnormal{merge}  &=& (n, b, a, f, o) \\
+\mathnormal{empty}  &=& ()
 \end{eqnarray*}
 
 with $n$ being the commit number, $b$ being the \emph{branch identifier},
-$h$ being the \emph{host identifier} where $f$, which is a mapping
+$a$ being the \emph{access identifier} identifying the location where
+$f$, which is a mapping
 $\mathnormal{file} \rightarrow \mathnormal{revision}$, is stored; $o$
-is itself an $\mathnormal{link}$.
+is a $\mathnormal{link}$.
 
 A repository $r$ is a set of sequences of commits:
 
 \begin{eqnarray*}
-r &=& \{s\ |\ \mathnormal{commit}\ \mathnormal{list} \ \wedge \\
-&&    \mathnormal{ft}\ s\ (\mathnormal{change} \ \vee \ \mathnormal{link}) \wedge \\
-&&    \forall c_1, c_2 \in s: \mathnormal{br}\ e_1 = \mathnormal{br}\ e_2 \wedge \\
-&&    \forall c \in s \ \mathnormal{rt}\ s : s\ (\mathnormal{change} \ \vee
-      \mathnormal{merget})\}
+r &=& \{s\ |\ s \ \mbox{\textsc{isa}}\ \mathnormal{commit}\ \mathnormal{sequence} \ \wedge \\
+&&    \mathnormal{ft}\ s\ \mbox{\textsc{isa}}\
+      (\mathnormal{change} \ \vee \ \mathnormal{link})\ \wedge \\
+&&    (\forall c_1, c_2 \in s:\, \mathnormal{br}\ e_1 = \mathnormal{br}\ e_2)\ \wedge \\
+&&    (\forall c \in \mathnormal{rt}\ s:\, s\ \mbox{\textsc{isa}}\
+      (\mathnormal{change} \ \vee \ \mathnormal{merge}))\}
 \end{eqnarray*}
+
+Each sequence is a \emph{branch}
 
 The commit numbers in one repository have to be unique:
 
 \begin{displaymath}
-\forall s_1, s_2 \in r: \forall c_1 \in s_1, c_2 \in s_2: \mathnormal{nu}\ c_
+\forall s_1, s_2 \in r:\, \forall c_1 \in s_1, c_2 \in s_2:\, \mathnormal{nu}\ c_1
 \neq \mathnormal{nu}\ c_2
 \end{displaymath}
 
-Branch identifiers have to be unique as well:
+Branch identifiers have to be unique:
 
 \begin{displaymath}
-\forall s_1, s_2 \in r: s_1 \neq s_2: \mathnormal{br}\ \mathnormal{ft}\ s_1
+\forall s_1, s_2 \in r: s_1 \neq s_2\ \Rightarrow\ \mathnormal{br}\ \mathnormal{ft}\ s_1
 \neq \mathnormal{br}\ \mathnormal{ft}\ s_2
 \end{displaymath}
 
-Only one \emph{main} trunk is allowed:
+Only one root for all branches is allowed. This root may be a change (i. e.
+the code resides in the local repository) or a link to another repository.
 
 \begin{displaymath}
-\exists_1 s\in r : \mathnormal{ft}\ s \ \mathnormal{change}
+|\{ s\ \in r\ |\
+ \mathnormal{ft}\ s\ \mbox{\textsc{isa}}\
+\mathnormal{change}\}| \le 1
 \end{displaymath}
 
 Some abbreviations and helper functions are used:
 
 \begin{itemize}
-\item $\uparrow c$ denotes a commit $c'$ such that $\uparrow c = (n, b, h)$
-and $c=(n, b, h, f)$.
-\item $\downarrow c$ denotes a commit $c'$ such that $\downarrow
-c = (n', b', h', f', o)$ with $o = \uparrow c$.
-\item $\mathnormal{nu}:\ \mathnormal{commit} \rightarrow \mathnormal{number}$ \\
+\item $\hat c$ denotes a commit $c'$ such that $\hat c = (n, b, a)$
+and $c=(n, b, a, f)$.
+\item $\tilde c$ denotes a commit $c'$ such that $\tilde
+c = (n', b', a', f', o)$ with $o = \hat c$.
+\item The following are selector functions for the elements of the
+tuples.
+
+
+$\mathnormal{nu}:\ \mathnormal{commit} \rightarrow \mathnormal{number}$ \\
 $\mathnormal{br}:\ \mathnormal{commit} \rightarrow \mathnormal{branch}$ \\
-$\mathnormal{ho}:\ \mathnormal{commit} \rightarrow \mathnormal{hostname}$ \\
+$\mathnormal{ac}:\ \mathnormal{commit} \rightarrow \mathnormal{hostname}$ \\
 $\mathnormal{fi}:\ \mathnormal{commit} \rightarrow (\mathnormal{filename} \rightarrow \mathnormal{revision})$ \\
 $\mathnormal{oi}:\ \mathnormal{commit} \rightarrow \mathnormal{commit}$
 \end{itemize}

@@ -1,6 +1,7 @@
 ;;; This source file is part of the Meta-CVS program, 
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
+;;; und ich
 
 (require "generic")
 (provide "watch")
