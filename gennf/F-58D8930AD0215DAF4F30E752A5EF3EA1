@@ -3,6 +3,12 @@
 
 NAME = scratchpad
 OUTPUT = $(NAME).dvi $(NAME).ps $(NAME).pdf
+USER = $(shell if [ $(BERLIOS_USER) ]; then echo $(BERLIOS_USER)@; fi)
+SERVER = shell.berlios.de
+ROOT = /home/groups/gennf/htdocs
+
+test :
+	echo $(USER)
 
 all : $(OUTPUT)
 
@@ -16,5 +22,12 @@ all : $(OUTPUT)
 	latex $<
 	latex $<
 
+publish : $(NAME).pdf
+	scp $(NAME).pdf $(USER)$(SERVER):$(ROOT)
+	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 660 $(NAME).pdf"
+
 clean :
-	rm -f *.dvi *.aux *.log *.ps *.pdf
+	rm -f $(NAME).dvi $(NAME).aux $(NAME).log
+
+dist-clean : clean
+	rm -f $(NAME).ps $(NAME).pdf

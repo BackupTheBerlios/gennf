@@ -1,2 +1,2 @@
-gennf is distributed version management with code signing support based
+gennf is distributed version management system with code signing support based
 on Meta-CVS written in Common Lisp.
