@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+
+<head>
+<title>gennf</title>
+<style type="text/css">
+<!--
+h1, h2, h3, h4, h5, h6 {
+    color: #890010;
+}
+a:link {
+    color: #100189
+}
+-->
+</style>
+</head>
+
+<body>
+<div align="right">
+<a href="http://developer.berlios.de" title="BerliOS Developer">
+<img src="http://developer.berlios.de/bslogo.php?group_id=5239" width="124px" height="32px" border="0" alt="BerliOS Developer Logo"></a>
+</div>
+
+
+<h1>gennf</h1>
+
+<p align="center">
+<a href="state">Current state</a>&nbsp;|&nbsp;
+<a href="details">Project details</a>&nbsp;|&nbsp;
+<a href="license">License and developers</a>
+</p>
+
+<p>gennf is a version management system for distributed repositories
+which supports code signing.</p>
+
+
+<a name="state"><h2>Current state of the project</h2></a>
+
+<p>The initial planning has not yet been concluded. The current state
+can be seen in our <a href="scratchpad.pdf"><em>scratchpad</em></a>,
+which is a document containing finished an unfinished concepts, plans
+and the like.</p>
+
+<a name="details"><h2>Project details</h2></a>
+
+<p>Development of this project is part of the course
+<a href="http://flp.cs.tu-berlin.de/lehre/wise05-06/ossi.html">
+<em>Infrastructures for Open Source Software Development</em></a> held
+at <a href="http://www.tu-berlin.de/">Berlin Technical University</a>.</p>
+
+<p>gennf is based on <a href="http://users.footprints.net/~kaz/mcvs.html">
+Meta-CVS</a> which in turn is a wrapper around
+<a href="http://www.nongnu.org/cvs/">cvs</a>.
+Meta-CVS is written in Common Lisp and so will be gennf. The Common
+Lisp implementation currently used is <a href="http://clisp.cons.org/">
+CLISP</a>.</p>
+
+<p>Extending Meta-CVS has the advantage that only cvs is
+needed on the repository servers which is available at nearly
+every site. gennf has to be installed on clients only. As gennf
+is written in Common Lisp it will be available on many platforms.</p>
+
+<p>In detail, the we want to provide the following possibilities:
+
+<ul>
+<li><a>A developer using gennf should be able to sign his patches via
+an already known-to-work and widely deployed public key cryptosystem.</p>
+
+<p>An auditor should be able to look at any number of parts of the code
+and sign them digitally after a successful code audit.</p>
+
+<p>A user checking out code should be able to verify the code, looking
+at the different trust levels of the lines of code.
+He should be able to easily spot the lines
+which are least trusted according to his web of trust. If he cares much
+about security, he can audit those hot spots and sign them in the repository,
+becoming an auditor.</p>
+
+<p>Hence, the trust is moved from the single point of failure (the repository
+server) to every developer (able to protect his private key, or otherwise
+revoke his key).</p></li>
+
+<li><p>Distributing repositories over many sites has several advantages:
+The failover behaviour is much better, the active spots in the code
+are more local to their developers, every developer or group of
+developers can have their own repository and do not clutter
+the main trunk with unstable or experimental code.</p>
+
+<p>gennf will provide a possibility to <em>inherit</em> from an
+already existing repository which means to create a branch
+at another site. It is not necessary for this new site to store the
+whole history of the project: gennf will establish a link between the two.
+Whenever someone at the new repository requests a version not locally
+available, it will be fetched from the original site. It is of course
+possible to replicate large parts of or the whole history to improve
+performance or redundancy. However, duplicated parts of the history still
+know where they come from.</p>
+
+<p>The different lines of development can be merged together, of course.
+gennf keeps track of the origin of the code merged in. The mechanism
+of merge is used to create branches, too. In fact, a merge is the only
+basic operation gennf knows about, apart from ordinary changes (which
+do not come from another site but out of some developer's head).
+Both - changes and merges - are called commits.</p></li>
+
+<li><p>It seems that gennf needs only very basic support from the backend:
+basically the possibility to create a repository, to store code (to
+which a revision number is assigned) and to retrieve code (by providing
+a revision number). It is also planned to include a backend-abstraction
+layer such that other servers than cvs could be used.</p></li>
+
+</li>
+</ul>
+</p>
+
+<h3>A word about our cvs repository</h3>
+
+<p>We use Meta-CVS to manage our code. In consequence our
+repository looks very strange. It contains only files with names
+like <kbd>Fxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.lisp</kbd>. This is due
+to the unique ranaming scheme applied by Meta-CVS which will be part of
+gennf of course. That means, if one wants to check out our code,
+Meta-CVS should be used.</p>
+
+
+<a name="license"><h2>License and developers</h2></a>
+
+<p>The code is developed under the <a href="http://www.gnu.org/">GNU</a>
+<a href="LICENSE">General Public License</a>.</p>
+
+<p>gennf is developed by
+
+<ul>
+<li>Fabian Otto</li>
+<li>Hannes Mehnert</li>
+<li>Florian Lorenzen</li>
+</ul>
+</p>
+
+</body>
+
+</html>
