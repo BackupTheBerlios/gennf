@@ -1,5 +1,5 @@
-\documentclass[fleqn, german, 10pt, a4paper]{article}
-\usepackage{babel}
+\documentclass[fleqn, 10pt, a4paper]{article}
+\usepackage{amssymb}
 \setlength{\parindent}{0pt}
 
 \begin{document}
@@ -18,7 +18,7 @@ course held by Steffen Evers at the Berlin Technical University.
 
 Our hope is, that eventually the project's documentation will be
 distilled out of this text. Up to that point, it will be a bit messy,
-probably unstructured and a moving target of course.1
+probably unstructured and a moving target of course.
 
 \section{Developers}
 Development is currently planned to be undertaken by
@@ -121,9 +121,9 @@ into \texttt{\textasciitilde/.emacs}.
 
 \subsection{Communication}
 Everyone participating in the project is free to mess up this file to
-record relevant thoughts, ideas, \ldots.
+record relevant thoughts, ideas, \ldots
 Day-to-day communication will be done using
-\texttt{ossi@insel.cs.tu-berlin.de} with the subject \texttt{SCM:}.
+\texttt{gennf-devel@lists.berlios.de}.
 
 There is a regular meeting tuesdays at 12 o'clock in the i-caf\'e if
 not announced differently.
@@ -291,145 +291,484 @@ repositories and their interaction. It is still incomplete
 especially concerning sandbox-repository interaction but gives already
 some implementation hints.
 
-\subsubsection{Basic building blocks}
+\subsubsection{The basic notions: Repository, branch and commit}
 
-I propose the notion of a \emph{commit} as the basic change which can
-occur to a repository.
+A \emph{repository} $r$ for a certain project is the set of development
+branches the project consists of.
 
-A commit $c$ can be a \emph{change}, \emph{link},
-\emph{merge} or \emph{empty}:
+A \emph{branch} $b$ is an ordered pair $[\beta, s]$ with $\beta$ being
+a \emph{branch identifier} including meta information and $s$ being
+a sequence of commits.
 
-\begin{eqnarray*}
-\mathnormal{change} &=& (n, b, a, f) \\
-\mathnormal{link}   &=& (n, b, a) \\
-\mathnormal{merge}  &=& (n, b, a, f, o) \\
-\mathnormal{empty}  &=& ()
-\end{eqnarray*}
+A \emph{commit} $c$ is the building block of repositories.
+Addition of commits to a repository is the basic modification
+of repositories.
 
-with $n$ being the commit number, $b$ being the \emph{branch identifier},
-$a$ being the \emph{access identifier} identifying the location where
-$f$, which is a mapping
-$\mathnormal{file} \rightarrow \mathnormal{revision}$, is stored; $o$
-is a $\mathnormal{link}$.
+A commit can be a change or a merge.
 
-A repository $r$ is a set of sequences of commits:
+A \emph{change} is a 4-tuple $[\nu, \beta, \alpha, f]$ with
+\begin{itemize}
+\item $\nu$ being the branch-unique commit-number,
+\item $\beta$ being the branch identifier of the branch
+this commit belongs to,
+\item $\alpha$ being an access identifier and
+\item $f$ being a map $\mathnormal{filename} \rightarrow
+\mathnormal{revision-number}$.
+\end{itemize}
 
-\begin{eqnarray*}
-r &=& \{s\ |\ s \ \mbox{\textsc{isa}}\ \mathnormal{commit}\ \mathnormal{sequence} \ \wedge \\
-&&    \mathnormal{ft}\ s\ \mbox{\textsc{isa}}\
-      (\mathnormal{change} \ \vee \ \mathnormal{link})\ \wedge \\
-&&    (\forall c_1, c_2 \in s:\, \mathnormal{br}\ e_1 = \mathnormal{br}\ e_2)\ \wedge \\
-&&    (\forall c \in \mathnormal{rt}\ s:\, s\ \mbox{\textsc{isa}}\
-      (\mathnormal{change} \ \vee \ \mathnormal{merge}))\}
-\end{eqnarray*}
+The domain of $f$ is the set of files modified by a certain
+commit $c$. $f(\mathtt{file})$ is the revision-number the
+backend assigned to \texttt{file}, which is necessary to
+retrieve the state of \texttt{file} at checkin time of $c$.
 
-Each sequence is a \emph{branch}
+The \emph{access identifier} $\alpha$ is an abstraction layer for the
+backend. This includes thing like hostname and path where the
+repository is stored, the corresponding authentication method
+and functions to checkin and -out files to and from this backend.
 
-The commit numbers in one repository have to be unique:
+A \emph{merge} is a change, which knows its origin. The origin of
+a change is known, too: It is the head of the developer who did the
+change. In contrast to a change, a merge was a change at some
+point in history to another branch. That means, a merge $m$ is
+a 5-tuple $[\nu, \beta, \alpha, f, o]$. The first four elements
+have the same meaning as in a change, the fifth links this commit
+to its origin.
 
-\begin{displaymath}
-\forall s_1, s_2 \in r:\, \forall c_1 \in s_1, c_2 \in s_2:\, \mathnormal{nu}\ c_1
-\neq \mathnormal{nu}\ c_2
-\end{displaymath}
+The \emph{origin} $o$ is a triple $[\nu, \beta, \alpha]$. The meaning
+of $\nu$, $\beta$, $\alpha$ is the same as for changes. But
+in this case they establish a link to a commit with number $\nu$
+on branch $\beta$ reachable via access identifier $\alpha$.
 
-Branch identifiers have to be unique:
+\subsubsection{Properties of the basic notions}
 
-\begin{displaymath}
-\forall s_1, s_2 \in r: s_1 \neq s_2\ \Rightarrow\ \mathnormal{br}\ \mathnormal{ft}\ s_1
-\neq \mathnormal{br}\ \mathnormal{ft}\ s_2
-\end{displaymath}
-
-Only one root for all branches is allowed. This root may be a change (i. e.
-the code resides in the local repository) or a link to another repository.
-
-\begin{displaymath}
-|\{ s\ \in r\ |\
- \mathnormal{ft}\ s\ \mbox{\textsc{isa}}\
-\mathnormal{change}\}| \le 1
-\end{displaymath}
-
-Some abbreviations and helper functions are used:
+The following helper functions are introduced for brevity:
 
 \begin{itemize}
-\item $\hat c$ denotes a commit $c'$ such that $\hat c = (n, b, a)$
-and $c=(n, b, a, f)$.
-\item $\tilde c$ denotes a commit $c'$ such that $\tilde
-c = (n', b', a', f', o)$ with $o = \hat c$.
-\item The following are selector functions for the elements of the
-tuples.
-
-
-$\mathnormal{nu}:\ \mathnormal{commit} \rightarrow \mathnormal{number}$ \\
-$\mathnormal{br}:\ \mathnormal{commit} \rightarrow \mathnormal{branch}$ \\
-$\mathnormal{ac}:\ \mathnormal{commit} \rightarrow \mathnormal{hostname}$ \\
-$\mathnormal{fi}:\ \mathnormal{commit} \rightarrow (\mathnormal{filename} \rightarrow \mathnormal{revision})$ \\
-$\mathnormal{oi}:\ \mathnormal{commit} \rightarrow \mathnormal{commit}$
+\item $\mathnormal{nu}:\ \mathnormal{branch} \rightarrow \mathbb{N}$ \\t
+The number of a branch.
+\item $\mathnormal{ma}:\ \mathnormal{branch} \rightarrow \mathnormal{filename}$ \\
+Returns the name of the map file for this branch. More on map files follows in
+a later section.
+\item $\mathnormal{sy}:\ \mathnormal{branch} \rightarrow \mathnormal{string}$ \\
+A symbolic name for this branch.
+\item $\mathnormal{de}:\ \mathnormal{branch} \rightarrow \mathnormal{string}$ \\
+A description of this branch.
+\item $\mathnormal{nu}:\ \mathnormal{commit} \rightarrow \mathbb{N}$ \\
+The number of a commit.
+\item $\mathnormal{br}:\ \mathnormal{commit} \rightarrow \mathnormal{branch\_identifier}$ \\
+The branch identifier of the branch the commit belongs to.
+\item $\mathnormal{ac}:\ \mathnormal{commit} \rightarrow \mathnormal{access\_identifier}$ \\
+The access identifier of the commit.
+\item $\mathnormal{fi}:\ \mathnormal{commit} \rightarrow (\mathnormal{filename}
+\rightarrow \mathnormal{revision-number})$ \\
+The filename-revision-map of this commit.
+\item $\mathnormal{oi}:\ \mathnormal{merge} \rightarrow \mathnormal{origin}$ \\
+The origin of the merge.
 \end{itemize}
+
+This abbreviation is used for merges:
+
+$\hat c = [\nu', \beta', \alpha', f', o]$ with $o=[\nu, \beta, \alpha]$ and
+$c=[\nu, \beta, \alpha, f]$. That means $\hat c$ is the result of mergeing
+commit $c$ to some other branch $\beta'$.
+
+Now follow important properties for repositories and their elements.
+
+A repository $r$ is a set of branches:
+
+\begin{displaymath}
+r = \{b \ |\ b\ \mbox{\textsc{isa}}\ \mathtt{branch}\}
+\end{displaymath}
+
+Branch numbers must be unique:
+
+\begin{displaymath}
+\forall b_1, b_2 \in r:\, \mathnormal{nu}\ b_1 \neq \mathnormal{nu}\ b_2
+\end{displaymath}
+
+A branch $b$ is a sequence of commits, which all belong to
+$b$ and are accessible in the same way:
+
+\begin{displaymath}
+b\ \mbox{\textsc{isa}}\ \mathnormal{commit}\ \mathnormal{sequence}\ \wedge\
+\forall c_1, c_2 \in b:\, \mathnormal{br}\ c_1 = \mathnormal{br}\ c_2\ \wedge
+\mathnormal{ac}\ c_1 = \mathnormal{ac}\ c_2
+\end{displaymath}
+
+Commit numbers in a branch must be unique:
+
+\begin{displaymath}
+\forall c_1, c_2 \in b:\, \mathnormal{nu}\ c_1 \neq
+\mathnormal{nu}\ c_2
+\end{displaymath}
 
 \subsubsection{Operations on repositories}
 
-Given a repository $r = \{\langle c_1, c_2, c_3, \ldots, c_n\rangle\}$ 
-important operations on repositories work like this:
+The effect of basic operations is described below. $r$ is an
+existing repository and initially looks like this:
+$r = \{[b, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$
+
+The following notations are used:
 
 \begin{itemize}
-\item \emph{inherit} the whole repository:
-
-$r' = \{\langle c'_1, c'_2, c'_3, \ldots, c'_n\rangle\}$ with
-$c'_i = (n', b', h', f)$ and $c_i=(n, b, h, f)$.
-
-\emph{inherit} parts of the repository:
-
-$r'=\{\langle \uparrow c_k, c'_1, \ldots, c'_{n-k}\rangle \}$ with
-$c'_{i-k}=(n', b', h', f)$ and $c_i=(n, b, h, f)$, $k\le n$ (if $k=n$,
-$r'=\{\langle \uparrow c_n\rangle\}$, no $f$).
-
-\item \emph{branch} from a commit $c_k$:
-
-The resulting repository is
-
-\begin{displaymath}
-r = \{\langle c_1, \ldots, c_n\rangle, \langle \uparrow c_{k-1}, c'_1
-\rangle\}, \qquad c'_1=c_k, \, k\le n
-\end{displaymath}
-
-After doing some commits to the new branch the repository looks like
-this:
-
-\begin{displaymath}
-r = \{\langle c_1, \ldots, c_n\rangle, \langle \uparrow c_{k-1}, c'_1, c'_2, \ldots, c'_m
-\rangle\}
-\end{displaymath}
-
-\item \emph{merge} two branches:
-
-Merging locally looks like
-
-\begin{displaymath}
-r = \{\langle c_1^1, \ldots, c_n^1\rangle, \langle c_1^2, \ldots,
-c_m^2, \downarrow c_n^1\rangle\}
-\end{displaymath}
-
-with $r=\{\langle c_1^1, \ldots, c_n^1\rangle, \langle c_1^2, \ldots,
-c_m^2\}$ before the merge.
-
-It is the same for merging between different sites except that we need two
-repositories:
-
-\begin{eqnarray*}
-r_1 &=& \{\langle c_1^1, \ldots, c_n^1\rangle\} \\
-r_2 &=& \{\langle c_2^1, \ldots, c_m^2\rangle\}
-\end{eqnarray*}
-
-The result of merging $c_m^2$ into the one and only branch in $r_1$ is
-
-\begin{displaymath}
-r_1 = \{\langle c_1^1, \ldots, c_n^1, \downarrow c_m^2\}
-\end{displaymath}
-
-which is the same as for local merges.
+\item $c \rhd c'$: $c$ is merged in $c'$.
+\item $\triangledown c$: A branch from $c$ is created, i.~e. $c \rhd \emptyset$
+is performed with $\emptyset$ being the empty branch.
+\item $\underline\triangledown_n c$: A branch from $c$ is created including $n$
+predecessors of $c$. $\underline\triangledown_0 c$ is equivalent to
+$\triangledown c$.
+An operation $\underline\triangledown_n c$ with $n>0$ is called inheriting from c.
+If all predecessors of $c$ are inherited this is denoted
+by $\underline\triangledown_\star$
+and called total inheritance and in fact is replication.
 \end{itemize}
 
+\begin{itemize}
+\item The empty repository $r'=\{\}$ \emph{inherits} the whole repository $r$
+($\underline\triangledown_\star c_n$):
+
+$r' = \{[b', \langle m'_1, m'_2, m'_3, \ldots, m'_n\rangle]\}$ with
+$m'_i = [\nu'_i, \beta'_i, \alpha'_i, f'_i, \hat c_i]$ (as reminder:
+$\hat c_i = [\nu_i, \beta_i, \alpha_i]\ \wedge\ c_i=[\nu_i, \beta_i, \alpha_i, f]$).
+
+\item $r'$ \emph{inherits parts} of the repository ($\underline\triangledown_
+{n-k}c_k$):
+
+$r'=\{[b', \langle m'_1, m'_2, m'_3, \ldots, m'_{n-k}, m'_{n-k+1}\rangle]\}$ with
+$m'_i=[\nu'_i, \beta'_i, \alpha'_i, f, \hat c_{i+k-1}]$ and
+$c_{i}=[\nu_i, \beta_i, \alpha_i, f_i)$, $k<n$.
+
+\item Create a \emph{branch} from a commit $c_k$ inside $r$
+($\triangledown c_k$):
+
+$r = \{[b, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [b^2, \langle m_1^2
+\rangle]\}$ with $m_1^2=[\nu_1^2, \beta_1^2, \alpha_1^2, f_1^2, \hat c_k]$.
+
+After doing some commits to the new branch the repository looks like
+
+$r = \{[b, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [b^2, \langle m_1^2,
+c_2^2, c_3^2, \ldots, c_m^2\rangle ]\}$
+
+\item Inside $r$, the heads of two branches are \emph{merged}
+($c_n^1 \rhd
+ c_m^2$):
+
+Before the merge, the repository has this form:
+
+$\{[b^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
+[b^2, \langle c_1^2, c_2^2, \ldots, c_m^2\rangle]\}$	
+
+After the merge, branch $b^2$ has one more commit:
+
+$\{[b^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
+[b^2, \langle c_1^2, c_2^2, \ldots, c_m^2, m_{m+1}^2\rangle]\}$
+
+with $m_{m+1}^2=[\nu_{m+1}^2, \beta_{m+1}^2, \alpha_{m+1}^2, f_{m+1}^2,
+\hat c_n^1]$
+
+It is obvious that the result looks the same when commits
+from different repositories are merged. Given
+
+$r = \{[b, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$ and \\
+$r' = \{[b', \langle c'_1, c'_2, c'_3, \ldots, c'_m\rangle]\}$,
+
+merging their heads $c'_m \rhd c_n$ leads to one more commit in
+$r$:
+
+$r = \{[b, \langle c_1, c_2, c_3, \ldots, c_n, m_{n+1}\rangle]\}$
+with a link $\hat c'_m$ as last element in $m_{n+1}$.
+\end{itemize}
+
+\emph{Section on MAPS and F-files is missing. Specification
+of backend abstraction and backend operations is missing.
+How to store each branch and how to store the information
+on which branches exist is missing.}
+
+\subsection{Case study}
+
+This section discusses in a concrete example to demonstrate the
+abstract model in a more implementation-close fashion.
+
+Some notions have not (yet) been introduced. This has to be done
+prior to this section but the according text is not (yet) written.
+
+\subsubsection{The situation}
+
+Imagine a developer $\mathnormal{Ensel}$ (or a team of developers
+if you prefer) writing
+some compiler in Lisp. Later, others --
+may their name be $\mathnormal{Krete}$ -- get interested in and join in.
+They decide to have their own repository. The interaction of the two
+repositories is presented in the following.
+
+\subsubsection{The initial import}
+
+$\mathnormal{Ensel}$ has written a new cool compiler from scratch
+and the work done so far manifested in four Lisp-files:
+
+\begin{verbatim}
+frontend.lisp
+backend.lisp
+parser/grammar.lisp
+parser/absy.lisp
+\end{verbatim}
+
+$\mathnormal{Ensel}$ imports these files into his repository $r$ which
+now stores exactly one branch $b$ consisting of one commit $c_1$:
+
+$r=\{[b, \langle c_1\rangle]\}$
+
+Digging deeper into this structure brings to light:
+
+\begin{itemize}
+\item $b\ \mbox{\textsc{isa}}\ \mathnormal{branch\ identifier}$
+\begin{eqnarray*}
+\mathnormal{sy}\ b &=& \mbox{``main''} \\
+\mathnormal{de}\ b &=& \mbox{``main line of development''} \\
+\mathnormal{nu}\ b &=& 1 \\
+\mathnormal{ma}\ b &=& \mathtt{MAP.1}
+\end{eqnarray*}
+
+\item $c_1\ \mbox{\textsc{isa}}\ \mathnormal{change}$ and
+$c_1=[\nu_1, b, \alpha, f_1]$.
+\begin{eqnarray*}
+\mathnormal{nu}\ c_1 &=& 1 \\
+\mathnormal{br}\ c_1 &=& b \\
+\mathnormal{ac}\ c_1 &=& \mathsf{cvs} \\
+\mathnormal{fi}\ c_1 &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{MAP.1}         & \mapsto & \mathsf{r1.1} \\
+\end{array}\right] \\
+\mathtt{MAP.1} &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F}d &\mapsto& \mathtt{parser/absy.lisp} \\
+\end{array}\right]
+\end{eqnarray*}
+\end{itemize}
+
+\subsubsection{$\mathnormal{Krete}$ joins in}
+
+$\mathnormal{Krete}$ is enthusiastic about the new compiler
+$\mathnormal{Ensel}$ has written but thinks that some basic
+optimization techniques are missing and decides to implement
+them. For easier access and to not clutter $\mathnormal{Ensel}$'s
+repository with intermediate commits (which likely break the code)
+a new repository $r'$ is installed. The first action is
+$\underline{\triangledown}_1 c_1$, i.~e. to inherit the last
+state of $\mathnormal{Ensel}$'s code (which is the first too at
+this time\ldots).
+
+Examination of $r'$ retrieves this information:
+
+\begin{itemize}
+\item $r=\{[b', \langle m'_1\rangle]\}$
+\item $b'\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
+\begin{eqnarray*}
+\mathnormal{sy}\ b' &=& \mbox{``optimizer''} \\
+\mathnormal{de}\ b' &=& \mbox{``includes tail-recursivion elimination''} \\
+\mathnormal{nu}\ b' &=& 1 \\
+\mathnormal{ma}\ b' &=& \mathtt{MAP.1}
+\end{eqnarray*}
+
+\item $m'_1\ \mbox{\textsc{isa}}\ \mathnormal{merge}$ and
+$m'_1=[\nu_1, b', \alpha', f'_1, o'_1]$.
+\begin{eqnarray*}
+\mathnormal{nu}\ m'_1 &=& 1 \\
+\mathnormal{br}\ m'_1 &=& b' \\
+\mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
+\mathnormal{fi}\ m'_1 &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{MAP.1}         & \mapsto & \mathsf{r1.1} \\
+\end{array}\right] \\
+\mathnormal{oi}\ m'_1 &=& [\nu_1, b, \alpha] = \hat c_1 \\
+\mathtt{MAP.1} &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F}d &\mapsto& \mathtt{parser/absy.lisp} \\
+\end{array}\right]
+\end{eqnarray*}
+\end{itemize}
+
+The optimizer code is partly performed on the Absy and partly
+on the backend's intermediate language. Thus, the first change
+moves the file \texttt{absy.lisp} up one level in the directory
+structure to reflect that it is manipulated in the frontend
+as well as in the backend. Lots of new code is inserted into
+the backend to implement the optimizer.
+
+This commit is added to $b'$: $c'_2=[\nu'_2, b', \alpha', f'_2]$
+\begin{eqnarray*}
+\mathnormal{nu}\ c'_2 &=& 2 \\
+\mathnormal{br}\ c'_2 &=& b' \\
+\mathnormal{ac}\ c'_2 &=& \mathsf{cvs} \\
+\mathnormal{fi}\ c'_2 &=& \left[
+\begin{array}{lcl}
+\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{MAP.1}         & \mapsto & \mathsf{r1.2} \\
+\end{array}\right] \\
+\mathtt{MAP.1} &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\end{array}\right]
+\end{eqnarray*}
+
+\subsubsection{Feedback}
+
+The performance of the code $\mathnormal{Krete}$'s optimizer puts out is
+astonishing and $\mathnormal{Ensel}$ wants to have it in to see the effect
+on the language extensions he plans to include. The optimizer is
+merged into the first version of the compiler: $c'_2 \rhd c_1$. This
+produces merge $m_2=[\nu_2, b, \alpha, f_2, o_2]$.
+\begin{eqnarray*}
+\mathnormal{nu}\ m_2 &=& 2 \\
+\mathnormal{br}\ m_2 &=& b' \\
+\mathnormal{ac}\ m_2 &=& \mathsf{cvs} \\
+\mathnormal{fi}\ m_2 &=& \left[
+\begin{array}{lcl}
+\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{MAP.1}         & \mapsto & \mathsf{r1.2} \\
+\end{array}\right] \\
+\mathnormal{oi}\ m_2 &=& [\nu'_2, b', \alpha'] = \hat c'_2 \\
+\mathtt{MAP.1} &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\end{array}\right]
+\end{eqnarray*}
+
+\medskip
+To summarize, the repositories now have the same code and look like this:
+\begin{eqnarray*}
+r  &=& \{[b, \langle c_1, m_1\rangle]\} \\
+r' &=& \{[b', \langle m'_1, c'_2\langle]\}
+\end{eqnarray*}
+
+\subsubsection{Branching ``locally''}
+
+$\mathnormal{Ensel}$ decides that it is probably better to develop
+the language extensions in a separate branch: $\triangledown m_2$.
+
+His repository now contains two branches:
+
+$r=\{[b, \langle c_1, m_2\rangle], [b^2, \langle m_1^2 \rangle]\}$.
+
+Let's examine this a bit further:
+\begin{itemize}
+\item $b^2\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
+\begin{eqnarray*}
+\mathnormal{sy}\ b^2 &=& \mbox{``langext''} \\
+\mathnormal{de}\ b^2 &=& \mbox{``support for sub-types based on set constraints''} \\
+\mathnormal{nu}\ b^2 &=& 2 \\
+\mathnormal{ma}\ b^2 &=& \mathtt{MAP.2}
+\end{eqnarray*}
+
+\item $m_1^2\ \mbox{\textsc{isa}}\ \mathnormal{merge}$ and
+$m_1^2=[\nu_1^2, b^2, \alpha^2, f_1^2, o_1^2]$.
+\begin{eqnarray*}
+\mathnormal{nu}\ m'_1 &=& 1 \\
+\mathnormal{br}\ m'_1 &=& b^2 \\
+\mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
+\mathnormal{fi}\ m'_1 &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}d\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{MAP.2}         & \mapsto & \mathsf{r1.1} \\
+\end{array}\right] \\
+\mathnormal{oi}\ m_1^2 &=& [\nu_2, b, \alpha] = \hat m_2 \\
+\mathtt{MAP.2} &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\end{array}\right]
+\end{eqnarray*}
+\end{itemize}
+
+\subsubsection{Hard work\ldots}
+
+\ldots lets the code base grow and the repositories have changed:
+\begin{eqnarray*}
+r &=& \{[b, \langle c_1, m_2\rangle], [b^2, \langle m_1^2, c_2^2,
+c_3^2, c_4^2\rangle]\} \\
+r' &=& \{[b', \langle m'_1, c'_2, c'_3\rangle]\}
+\end{eqnarray*}
+
+The most important changes always happen to $f$ and \texttt{MAP}.
+As the next step will be merging the head from $b^2$ into $b'$
+we look at $f$ and \texttt{MAP} of $c_4^2$:
+\begin{eqnarray*}
+\mathnormal{fi}\ c_4^2 &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}d\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F}e\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F}f\mathtt{.2} & \mapsto & \mathsf{r1.3} \\
+\mathtt{MAP.2}         & \mapsto & \mathsf{r1.2} \\
+\end{array}\right] \\
+\mathtt{MAP.2} &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\mathtt{F}e &\mapsto& \mathtt{constraints/search.lisp} \\
+\mathtt{F}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
+\end{array}\right]
+\end{eqnarray*}
+
+Now it is time for the optimizer team to merge in the constraint solving
+code to write some optimization for it: $c_4^2 \rhd c'_3$.
+
+The result is $m'_4=[\nu'_4, b', \alpha', f'_4, o'_4]$ with the
+following maps:
+\begin{eqnarray*}
+\mathnormal{fi}\ m_4 &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}d\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F}e\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F}f\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{MAP.1}         & \mapsto & \mathsf{r1.3} \\
+\end{array}\right] \\
+\mathtt{MAP.2} &=& \left[
+\begin{array}{lcl}
+\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\mathtt{F}e &\mapsto& \mathtt{constraints/search.lisp} \\
+\mathtt{F}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
+\end{array}\right]
+\end{eqnarray*}
+
+
 \subsection{Looking towards implementation}
+\emph{section outdated}
 
 Problems to be solved and questions to be answered for implementation
 are
@@ -441,7 +780,7 @@ of \textsc{cvs}?
 inherit and branch operating on the repository directly (and the result
 can be enjoyed by a checkout)?
 \item How is data transported between repositories? Using \textsc{cvsup}
-is an option. Another option is using \textsc{remotely} which will be
+is an option. Another option is using \textsc{cvs} remotely which will be
 slow (because many diffs have to be computed and transceived).
 \item Are branch identifier factored out of sequences of commits (because
 they are the same for all commits)?
@@ -520,36 +859,6 @@ just pass those commands to the \textsc{cvs} binary and end up in the debugger
 only if the command is unknown to \textsc{cvs} too.
 \end{itemize}
 
-\section{Logbook}
-
-This section is intended to contain short notes of changes done to the
-project, be it commits to the code base or adding content to this o
-other describtive files.
-
-\subsubsection*{November 24, 2005}
-Added this section to the scratchpad and a to do list and milestos
-
-Removed the \textsc{metacvs} sources from our repository. The reason is
-that it is bad style to store someone else's complete tree when not forking.
-Maybe, the project evolves into a fork but at the moment a patch is
-intended.
-
-Wrote some comment on \textsc{dcvs}.\hfill{\textit{florenz}}
-
-
-\subsubsection*{November 29, 2005}
-
-Written a first specification for the distributiveness along with some
-very basic implementation hints.\hfill{\textit{florenz}}
-
-
-\subsection*{December 2, 2005}
-
-Enabled commit mails. First tried syncmail but this script includes
-diffs in the mails which is not really necessary. Replaced it with
-\texttt{log\_accum.pl} from the octopus-project (\texttt{http://www.tddft.org})
-which is originally from FreeBSD.\hfill{\textit{florenz}}
-
 \section{References}
 
 \begin{itemize}
@@ -562,8 +871,8 @@ which is originally from FreeBSD.\hfill{\textit{florenz}}
 \textsc{slime}, a good interface to different \textsc{Common~Lisp}
 systems for \textsc{emacs}.
 \item \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the Howto of the
-GNU arch project using signed archives
-\item \texttt{http://www.gnupg.org} GNU Privacy Guard
+GNU arch project using signed archives.
+\item \texttt{http://www.gnupg.org} GNU Privacy Guard.
 \item \textsc{hocvs} is an extension to \textsc{metacvs} with change based
 revisions. It is done with \textsc{cvs} tags, I believe, but perhaps worth a
 glance. It can be found at \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
