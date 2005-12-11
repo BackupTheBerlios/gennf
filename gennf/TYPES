@@ -1,6 +1,7 @@
 (("aux" :IGNORE)
  ("c" :DEFAULT)
  ("dvi" :IGNORE)
+ ("html" :DEFAULT)
  ("ist" :DEFAULT)
  ("latex" :DEFAULT)
  ("lisp" :DEFAULT)

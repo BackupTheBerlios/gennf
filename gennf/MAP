@@ -112,6 +112,9 @@
   "MCVS/F-ABFCD555D3597D76F2AE7BB47DAD0C07"
   "src/unix-bindings/Makefile")
  (:FILE
+  "MCVS/F-B457DDF336218AEBF4158383BC4BB553.html"
+  "htdocs/index.html")
+ (:FILE
   "MCVS/F-BB223D44B63BE9E1F84D89EE7FDDFB69.tex"
   "doc/scratchpad.tex")
  (:FILE
