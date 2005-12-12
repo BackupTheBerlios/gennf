@@ -7,9 +7,6 @@ USER = $(shell if [ $(BERLIOS_USER) ]; then echo $(BERLIOS_USER)@; fi)
 SERVER = shell.berlios.de
 ROOT = /home/groups/gennf/htdocs
 
-test :
-	echo $(USER)
-
 all : $(OUTPUT)
 
 %.pdf : %.dvi

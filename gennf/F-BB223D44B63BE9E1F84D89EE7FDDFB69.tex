@@ -249,40 +249,24 @@ By support for \emph{distributed repository} we mean support for the following
 features:
 
 \begin{itemize}
-\item The possibility to build a new repository from a given a 
-repository either by replicating the whole history or
-by takeing a certain revision as new starting point -- on a per module
-base of course.
-\item Generation of patch sets between two given revisions (for example
-\texttt{head}/\texttt{head}) of two different repositories either by pull
-or push. To clarify this: Let $r_L$ be the repository of the developer
-demanding a patch set and $r_R$ the partner repository. A pull patch set
-is one suitable for application to $r_L$ and a push patch set is one
-suitable for application to $r_R$.
-There should be different methods to store and transport a patchset:
-on the fly generation and application as well as saveing as an archive file
-to be sent per e-mail for example.
+\item \textsc{gennf} will provide a possibility to \emph{inherit} from an
+already existing repository which means to create a branch
+at another site. It is not necessary for this new site to store the
+whole history of the project: gennf will establish a link between the two.
+Whenever someone at the new repository requests a version not locally
+available, it will be fetched from the original site. It is of course
+possible to replicate large parts of or the whole history to improve
+performance or redundancy. However, duplicated parts of the history still
+know where they come from.
+
+\item The different lines of development can be merged together, of course.
+gennf keeps track of the origin of the code merged in. The mechanism
+of merge is used to create branches, too. In fact, a merge is the only
+basic operation gennf knows about, apart from ordinary changes (which
+do not come from another site but out of some developer's head).
+Both -- changes and merges -- are called commits.
 \end{itemize}
 
-\subsection{Technical issues}
-
-As for the code signing part numbers for each commit have
-to be introduced. I suggest, this will be the first thing to be done anyway.
-
-Generation of one repository out of another one takes part on the backend
-side of the version management. The same is true for the generation
-of patch sets. This means that the repository handling capabilities of
-\textsc{metacvs} will probably have to be improved. It would be good if
-this was possible by exclusive usage of calls to \textsc{cvs}.
-They differ from most of the rest of the \texttt{metacvs} commands
-because they do not affect any working copy whatsoever.
-
-Two new commands with several options will be necessary:
-\begin{itemize}
-\item \texttt{inherit} to produce a new repository from some existing one,
-either full blown or just of partly.
-\item \texttt{create-patchset} to produce push and pull patchsets.
-\end{itemize}
 
 \subsection{Modelling distributiveness}
 
@@ -313,7 +297,7 @@ A \emph{change} is a 4-tuple $[\nu, \beta, \alpha, f]$ with
 this commit belongs to,
 \item $\alpha$ being an access identifier and
 \item $f$ being a map $\mathnormal{filename} \rightarrow
-\mathnormal{revision-number}$.
+\mathnormal{revision\_number}$.
 \end{itemize}
 
 The domain of $f$ is the set of files modified by a certain
@@ -344,8 +328,8 @@ on branch $\beta$ reachable via access identifier $\alpha$.
 The following helper functions are introduced for brevity:
 
 \begin{itemize}
-\item $\mathnormal{nu}:\ \mathnormal{branch} \rightarrow \mathbb{N}$ \\t
-The number of a branch.
+\item $\mathnormal{nu}:\ \mathnormal{branch} \rightarrow \mathbb{N}$ \\
+The number of a branch (its identifier).
 \item $\mathnormal{ma}:\ \mathnormal{branch} \rightarrow \mathnormal{filename}$ \\
 Returns the name of the map file for this branch. More on map files follows in
 a later section.
@@ -360,7 +344,7 @@ The branch identifier of the branch the commit belongs to.
 \item $\mathnormal{ac}:\ \mathnormal{commit} \rightarrow \mathnormal{access\_identifier}$ \\
 The access identifier of the commit.
 \item $\mathnormal{fi}:\ \mathnormal{commit} \rightarrow (\mathnormal{filename}
-\rightarrow \mathnormal{revision-number})$ \\
+\rightarrow \mathnormal{revision\_number})$ \\
 The filename-revision-map of this commit.
 \item $\mathnormal{oi}:\ \mathnormal{merge} \rightarrow \mathnormal{origin}$ \\
 The origin of the merge.
@@ -377,7 +361,7 @@ Now follow important properties for repositories and their elements.
 A repository $r$ is a set of branches:
 
 \begin{displaymath}
-r = \{b \ |\ b\ \mbox{\textsc{isa}}\ \mathtt{branch}\}
+r = \{b \ |\ b\ \mbox{\textsc{isa}}\ \mathnormal{branch}\}
 \end{displaymath}
 
 Branch numbers must be unique:
@@ -406,7 +390,7 @@ Commit numbers in a branch must be unique:
 
 The effect of basic operations is described below. $r$ is an
 existing repository and initially looks like this:
-$r = \{[b, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$
+$r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$
 
 The following notations are used:
 
@@ -427,26 +411,26 @@ and called total inheritance and in fact is replication.
 \item The empty repository $r'=\{\}$ \emph{inherits} the whole repository $r$
 ($\underline\triangledown_\star c_n$):
 
-$r' = \{[b', \langle m'_1, m'_2, m'_3, \ldots, m'_n\rangle]\}$ with
+$r' = \{[\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_n\rangle]\}$ with
 $m'_i = [\nu'_i, \beta'_i, \alpha'_i, f'_i, \hat c_i]$ (as reminder:
 $\hat c_i = [\nu_i, \beta_i, \alpha_i]\ \wedge\ c_i=[\nu_i, \beta_i, \alpha_i, f]$).
 
 \item $r'$ \emph{inherits parts} of the repository ($\underline\triangledown_
 {n-k}c_k$):
 
-$r'=\{[b', \langle m'_1, m'_2, m'_3, \ldots, m'_{n-k}, m'_{n-k+1}\rangle]\}$ with
+$r'=\{[\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_{n-k}, m'_{n-k+1}\rangle]\}$ with
 $m'_i=[\nu'_i, \beta'_i, \alpha'_i, f, \hat c_{i+k-1}]$ and
 $c_{i}=[\nu_i, \beta_i, \alpha_i, f_i)$, $k<n$.
 
 \item Create a \emph{branch} from a commit $c_k$ inside $r$
 ($\triangledown c_k$):
 
-$r = \{[b, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [b^2, \langle m_1^2
+$r = \{[\beta, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [\beta^2, \langle m_1^2
 \rangle]\}$ with $m_1^2=[\nu_1^2, \beta_1^2, \alpha_1^2, f_1^2, \hat c_k]$.
 
 After doing some commits to the new branch the repository looks like
 
-$r = \{[b, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [b^2, \langle m_1^2,
+$r = \{[\beta, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [\beta^2, \langle m_1^2,
 c_2^2, c_3^2, \ldots, c_m^2\rangle ]\}$
 
 \item Inside $r$, the heads of two branches are \emph{merged}
@@ -455,13 +439,13 @@ c_2^2, c_3^2, \ldots, c_m^2\rangle ]\}$
 
 Before the merge, the repository has this form:
 
-$\{[b^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
-[b^2, \langle c_1^2, c_2^2, \ldots, c_m^2\rangle]\}$	
+$\{[\beta^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
+[\beta^2, \langle c_1^2, c_2^2, \ldots, c_m^2\rangle]\}$	
 
 After the merge, branch $b^2$ has one more commit:
 
-$\{[b^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
-[b^2, \langle c_1^2, c_2^2, \ldots, c_m^2, m_{m+1}^2\rangle]\}$
+$\{[\beta^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
+[\beta^2, \langle c_1^2, c_2^2, \ldots, c_m^2, m_{m+1}^2\rangle]\}$
 
 with $m_{m+1}^2=[\nu_{m+1}^2, \beta_{m+1}^2, \alpha_{m+1}^2, f_{m+1}^2,
 \hat c_n^1]$
@@ -469,28 +453,164 @@ with $m_{m+1}^2=[\nu_{m+1}^2, \beta_{m+1}^2, \alpha_{m+1}^2, f_{m+1}^2,
 It is obvious that the result looks the same when commits
 from different repositories are merged. Given
 
-$r = \{[b, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$ and \\
-$r' = \{[b', \langle c'_1, c'_2, c'_3, \ldots, c'_m\rangle]\}$,
+$r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$ and \\
+$r' = \{[\beta', \langle c'_1, c'_2, c'_3, \ldots, c'_m\rangle]\}$,
 
 merging their heads $c'_m \rhd c_n$ leads to one more commit in
 $r$:
 
-$r = \{[b, \langle c_1, c_2, c_3, \ldots, c_n, m_{n+1}\rangle]\}$
+$r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n, m_{n+1}\rangle]\}$
 with a link $\hat c'_m$ as last element in $m_{n+1}$.
 \end{itemize}
 
-\emph{Section on MAPS and F-files is missing. Specification
-of backend abstraction and backend operations is missing.
-How to store each branch and how to store the information
-on which branches exist is missing.}
+
+\subsubsection{How to store branches}
+
+\textsc{metacvs} introduces F-files. They are called F-files
+because their names start with an ``F'' followed by a dash and
+32 randomly generated hexadecimal digits. The name of an F-file
+is the unique identifier for a file which is under \textsc{metacvs}'s
+control.
+
+\textsc{metacvs} introduces a mapping $\mathnormal{F\_file}
+\rightarrow filename$ to map the unique identifiers to
+a ``physical'' filename. This map ist stored in a file
+called \texttt{MAP} which has the format:
+
+\begin{verbatim}
+(mapping*)
+\end{verbatim}
+
+
+A \texttt{mapping} is a list which stores the F-filename,
+the ``physical'' filename and meta information like
+executable state of the file:
+
+\begin{verbatim}
+(:KEY
+ "F-filename"
+ "filename"
+ (meta-information))
+\end{verbatim}
+
+\texttt{:KEY} can be \texttt{:FILE} indicating that \texttt{filename}
+is an ordinary file or \texttt{:LINK} to version symbolic links.
+
+The main goal of the \texttt{MAP}-file is to resolve the
+trouble \textsc{cvs} has with directories and file moves. The entire
+project hierarchy is flattened (my guess is that the ``F'' in
+the F-files stands for \emph{flat}) and structure is provided
+by the \texttt{MAP}-file.
+
+A project $p$ may have a structure like
+\begin{displaymath}
+\begin{array}{l}
+p/ \\
+\qquad d_1/ \\
+\qquad\qquad f_{11} \\
+\qquad\qquad f_{12} \\
+\qquad\qquad \vdots \\
+\qquad\qquad f_{1k} \\
+\qquad \vdots \\
+\qquad d_m/ \\
+\qquad\qquad f_{m1} \\
+\qquad\qquad \vdots \\
+\qquad\qquad f_{ml}
+\end{array}
+\end{displaymath}
+
+This leads to a \texttt{MAP}-file as follows -- the $a$, $b$, $c$,
+\ldots are randomly generated numbers:
+\begin{displaymath}
+\begin{array}{l@{}l}
+\mathtt{((} & \mathtt{:KEY} \\
+            & \mathtt{"MCVS/F-}a \mathtt{"} \\
+            & \mathtt{"}d_1/f_{11}\mathtt{")} \\
+\mathtt{(}  & \mathtt{:KEY} \\
+            & \mathtt{"MCVS/F-}b \mathtt{"} \\
+            & \mathtt{"}d_1/f_{12}\mathtt{")} \\
+            & \vdots \\
+\mathtt{(}  & \mathtt{:KEY} \\
+            & \mathtt{"MVCS/F-}c \mathtt{"} \\
+            & \mathtt{"}d_1/f_{1k}\mathtt{")} \\
+            & \vdots \\
+\mathtt{(}  & \mathtt{:KEY} \\
+            & \mathtt{"MCVS/F-}d \mathtt{"} \\
+            & \mathtt{"}d_m/f_{m1}\mathtt{")} \\
+	    & \vdots \\
+\mathtt{(}  & \mathtt{:KEY} \\
+            & \mathtt{"MCVS/F-}e \mathtt{"} \\
+            & \mathtt{"}d_m/f_{ml}\mathtt{"))} \\
+\end{array}
+\end{displaymath}
+
+The reason that all F-file paths are prepended by
+\texttt{MCVS} is that \textsc{metacvs} stores its
+administrative information in a directory \texttt{MCVS}
+inside the project directory -- like \texttt{cvs} does
+with its \texttt{CVS} directory. The \texttt{MCVS}
+directory keeps all F-files.
+
+The trick is to hard link the F-files into the project's
+sandbox according to the \texttt{MAP}-file. Now moving or
+renaming files is done with \textsc{metacvs} command which
+rename the hard links and modify the mappings. A move conflict
+appears as a conflict in the \texttt{MAP}-file.
+
+As gotcha, \texttt{MAP} enables version control of links and
+additional bits like the executable bit.
+
+In later sections the \texttt{MAP}-file will be shown as a
+a map -- omitting the \texttt{MCVS}-path-prefix and quotation
+marks -- like this:
+\begin{displaymath}
+\mathtt{MAP} =\left[
+\begin{array}{lcl}
+\mathtt{F-}a &\mapsto& d_1/f_{11} \\
+\mathtt{F-}b &\mapsto& d_1/f_{12} \\
+             &\vdots & \\
+\mathtt{F-}c &\mapsto& d_1/f_{1k} \\
+\mathtt{F-}d &\mapsto& d_m/f_{m1} \\
+             &\vdots & \\
+\mathtt{F-}e &\mapsto& d_m/f_{ml} \\
+\end{array}\right]
+\end{displaymath}
+
+The idea to implement branches is to have one \texttt{MAP} file
+for each branch to store which files belong to this branch and what
+their ``physical name'' is. This way, all files are stored without
+any hierarchy. There is one constraint: The identifier in the
+F-file may not change from branch to branch. If it did, one
+needed another mapping from trunk- to branch-F-files. If not done
+so it would be impossible to track down the origin of a file in
+a branch which made merging impossible.
+
+Hence, it is easiest to let the F-filenames be invariant. As it is
+impossible to have two files of the same name in one directory the
+branch identifier $\beta$ is appended to the F-filename. At this
+point, we should track down branch identifiers to $\mathbb{N}$
+such that possible names of F-files are $\mathtt{F-}a\mathtt{.}\beta$
+with $\beta\in \mathbb{N}$. The same branch identifier is appended
+to the branch's \texttt{MAP}-file. This way, all files of
+branch $b$ with identifier $\beta$ have the same suffix.
+
+As said, a branch is $[\beta, s]$. To completely store a branch
+$s$ has to be put somewhere. This will be done in a file
+$\mathtt{COMMIT}.\beta$ which is just a list of commits (merges
+and changes) stored in reversed order that the last commit is
+accessible as head of the list.
+
+To complete a repository, a file $\mathtt{BRANCHES.}\beta$ is installed,
+which contains a list of existing branches in reversed order,
+i.~e. the branch created last is head of the list.
+For each branch, its identifier $\beta$ ($nu$), a symbolic name
+($sy$), a description ($de$) and the name of it's
+\texttt{MAP}-file ($ma$) is stored.
 
 \subsection{Case study}
 
-This section discusses in a concrete example to demonstrate the
+This section discusses in depth a concrete example to demonstrate the
 abstract model in a more implementation-close fashion.
-
-Some notions have not (yet) been introduced. This has to be done
-prior to this section but the according text is not (yet) written.
 
 \subsubsection{The situation}
 
@@ -516,39 +636,39 @@ parser/absy.lisp
 $\mathnormal{Ensel}$ imports these files into his repository $r$ which
 now stores exactly one branch $b$ consisting of one commit $c_1$:
 
-$r=\{[b, \langle c_1\rangle]\}$
+$r=\{[\beta, \langle c_1\rangle]\}$
 
 Digging deeper into this structure brings to light:
 
 \begin{itemize}
-\item $b\ \mbox{\textsc{isa}}\ \mathnormal{branch\ identifier}$
+\item $[\beta, \langle c_1\rangle]\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
 \begin{eqnarray*}
-\mathnormal{sy}\ b &=& \mbox{``main''} \\
-\mathnormal{de}\ b &=& \mbox{``main line of development''} \\
-\mathnormal{nu}\ b &=& 1 \\
-\mathnormal{ma}\ b &=& \mathtt{MAP.1}
+\mathnormal{sy}\ \beta &=& \mbox{``main''} \\
+\mathnormal{de}\ \beta &=& \mbox{``main line of development''} \\
+\mathnormal{nu}\ \beta &=& 1 \\
+\mathnormal{ma}\ \beta &=& \mathtt{MAP.1}
 \end{eqnarray*}
 
 \item $c_1\ \mbox{\textsc{isa}}\ \mathnormal{change}$ and
-$c_1=[\nu_1, b, \alpha, f_1]$.
+$c_1=[\nu_1, \beta, \alpha, f_1]$.
 \begin{eqnarray*}
 \mathnormal{nu}\ c_1 &=& 1 \\
-\mathnormal{br}\ c_1 &=& b \\
+\mathnormal{br}\ c_1 &=& \beta \\
 \mathnormal{ac}\ c_1 &=& \mathsf{cvs} \\
 \mathnormal{fi}\ c_1 &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
 \mathtt{MAP.1}         & \mapsto & \mathsf{r1.1} \\
 \end{array}\right] \\
 \mathtt{MAP.1} &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F}d &\mapsto& \mathtt{parser/absy.lisp} \\
+\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F-}d &\mapsto& \mathtt{parser/absy.lisp} \\
 \end{array}\right]
 \end{eqnarray*}
 \end{itemize}
@@ -568,36 +688,36 @@ this time\ldots).
 Examination of $r'$ retrieves this information:
 
 \begin{itemize}
-\item $r=\{[b', \langle m'_1\rangle]\}$
-\item $b'\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
+\item $r=\{[\beta', \langle m'_1\rangle]\}$
+\item $[\beta',\langle m'_1\rangle]\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
 \begin{eqnarray*}
-\mathnormal{sy}\ b' &=& \mbox{``optimizer''} \\
-\mathnormal{de}\ b' &=& \mbox{``includes tail-recursivion elimination''} \\
-\mathnormal{nu}\ b' &=& 1 \\
-\mathnormal{ma}\ b' &=& \mathtt{MAP.1}
+\mathnormal{sy}\ \beta' &=& \mbox{``optimizer''} \\
+\mathnormal{de}\ \beta' &=& \mbox{``includes tail-recursivion elimination''} \\
+\mathnormal{nu}\ \beta' &=& 1 \\
+\mathnormal{ma}\ \beta' &=& \mathtt{MAP.1}
 \end{eqnarray*}
 
 \item $m'_1\ \mbox{\textsc{isa}}\ \mathnormal{merge}$ and
-$m'_1=[\nu_1, b', \alpha', f'_1, o'_1]$.
+$m'_1=[\nu_1, \beta', \alpha', f'_1, o'_1]$.
 \begin{eqnarray*}
 \mathnormal{nu}\ m'_1 &=& 1 \\
-\mathnormal{br}\ m'_1 &=& b' \\
+\mathnormal{br}\ m'_1 &=& \beta' \\
 \mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
 \mathnormal{fi}\ m'_1 &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
 \mathtt{MAP.1}         & \mapsto & \mathsf{r1.1} \\
 \end{array}\right] \\
-\mathnormal{oi}\ m'_1 &=& [\nu_1, b, \alpha] = \hat c_1 \\
+\mathnormal{oi}\ m'_1 &=& [\nu_1, \beta, \alpha] = \hat c_1 \\
 \mathtt{MAP.1} &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F}d &\mapsto& \mathtt{parser/absy.lisp} \\
+\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F-}d &\mapsto& \mathtt{parser/absy.lisp} \\
 \end{array}\right]
 \end{eqnarray*}
 \end{itemize}
@@ -609,22 +729,22 @@ structure to reflect that it is manipulated in the frontend
 as well as in the backend. Lots of new code is inserted into
 the backend to implement the optimizer.
 
-This commit is added to $b'$: $c'_2=[\nu'_2, b', \alpha', f'_2]$
+This commit is added to $\beta'$: $c'_2=[\nu'_2, \beta', \alpha', f'_2]$
 \begin{eqnarray*}
 \mathnormal{nu}\ c'_2 &=& 2 \\
-\mathnormal{br}\ c'_2 &=& b' \\
+\mathnormal{br}\ c'_2 &=& \beta' \\
 \mathnormal{ac}\ c'_2 &=& \mathsf{cvs} \\
 \mathnormal{fi}\ c'_2 &=& \left[
 \begin{array}{lcl}
-\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
 \mathtt{MAP.1}         & \mapsto & \mathsf{r1.2} \\
 \end{array}\right] \\
 \mathtt{MAP.1} &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
 \end{array}\right]
 \end{eqnarray*}
 
@@ -634,31 +754,31 @@ The performance of the code $\mathnormal{Krete}$'s optimizer puts out is
 astonishing and $\mathnormal{Ensel}$ wants to have it in to see the effect
 on the language extensions he plans to include. The optimizer is
 merged into the first version of the compiler: $c'_2 \rhd c_1$. This
-produces merge $m_2=[\nu_2, b, \alpha, f_2, o_2]$.
+produces merge $m_2=[\nu_2, \beta, \alpha, f_2, o_2]$.
 \begin{eqnarray*}
 \mathnormal{nu}\ m_2 &=& 2 \\
-\mathnormal{br}\ m_2 &=& b' \\
+\mathnormal{br}\ m_2 &=& \beta' \\
 \mathnormal{ac}\ m_2 &=& \mathsf{cvs} \\
 \mathnormal{fi}\ m_2 &=& \left[
 \begin{array}{lcl}
-\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
 \mathtt{MAP.1}         & \mapsto & \mathsf{r1.2} \\
 \end{array}\right] \\
-\mathnormal{oi}\ m_2 &=& [\nu'_2, b', \alpha'] = \hat c'_2 \\
+\mathnormal{oi}\ m_2 &=& [\nu'_2, \beta', \alpha'] = \hat c'_2 \\
 \mathtt{MAP.1} &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
 \end{array}\right]
 \end{eqnarray*}
 
 \medskip
 To summarize, the repositories now have the same code and look like this:
 \begin{eqnarray*}
-r  &=& \{[b, \langle c_1, m_1\rangle]\} \\
-r' &=& \{[b', \langle m'_1, c'_2\langle]\}
+r  &=& \{[\beta, \langle c_1, m_1\rangle]\} \\
+r' &=& \{[\beta', \langle m'_1, c'_2\langle]\}
 \end{eqnarray*}
 
 \subsubsection{Branching ``locally''}
@@ -668,39 +788,39 @@ the language extensions in a separate branch: $\triangledown m_2$.
 
 His repository now contains two branches:
 
-$r=\{[b, \langle c_1, m_2\rangle], [b^2, \langle m_1^2 \rangle]\}$.
+$r=\{[b, \langle c_1, m_2\rangle], [\beta^2, \langle m_1^2 \rangle]\}$.
 
 Let's examine this a bit further:
 \begin{itemize}
-\item $b^2\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
+\item $[\beta^2, \langle m_1^2 \rangle\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
 \begin{eqnarray*}
-\mathnormal{sy}\ b^2 &=& \mbox{``langext''} \\
-\mathnormal{de}\ b^2 &=& \mbox{``support for sub-types based on set constraints''} \\
-\mathnormal{nu}\ b^2 &=& 2 \\
-\mathnormal{ma}\ b^2 &=& \mathtt{MAP.2}
+\mathnormal{sy}\ \beta^2 &=& \mbox{``langext''} \\
+\mathnormal{de}\ \beta^2 &=& \mbox{``support for sub-types based on set constraints''} \\
+\mathnormal{nu}\ \beta^2 &=& 2 \\
+\mathnormal{ma}\ \beta^2 &=& \mathtt{MAP.2}
 \end{eqnarray*}
 
 \item $m_1^2\ \mbox{\textsc{isa}}\ \mathnormal{merge}$ and
-$m_1^2=[\nu_1^2, b^2, \alpha^2, f_1^2, o_1^2]$.
+$m_1^2=[\nu_1^2, \beta^2, \alpha^2, f_1^2, o_1^2]$.
 \begin{eqnarray*}
 \mathnormal{nu}\ m'_1 &=& 1 \\
-\mathnormal{br}\ m'_1 &=& b^2 \\
+\mathnormal{br}\ m'_1 &=& \beta^2 \\
 \mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
 \mathnormal{fi}\ m'_1 &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}d\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}d\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
 \mathtt{MAP.2}         & \mapsto & \mathsf{r1.1} \\
 \end{array}\right] \\
 \mathnormal{oi}\ m_1^2 &=& [\nu_2, b, \alpha] = \hat m_2 \\
 \mathtt{MAP.2} &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
+\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
 \end{array}\right]
 \end{eqnarray*}
 \end{itemize}
@@ -709,107 +829,101 @@ $m_1^2=[\nu_1^2, b^2, \alpha^2, f_1^2, o_1^2]$.
 
 \ldots lets the code base grow and the repositories have changed:
 \begin{eqnarray*}
-r &=& \{[b, \langle c_1, m_2\rangle], [b^2, \langle m_1^2, c_2^2,
+r &=& \{[\beta, \langle c_1, m_2\rangle], [\beta^2, \langle m_1^2, c_2^2,
 c_3^2, c_4^2\rangle]\} \\
-r' &=& \{[b', \langle m'_1, c'_2, c'_3\rangle]\}
+r' &=& \{[\beta', \langle m'_1, c'_2, c'_3\rangle]\}
 \end{eqnarray*}
 
 The most important changes always happen to $f$ and \texttt{MAP}.
-As the next step will be merging the head from $b^2$ into $b'$
+As the next step will be merging the head from $\beta^2$ into $\beta'$
 we look at $f$ and \texttt{MAP} of $c_4^2$:
 \begin{eqnarray*}
 \mathnormal{fi}\ c_4^2 &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}d\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F}e\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F}f\mathtt{.2} & \mapsto & \mathsf{r1.3} \\
+\mathtt{F-}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}d\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F-}e\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F-}f\mathtt{.2} & \mapsto & \mathsf{r1.3} \\
 \mathtt{MAP.2}         & \mapsto & \mathsf{r1.2} \\
 \end{array}\right] \\
 \mathtt{MAP.2} &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
-\mathtt{F}e &\mapsto& \mathtt{constraints/search.lisp} \\
-\mathtt{F}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
+\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
+\mathtt{F-}e &\mapsto& \mathtt{constraints/search.lisp} \\
+\mathtt{F-}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
 \end{array}\right]
 \end{eqnarray*}
 
 Now it is time for the optimizer team to merge in the constraint solving
 code to write some optimization for it: $c_4^2 \rhd c'_3$.
 
-The result is $m'_4=[\nu'_4, b', \alpha', f'_4, o'_4]$ with the
+The result is $m'_4=[\nu'_4, \beta', \alpha', f'_4, o'_4]$ with the
 following maps:
 \begin{eqnarray*}
 \mathnormal{fi}\ m_4 &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}d\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F}e\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F}f\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F-}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}d\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
+\mathtt{F-}e\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
+\mathtt{F-}f\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
 \mathtt{MAP.1}         & \mapsto & \mathsf{r1.3} \\
 \end{array}\right] \\
 \mathtt{MAP.2} &=& \left[
 \begin{array}{lcl}
-\mathtt{F}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F}d &\mapsto& \mathtt{absy.lisp} \\
-\mathtt{F}e &\mapsto& \mathtt{constraints/search.lisp} \\
-\mathtt{F}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
+\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
+\mathtt{F-}e &\mapsto& \mathtt{constraints/search.lisp} \\
+\mathtt{F-}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
 \end{array}\right]
 \end{eqnarray*}
 
 
-\subsection{Looking towards implementation}
-\emph{section outdated}
+\subsection{Repository actions}
 
-Problems to be solved and questions to be answered for implementation
-are
+This section describes the basic actions branch, checkin, merge,
+update in detail.
 
-\begin{itemize}
-\item Is it sensible (or even necessary) to use the branching features
-of \textsc{cvs}?
-\item How is the interaction between sandbox and repository? Are merge,
-inherit and branch operating on the repository directly (and the result
-can be enjoyed by a checkout)?
-\item How is data transported between repositories? Using \textsc{cvsup}
-is an option. Another option is using \textsc{cvs} remotely which will be
-slow (because many diffs have to be computed and transceived).
-\item Are branch identifier factored out of sequences of commits (because
-they are the same for all commits)?
-\end{itemize}
+\subsubsection{Sandbox and Repository}
 
-The model given in the previous section already hints some implementation
-details:
+The sandbox the checked out copy of a certain commit
+of a certain branch. The information which branch and
+commit lives in the sandbox is stored in the administrative
+directory.
 
-\begin{itemize}
-\item $f$ should be implemented as a hash map.
-\item Branches are sequences which can either be stored as
-arrays or lists. As it is expected that most work will be done
-either on all commits or the last, lists will proabbly do the job
-pretty well when stored in reversed order.
-\item There should be a map from hostnames to some identifier because
-hostnames (and paths of \textsc{cvs} repositories) may change.
-\item Commits and $\mathrm{[lmc]set}$s will be classes and
-branches sequences of instances of these classes.
-\end{itemize}
+\subsubsection{checkin}
 
-\subsection{Nice features to have}
+A checkin adds a new change to a branch. Checking in is a
+several step procedure:
 
-\begin{itemize}
-\item An operation to gather all $\mathnormal{lsets}$s as
-local copies into a repository (ending the distributiveness, perhaps
-for a restart).
-\item A possibility to generate a graph to show the links between
-repositories.
-\end{itemize}
+\begin{enumerate}
+\item Get the latest $\mathtt{COMMITS.}\beta$.
+\item For all registered files in the sandbox check
+if they are modified relative to the head of the branch
+(\textsf{update-check}).
+\end{enumerate}
+
+
+\subsubsection{branch}
+\emph{To be written.}
+
+\subsubsection{merge}
+\emph{To be written.}
+
+\subsubsection{update}
+\emph{To be written.}
+
+\subsection{Access identifier -- backend abstraction}
+\emph{To be written.}
+
 
 \section{Comments on other software}
 
@@ -854,9 +968,20 @@ to build the system should be removed. I think, \textsc{clisp}'s
 \item \textsc{metacvs} does not support empty directories at the moment.
 We could patch this.
 \item The behaviour when issuing a \textsc{cvs} command not shadowed by
-\textsc{metacvs} is to fire the dbeugger. Perhaps it is sensible to
+\textsc{metacvs} is to fire the debugger. Perhaps it is sensible to
 just pass those commands to the \textsc{cvs} binary and end up in the debugger
 only if the command is unknown to \textsc{cvs} too.
+\item The user should not see any F-files.
+\end{itemize}
+
+\subsection{Nice features to have}
+
+\begin{itemize}
+\item An operation to gather all $\mathnormal{lsets}$s as
+local copies into a repository (ending the distributiveness, perhaps
+for a restart).
+\item A possibility to generate a graph to show the links between
+repositories.
 \end{itemize}
 
 \section{References}
