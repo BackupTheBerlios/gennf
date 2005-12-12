@@ -21,7 +21,7 @@ all : $(OUTPUT)
 
 publish : $(NAME).pdf
 	scp $(NAME).pdf $(USER)$(SERVER):$(ROOT)
-	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 660 $(NAME).pdf"
+	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 664 $(NAME).pdf"
 
 clean :
 	rm -f $(NAME).dvi $(NAME).aux $(NAME).log
