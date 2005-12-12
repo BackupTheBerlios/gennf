@@ -7,10 +7,16 @@
 <style type="text/css">
 <!--
 h1, h2, h3, h4, h5, h6 {
-    color: #890010;
+    color: #780010;
 }
 a:link {
     color: #100189
+}
+pre {
+    color: #780010;
+    background-color: #eee;
+    border: #666 1px solid;
+    padding: 0.5em
 }
 -->
 </style>
@@ -118,10 +124,24 @@ layer such that other servers than cvs could be used.</p></li>
 
 <p>We use Meta-CVS to manage our code. In consequence our
 repository looks very strange. It contains only files with names
-like <kbd>Fxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.lisp</kbd>. This is due
+like <kbd>F-01BFC84C7B5AA5916B1FC95B481B0DEC.lisp</kbd>. This is due
 to the unique ranaming scheme applied by Meta-CVS which will be part of
 gennf of course. That means, if one wants to check out our code,
-Meta-CVS should be used.</p>
+Meta-CVS should be used with the following commands:</p>
+
+<pre>
+$ cvs -d:pserver:anonymous@cvs.gennf.berlios.de:/cvsroot/gennf login
+Logging in to :pserver:anonymous@cvs.gennf.berlios.de:2401/cvsroot/gennf
+CVS password:
+$ CVSROOT=:pserver:anonymous@cvs.gennf.berlios.de:/cvsroot/gennf mcvs co gennf
+[1]> cvs server: Updating MCVS
+U MCVS/.cvsignore
+U MCVS/F-01BFC84C7B5AA5916B1FC95B481B0DEC.lisp
+<...>
+</pre>
+
+<p>The password is empty. Please note using <kbd>cvs</kbd> to login and <kbd>mcvs</kbd>
+to check out. Meta-CVS relies on cvs for all repository-sandbox interaction.</p>
 
 
 <a name="license"><h2>License and developers</h2></a>
