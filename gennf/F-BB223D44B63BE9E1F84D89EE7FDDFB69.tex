@@ -49,7 +49,7 @@ Initially, we also thought about improving the code merging capabilities
 which are geavily relied on in distributed environments. The idea was to
 do a merge not of streams of characters (the source code) but of
 abstract syntax trees of the programming language used. This seemd very
-promising because fewer conflicts should arise. We abandoned this plan
+nnpromising because fewer conflicts should arise. We abandoned this plan
 for several reasons:
 \begin{itemize}
 \item It is language dependant: for every language used in the code at
@@ -252,7 +252,7 @@ features:
 \item \textsc{gennf} will provide a possibility to \emph{inherit} from an
 already existing repository which means to create a branch
 at another site. It is not necessary for this new site to store the
-whole history of the project: gennf will establish a link between the two.
+whole history of the project: \textsc{gennf} will establish a link between the two.
 Whenever someone at the new repository requests a version not locally
 available, it will be fetched from the original site. It is of course
 possible to replicate large parts of or the whole history to improve
@@ -260,9 +260,9 @@ performance or redundancy. However, duplicated parts of the history still
 know where they come from.
 
 \item The different lines of development can be merged together, of course.
-gennf keeps track of the origin of the code merged in. The mechanism
+\textsc{gennf} keeps track of the origin of the code merged in. The mechanism
 of merge is used to create branches, too. In fact, a merge is the only
-basic operation gennf knows about, apart from ordinary changes (which
+basic operation \textsc{gennf} knows about, apart from ordinary changes (which
 do not come from another site but out of some developer's head).
 Both -- changes and merges -- are called commits.
 \end{itemize}
@@ -281,7 +281,7 @@ A \emph{repository} $r$ for a certain project is the set of development
 branches the project consists of.
 
 A \emph{branch} $b$ is an ordered pair $[\beta, s]$ with $\beta$ being
-a \emph{branch identifier} including meta information and $s$ being
+a \emph{branch identifier} and $s$ being
 a sequence of commits.
 
 A \emph{commit} $c$ is the building block of repositories.
@@ -306,22 +306,35 @@ backend assigned to \texttt{file}, which is necessary to
 retrieve the state of \texttt{file} at checkin time of $c$.
 
 The \emph{access identifier} $\alpha$ is an abstraction layer for the
-backend. This includes thing like hostname and path where the
+backend. This includes things like hostname and path where the
 repository is stored, the corresponding authentication method
 and functions to checkin and -out files to and from this backend.
 
-A \emph{merge} is a change, which knows its origin. The origin of
-a change is known, too: It is the head of the developer who did the
-change. In contrast to a change, a merge was a change at some
-point in history to another branch. That means, a merge $m$ is
+A \emph{merge} is a change with two ancestors:
+One is its predecessing commit in the same branch the merge
+goes to. The second one is the commit being merged in which is
+called \emph{origin} of the merge.
+
+The origin of a merge was a change at some
+point in history to another branch. Consequently, a merge $m$ is
 a 5-tuple $[\nu, \beta, \alpha, f, o]$. The first four elements
 have the same meaning as in a change, the fifth links this commit
 to its origin.
 
-The \emph{origin} $o$ is a triple $[\nu, \beta, \alpha]$. The meaning
+The origin $o$ is a 4-tuple $[\nu, \beta, \alpha, d]$. The meaning
 of $\nu$, $\beta$, $\alpha$ is the same as for changes. But
-in this case they establish a link to a commit with number $\nu$
+in this case they establish a link to a (possibly remote)
+commit with number $\nu$
 on branch $\beta$ reachable via access identifier $\alpha$.
+
+$d$ indicates if the change-part of a merge \emph{d}uplicates
+the change part of its origin. In this case traversing history
+along the merge's branch leads to the same result as traversing
+the origin's history -- at least for the one commit.
+This feature is useful as merges are used for inheritance, i.~e.
+duplication. It is not necessary for inheritance to work but
+is convenient as it indicates that traversing the origin's history
+is the same as traversing the merge's history.
 
 \subsubsection{Properties of the basic notions}
 
@@ -348,11 +361,20 @@ The access identifier of the commit.
 The filename-revision-map of this commit.
 \item $\mathnormal{oi}:\ \mathnormal{merge} \rightarrow \mathnormal{origin}$ \\
 The origin of the merge.
+\item $\mathnormal{nu}:\ \mathnormal{origin} \rightarrow \mathbb{N}$ \\
+The origin's commit-number.
+\item $\mathnormal{br}:\ \mathnormal{origin} \rightarrow \mathnormal{branch\_identifier}$ \\
+The origin's branch identifier.
+\item $\mathnormal{ac}:\ \mathnormal{origin} \rightarrow \mathnormal{access\_identifier}$ \\
+How to access the origin (its access identifier).
+\item $\mathnormal{du}:\ \mathnormal{origin} \rightarrow \mathbb{B}$ \\
+The duplication identifier. If $\mathnormal{du}(o) = \mathtt{true}$
+histories are equal. In general it is $\mathtt{false}$.
 \end{itemize}
 
 This abbreviation is used for merges:
 
-$\hat c = [\nu', \beta', \alpha', f', o]$ with $o=[\nu, \beta, \alpha]$ and
+$\hat c = [\nu', \beta', \alpha', f', o]$ with $o=[\nu, \beta, \alpha, d]$ and
 $c=[\nu, \beta, \alpha, f]$. That means $\hat c$ is the result of mergeing
 commit $c$ to some other branch $\beta'$.
 
@@ -404,8 +426,16 @@ $\triangledown c$.
 An operation $\underline\triangledown_n c$ with $n>0$ is called inheriting from c.
 If all predecessors of $c$ are inherited this is denoted
 by $\underline\triangledown_\star$
-and called total inheritance and in fact is replication.
+and called total inheritance and in fact is duplication. A
+$\underline\triangledown_n$ operation is the only one to cause
+$\mathnormal{du}(\hat c)\neq \mathtt{false}$. For convenience,
+$d$ is always false if not mentioned in the tuple $o$ ($[\nu, \beta, \alpha,
+\mathtt{false}]=[\nu, \beta, \alpha]$)
+or indicated otherwise.
 \end{itemize}
+
+The basic operations inherit, branch, merge are ``defined'' by the
+following transitions:	
 
 \begin{itemize}
 \item The empty repository $r'=\{\}$ \emph{inherits} the whole repository $r$
@@ -413,20 +443,23 @@ and called total inheritance and in fact is replication.
 
 $r' = \{[\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_n\rangle]\}$ with
 $m'_i = [\nu'_i, \beta'_i, \alpha'_i, f'_i, \hat c_i]$ (as reminder:
-$\hat c_i = [\nu_i, \beta_i, \alpha_i]\ \wedge\ c_i=[\nu_i, \beta_i, \alpha_i, f]$).
+$\hat c_i = [\nu_i, \beta_i, \alpha_i, \mathtt{true}]\
+\wedge\ c_i=[\nu_i, \beta_i, \alpha_i, f]$, note $\forall
+\hat c_i:\, \mathnormal{du}(d_i)=\mathtt{true}$).
 
 \item $r'$ \emph{inherits parts} of the repository ($\underline\triangledown_
 {n-k}c_k$):
 
 $r'=\{[\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_{n-k}, m'_{n-k+1}\rangle]\}$ with
 $m'_i=[\nu'_i, \beta'_i, \alpha'_i, f, \hat c_{i+k-1}]$ and
-$c_{i}=[\nu_i, \beta_i, \alpha_i, f_i)$, $k<n$.
+$c_{i}=[\nu_i, \beta_i, \alpha_i, f_i]$, $k<n$.
 
 \item Create a \emph{branch} from a commit $c_k$ inside $r$
 ($\triangledown c_k$):
 
 $r = \{[\beta, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [\beta^2, \langle m_1^2
-\rangle]\}$ with $m_1^2=[\nu_1^2, \beta_1^2, \alpha_1^2, f_1^2, \hat c_k]$.
+\rangle]\}$ with $m_1^2=[\nu_1^2, \beta_1^2, \alpha_1^2, f_1^2, \hat c_k]$ and
+$\mathnormal{du}(\hat c_k)=\mathtt{false}$.	
 
 After doing some commits to the new branch the repository looks like
 
@@ -906,9 +939,22 @@ several step procedure:
 
 \begin{enumerate}
 \item Get the latest $\mathtt{COMMITS.}\beta$.
-\item For all registered files in the sandbox check
-if they are modified relative to the head of the branch
-(\textsf{update-check}).
+\item Comparison of the latest $\mathtt{COMMITS.}\beta$ with 
+the one present in the sandbox gives the files changed
+in the meantime from other commits.
+\item Check which files are modified locally.
+\item The intersection of the two file sets gives potential
+conflicts. If this intersection is empty create a new commit
+and prepend it to the current $\mathtt{COMMITS.}\beta$
+The file map for the new commit is generated out of
+the revision numbers the backend assigns to each file on
+checkin.
+
+Check in the modified $\mathtt{COMMITS.}\beta$ on throw
+away the old one.
+\item If the intersection is not empty check if potential
+conflicts are real conflicts. (\emph{How will this be done?})
+\item \emph{To be continued.}
 \end{enumerate}
 
 
