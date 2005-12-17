@@ -34,6 +34,7 @@ pre {
 <p align="center">
 <a href="#state">Current state</a>&nbsp;|&nbsp;
 <a href="#details">Project details</a>&nbsp;|&nbsp;
+<a href="#mailinglist">Mailing list</a>&nbsp;|&nbsp;
 <a href="#license">License and developers</a>
 </p>
 
@@ -58,9 +59,18 @@ at <a href="http://www.tu-berlin.de/">Berlin Technical University</a>.</p>
 <p>gennf is based on <a href="http://users.footprints.net/~kaz/mcvs.html">
 Meta-CVS</a> which in turn is a wrapper around
 <a href="http://www.nongnu.org/cvs/">cvs</a>.
-Meta-CVS is written in Common Lisp and so will be gennf. The Common
-Lisp implementation currently used is <a href="http://clisp.cons.org/">
-CLISP</a>.</p>
+Meta-CVS is written in Common Lisp and so will be gennf.</p>
+
+<p>At the moment we work on porting Meta-CVS to
+<a href="http://sbcl.sourceforge.net/">SBCL</a>. In fact, we
+try to make the code compatible with as many Common Lisp implementation
+as possible using portable libraries such as <a href="http://uffi.b9.com/">
+UFFI</a> and <a href="http://common-lisp.net/project/osicat/">osicat</a>.
+</p>
+
+<p>Unfortunately, UFFI is not compatible with
+<a href="http://clisp.cons.org/">CLISP</a> but Meta-CVS was originally
+developed for CLISP, so there is support for this implementation.</p>
 
 <p>Extending Meta-CVS has the advantage that only cvs is
 needed on the repository servers which is available at nearly
@@ -120,7 +130,7 @@ layer such that other servers than cvs could be used.</p></li>
 </ul>
 </p>
 
-<h3>A word about our cvs repository</h3>
+<a name="repo"><h3>A word about our cvs repository</h3></a>
 
 <p>We use Meta-CVS to manage our code. In consequence our
 repository looks very strange. It contains only files with names
@@ -144,6 +154,21 @@ U MCVS/F-01BFC84C7B5AA5916B1FC95B481B0DEC.lisp
 to check out. Meta-CVS relies on cvs for all repository-sandbox interaction.</p>
 
 
+<a name="mailinglist"><h2>Mailing list</h2></a>
+
+<p>We have a developers mailing list <kbd>gennf-devel@lists.berlios.de</kbd> to
+discuss gennf development. Commit messages are posted to this list.
+Sometimes messages in german appear.</p>
+
+<p>The list archive is at
+<kbd><a href="http://lists.berlios.de/pipermail/gennf-devel/">
+http://lists.berlios.de/pipermail/gennf-devel/</a></kbd> and to subscribe
+to the list visit
+<kbd><a href="http://lists.berlios.de/mailman/listinfo/gennf-devel">
+http://lists.berlios.de/mailman/listinfo/gennf-devel/</a></kbd>.
+
+<p>
+
 <a name="license"><h2>License and developers</h2></a>
 
 <p>The code is developed under the <a href="http://www.gnu.org/">GNU</a>
@@ -152,9 +177,9 @@ to check out. Meta-CVS relies on cvs for all repository-sandbox interaction.</p>
 <p>gennf is developed by
 
 <ul>
-<li>Fabian Otto</li>
-<li>Hannes Mehnert</li>
-<li>Florian Lorenzen</li>
+<li>Fabian Otto, <kbd>&lt;sigsegv at users.berlios.de&gt;</pre></li>
+<li>Hannes Mehnert, <kbd>&lt;hannes23 at users.berlios.de&gt;</kbd></li>
+<li>Florian Lorenzen, <kbd>&lt;florenz at users.berlios.de&gt</kbd></li>
 </ul>
 </p>
 
