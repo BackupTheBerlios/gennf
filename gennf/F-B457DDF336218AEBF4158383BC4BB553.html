@@ -3,6 +3,8 @@
 <html>
 
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
 <title>gennf</title>
 <style type="text/css">
 <!--
@@ -17,6 +19,9 @@ pre {
     background-color: #eee;
     border: #666 1px solid;
     padding: 0.5em
+}
+hr {
+    border: #780010 1px solid;
 }
 -->
 </style>
@@ -42,24 +47,12 @@ pre {
 which supports code signing.</p>
 
 
-<a name="state"><h2>Current state of the project</h2></a>
+<h2><a name="state">Current state of the project</a></h2>
 
 <p>The initial planning has not yet been concluded. The current state
 can be seen in our <a href="scratchpad.pdf"><em>scratchpad</em></a>,
 which is a document containing finished an unfinished concepts, plans
 and the like.</p>
-
-<a name="details"><h2>Project details</h2></a>
-
-<p>Development of this project is part of the course
-<a href="http://flp.cs.tu-berlin.de/lehre/wise05-06/ossi.html">
-<em>Infrastructures for Open Source Software Development</em></a> held
-at <a href="http://www.tu-berlin.de/">Berlin Technical University</a>.</p>
-
-<p>gennf is based on <a href="http://users.footprints.net/~kaz/mcvs.html">
-Meta-CVS</a> which in turn is a wrapper around
-<a href="http://www.nongnu.org/cvs/">cvs</a>.
-Meta-CVS is written in Common Lisp and so will be gennf.</p>
 
 <p>At the moment we work on porting Meta-CVS to
 <a href="http://sbcl.sourceforge.net/">SBCL</a>. In fact, we
@@ -72,15 +65,28 @@ UFFI</a> and <a href="http://common-lisp.net/project/osicat/">osicat</a>.
 <a href="http://clisp.cons.org/">CLISP</a> but Meta-CVS was originally
 developed for CLISP, so there is support for this implementation.</p>
 
+
+<h2><a name="details">Project details</a></h2>
+
+<p>Development of this project is part of the course
+<a href="http://flp.cs.tu-berlin.de/lehre/wise05-06/ossi.html">
+<em>Infrastructures for Open Source Software Development</em></a> held
+at <a href="http://www.tu-berlin.de/">Berlin Technical University</a>.</p>
+
+<p>gennf is based on <a href="http://users.footprints.net/~kaz/mcvs.html">
+Meta-CVS</a> which in turn is a wrapper around
+<a href="http://www.nongnu.org/cvs/">cvs</a>.
+Meta-CVS is written in Common Lisp and so will be gennf.</p>
+
 <p>Extending Meta-CVS has the advantage that only cvs is
 needed on the repository servers which is available at nearly
 every site. gennf has to be installed on clients only. As gennf
 is written in Common Lisp it will be available on many platforms.</p>
 
-<p>In detail, the we want to provide the following possibilities:
+<p>In detail, the we want to provide the following possibilities:</p>
 
 <ul>
-<li><a>A developer using gennf should be able to sign his patches via
+<li><p>A developer using gennf should be able to sign his patches via
 an already known-to-work and widely deployed public key cryptosystem.</p>
 
 <p>An auditor should be able to look at any number of parts of the code
@@ -125,12 +131,10 @@ basically the possibility to create a repository, to store code (to
 which a revision number is assigned) and to retrieve code (by providing
 a revision number). It is also planned to include a backend-abstraction
 layer such that other servers than cvs could be used.</p></li>
-
-</li>
 </ul>
-</p>
 
-<a name="repo"><h3>A word about our cvs repository</h3></a>
+
+<h3><a name="repo">A word about our cvs repository</a></h3>
 
 <p>We use Meta-CVS to manage our code. In consequence our
 repository looks very strange. It contains only files with names
@@ -154,7 +158,7 @@ U MCVS/F-01BFC84C7B5AA5916B1FC95B481B0DEC.lisp
 to check out. Meta-CVS relies on cvs for all repository-sandbox interaction.</p>
 
 
-<a name="mailinglist"><h2>Mailing list</h2></a>
+<h2><a name="mailinglist">Mailing list</a></h2>
 
 <p>We have a developers mailing list <kbd>gennf-devel@lists.berlios.de</kbd> to
 discuss gennf development. Commit messages are posted to this list.
@@ -169,19 +173,34 @@ http://lists.berlios.de/mailman/listinfo/gennf-devel/</a></kbd>.
 
 <p>
 
-<a name="license"><h2>License and developers</h2></a>
+<h2><a name="license">License and developers</a></h2>
 
 <p>The code is developed under the <a href="http://www.gnu.org/">GNU</a>
 <a href="LICENSE">General Public License</a>.</p>
 
-<p>gennf is developed by
+<p>gennf is developed by</p>
 
 <ul>
-<li>Fabian Otto, <kbd>&lt;sigsegv at users.berlios.de&gt;</pre></li>
+<li>Fabian Otto, <kbd>&lt;sigsegv at users.berlios.de&gt;</kbd></li>
 <li>Hannes Mehnert, <kbd>&lt;hannes23 at users.berlios.de&gt;</kbd></li>
 <li>Florian Lorenzen, <kbd>&lt;florenz at users.berlios.de&gt</kbd></li>
 </ul>
-</p>
+
+<hr>
+<table border="0" cellpadding="3" cellspacing="0">
+<tr>
+<td valign="top"><a href="http://validator.w3.org/check?uri=referer"><img
+src="http://www.w3.org/Icons/valid-html401"
+alt="Valid HTML 4.01 Transitional" height="31" width="88"
+border="0"></a></td>
+<td valign="top"><a href="http://jigsaw.w3.org/css-validator/">
+<img style="border:0;width:88px;height:31px"
+src="http://jigsaw.w3.org/css-validator/images/vcss" 
+alt="Valid CSS!">
+</a></td>
+<td valign="middle">Revision $Revision: 1.5 $, last change on
+$Date: 2005/12/18 12:52:06 $ by $Author: florenz $.</td>
+</table>
 
 </body>
 
