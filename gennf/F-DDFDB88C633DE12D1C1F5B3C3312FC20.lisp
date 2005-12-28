@@ -2,12 +2,14 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "mapping")
-(require "types")
-(require "chatter")
-(require "options")
-(provide "generic")
+(in-package :gennf)
+
+;(require "system")
+;(require "mapping")
+;(require "types")
+;(require "chatter")
+;(require "options")
+;(provide "generic")
 
 (defun mcvs-generic (cvs-command cvs-options command-options command-args 
 		     files &key need-sync-before need-sync-after 

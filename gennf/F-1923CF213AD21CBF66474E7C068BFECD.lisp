@@ -2,7 +2,9 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(provide "split")
+(in-package :gennf)
+
+;(provide "split")
 
 (defun split-fields (in-string delim-char-bag)
 "Split string into rigid fields based on delimiter characters. 

@@ -2,20 +2,22 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "mapping")
-(require "system")
-(require "print")
-(require "seqfuncs")
-(provide "types")
+(in-package :gennf)
+
+;(require "mapping")
+;(require "system")
+;(require "print")
+;(require "seqfuncs")
+;(provide "types")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defconstant *mcvs-types-name* "TYPES"))
+  (define-constant *mcvs-types-name* "TYPES"))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defconstant *mcvs-types* #.(path-cat *mcvs-dir* *mcvs-types-name*))
-  (defconstant *mcvs-new-types* #.(path-cat *mcvs-dir* "TYPES-NEW")))
+  (define-constant *mcvs-types* #.(path-cat *mcvs-dir* *mcvs-types-name*))
+  (define-constant *mcvs-new-types* #.(path-cat *mcvs-dir* "TYPES-NEW")))
 
-(defconstant *types-comments*
+(define-constant *types-comments*
 ";;; For each file suffix that appears in the file set, you can specify
 ;;; the CVS keyword expansion mode, or you can specify that the files having
 ;;; that suffix should not be imported. This is done by editing the list below.

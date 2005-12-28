@@ -2,10 +2,12 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "dirwalk")
-(require "mapping")
-(require "find-bind")
+(in-package :gennf)
+
+;(require "system")
+;(require "dirwalk")
+;(require "mapping")
+;(require "find-bind")
 
 (defun mcvs-purge (global-options)
   (in-sandbox-root-dir

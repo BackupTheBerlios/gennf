@@ -2,13 +2,15 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "split")
-(require "mapping")
-(require "options")
-(require "update")
-(require "system")
+(in-package :gennf)
 
-(defconstant *branch-char* #\~)
+;(require "split")
+;(require "mapping")
+;(require "options")
+;(require "update")
+;(require "system")
+
+(define-constant *branch-char* #\~)
 
 (defun tags-from-cvs-log (stream)
 "Parse stream which is assumed to be the output of a cvs log -h command
@@ -271,7 +273,7 @@ and one of branch tags."
 		    (error "specify at most one branch tag.")))))
     (mcvs-update global-options `(,up-opt ,@command-options))))
 
-(defconstant *branch-help*
+(define-constant *branch-help*
 "Syntax:
 
   mcvs branch branch-name

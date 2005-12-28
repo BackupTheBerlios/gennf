@@ -2,11 +2,13 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "mapping")
-(require "chatter")
-(require "find-bind")
-(provide "remove")
+(in-package :gennf)
+
+;(require "system")
+;(require "mapping")
+;(require "chatter")
+;(require "find-bind")
+;(provide "remove")
 
 (defun mcvs-remove (recursivep files &key no-sync)
   (when (null files)
@@ -58,7 +60,7 @@
 	     cvs-command-options
     (mcvs-remove recursivep mcvs-args)))
 
-(defconstant *remove-help*
+(define-constant *remove-help*
 "Syntax:
 
   mcvs remove [ options ] objects ...

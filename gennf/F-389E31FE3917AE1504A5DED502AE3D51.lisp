@@ -2,7 +2,9 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(provide "print")
+(in-package :gennf)
+
+;(provide "print")
 
 (defun print-assoc-list (alist &optional (stream *standard-output*))
 "Print an association list in this nice form

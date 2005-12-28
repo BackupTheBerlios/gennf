@@ -2,8 +2,10 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "memoize")
-(provide "seqfuncs")
+(in-package :gennf)
+
+;(require "memoize")
+;(provide "seqfuncs")
 
 (defun separate-if (test sequence &rest keys)
   (let ((wheat (apply #'remove-if-not test sequence keys))

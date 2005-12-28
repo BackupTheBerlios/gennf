@@ -2,10 +2,12 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "mapping")
-(require "options")
-(provide "filt")
+(in-package :gennf)
+
+;(require "system")
+;(require "mapping")
+;(require "options")
+;(provide "filt")
 
 (defun make-filt-hash (mapping)
   (let ((h (make-hash-table :test #'equal)))

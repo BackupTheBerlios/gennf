@@ -2,10 +2,12 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "mapping")
-(require "chatter")
-(provide "link")
+(in-package :gennf)
+
+;(require "system")
+;(require "mapping")
+;(require "chatter")
+;(provide "link")
 
 (defun mcvs-link (target name)
   (when (or (string= "" target)
@@ -85,7 +87,7 @@
     (error "specify link target and link name."))
   (mcvs-link (first args) (second args)))
 
-(defconstant *link-help*
+(define-constant *link-help*
 "Syntax:
 
   mcvs link target-path name

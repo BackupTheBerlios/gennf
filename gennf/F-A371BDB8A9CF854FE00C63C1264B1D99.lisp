@@ -2,32 +2,34 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-;; Clear out requires for mcvs-upgrade to work right.
-(setf *modules* nil)
+(in-package :gennf)
 
-(require "create")
-(require "checkout")
-(require "grab")
-(require "add")
-(require "remove")
-(require "move")
-(require "link")
-(require "update")
-(require "filt")
-(require "generic")
-(require "convert")
-(require "branch")
-(require "remap")
-(require "purge")
-(require "restore")
-(require "prop")
-(require "watch")
-(require "split")
-(require "restart")
-(require "error")
-(require "options")
-(require "find-bind")
-(provide "mcvs-main")
+;; Clear out requires for mcvs-upgrade to work right.
+;(setf *modules* nil)
+
+;(require "create")
+;(require "checkout")
+;(require "grab")
+;(require "add")
+;(require "remove")
+;(require "move")
+;(require "link")
+;(require "update")
+;(require "filt")
+;(require "generic")
+;(require "convert")
+;(require "branch")
+;(require "remap")
+;(require "purge")
+;(require "restore")
+;(require "prop")
+;(require "watch")
+;(require "split")
+;(require "restart")
+;(require "error")
+;(require "options")
+;(require "find-bind")
+;(provide "mcvs-main")
 
 (define-option-constant *global-options* 
   (0 arg "H" "help" "Q" "q" "r" "w" "l" "n" "t" "v" "f" "version"
@@ -138,32 +140,9 @@
 
 (declaim (special *usage* *mcvs-command-table*))
 
-(defun mcvs-help (global-options command-options args)
-  (declare (ignore global-options command-options))
-  (cond
-    ((null args)
-      (terpri)
-      (write-line *usage*)
-      (terpri))
-    ((= (length args) 1)
-      (let* ((command-name (first args))
-	     (command (find command-name *mcvs-command-table* 
-			    :key #'first
-			    :test #'string=)))
-	(when (null command)
-	  (error "~a is not a recognized mcvs command." 
-		 command-name))
-	(let ((help-text (third command)))
-	  (when (null help-text)
-	    (error "sorry, no help available for ~a command."
-		   command-name))
-	  (terpri)
-	  (write-line help-text)
-	  (terpri))))
-    (t (error "try \"mcvs help <name-of-command>\"."))))
-
-(defconstant *mcvs-command-table*
- `(("help" ,#'mcvs-help nil ,*help-options*)
+(defparameter *mcvs-command-table*
+ `(
+;("help" ,#'mcvs-help nil ,*help-options*)
    ("create" ,#'mcvs-create-wrapper ,*create-help* ,*create-options*)
    ("grab" ,#'mcvs-grab-wrapper ,*grab-help* ,*grab-options*)
    ("checkout" ,#'mcvs-checkout-wrapper ,*checkout-help* ,*checkout-options*)
@@ -212,7 +191,37 @@
    ("sync-from-cvs" ,#'mcvs-sync-from-wrapper nil ,*editors-options*)
    ("sync-to-cvs" ,#'mcvs-sync-to-wrapper nil ,*editors-options*)))
 
-(defconstant *usage*
+(defun mcvs-help (global-options command-options args)
+  (declare (ignore global-options command-options))
+  (cond
+    ((null args)
+      (terpri)
+      (write-line *usage*)
+      (terpri))
+    ((= (length args) 1)
+      (let* ((command-name (first args))
+	     (command (find command-name *mcvs-command-table* 
+			    :key #'first
+			    :test #'string=)))
+	(when (null command)
+	  (error "~a is not a recognized mcvs command." 
+		 command-name))
+	(let ((help-text (third command)))
+	  (when (null help-text)
+
+	    (error "sorry, no help available for ~a command."
+		   command-name))
+	  (terpri)
+	  (write-line help-text)
+	  (terpri))))
+    (t (error "try \"mcvs help <name-of-command>\"."))))
+
+; This is not very elegant but SBCL refuses to compile the
+; cyclic dependency between *mcvs-command-table* and
+; mcvs-help.
+(push `("help" ,#'mcvs-help nil ,*help-options*) *mcvs-command-table*)
+
+(defparameter *usage*
 "Meta-CVS command syntax:
 
   mcvs [ global-options ] command [ command-options ] [ command-arguments ]
@@ -337,7 +346,7 @@ Commands:
 
 (defun mcvs-execute (args)
   (with-open-file-ignore-errors (*interactive-error-io* (parse-posix-namestring 
-							  (unix-funcs:ctermid))
+							  (ctermid))
 							:direction :io
 							:if-does-not-exist nil)
     (let ((*mcvs-error-treatment* (if *interactive-error-io*
@@ -345,7 +354,7 @@ Commands:
 				    :terminate)))
       (unless *interactive-error-io*
 	(chatter-info "unable to open terminal device ~a .~%" 
-		      (unix-funcs:ctermid))
+		      (ctermid))
 	(chatter-info "interactive error handling disabled.~%"))
       (handler-bind ((error #'mcvs-error-handler))
 	(multiple-value-bind (global-options global-args)

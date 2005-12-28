@@ -2,8 +2,10 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "slot-refs")
-(provide "rcs-utils")
+(in-package :gennf)
+
+;(require "slot-refs")
+;(provide "rcs-utils")
 
 (defstruct rcs-token
   (type)

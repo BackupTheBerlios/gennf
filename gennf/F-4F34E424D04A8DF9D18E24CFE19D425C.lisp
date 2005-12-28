@@ -2,8 +2,10 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "multi-hash")
-(provide "memoize")
+(in-package :gennf)
+
+;(require "multi-hash")
+;(provide "memoize")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun remove-key-aux-rest (lambda-list)

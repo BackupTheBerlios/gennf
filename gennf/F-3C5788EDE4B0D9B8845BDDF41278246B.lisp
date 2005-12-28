@@ -2,12 +2,14 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "chatter")
-(require "find-bind")
-(require "split")
-(require "error")
-(provide "options")
+(in-package :gennf)
+
+;(require "system")
+;(require "chatter")
+;(require "find-bind")
+;(require "split")
+;(require "error")
+;(provide "options")
 
 (defvar *print-usage* nil)
 (defvar *nometa-option* nil)
@@ -29,7 +31,7 @@
 		     option-specs)))
 
 (defmacro define-option-constant (var &rest option-specs)
-  `(defconstant ,var (option-spec ,@option-specs)))
+  `(define-constant ,var (option-spec ,@option-specs)))
 
 (defun parse-opt (arguments option-spec)
   (flet ((process-option (arg)

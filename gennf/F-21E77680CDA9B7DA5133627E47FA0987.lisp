@@ -2,9 +2,11 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "chatter")
-(require "find-bind")
-(provide "error")
+(in-package :gennf)
+
+;(require "chatter")
+;(require "find-bind")
+;(provide "error")
 
 (defvar *mcvs-error-treatment* :interactive
 "This variable is used by the top level error handler set up in mcvs-execute to

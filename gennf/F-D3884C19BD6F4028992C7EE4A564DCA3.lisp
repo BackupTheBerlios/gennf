@@ -2,7 +2,9 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(provide "restart")
+(in-package :gennf)
+
+;(provide "restart")
 
 (defmacro can-restart-here ((format-string &rest format-args) &body forms)
   (let ((restart-block (gensym "RESTART-"))

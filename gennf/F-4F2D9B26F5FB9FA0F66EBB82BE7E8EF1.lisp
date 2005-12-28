@@ -2,10 +2,12 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "mapping")
-(require "chatter")
-(provide "prop")
+(in-package :gennf)
+
+;(require "system")
+;(require "mapping")
+;(require "chatter")
+;(provide "prop")
 
 (defun mcvs-prop (prop-options files)
   (in-sandbox-root-dir

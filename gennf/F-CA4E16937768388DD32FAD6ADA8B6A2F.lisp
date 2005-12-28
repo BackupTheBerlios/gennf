@@ -62,24 +62,28 @@
     (setf message (format nil "Unable to open ~A: ~A." 
                           path (unix-funcs:strerror unix-funcs:errno)))))
    
-   
+; clisp-unix   
 (defun opendir (dir) 
   (cond
     ((null-to-nil (unix-funcs:opendir dir)))
     (t (error (make-condition 'open-dir-error :dir dir)))))
 
+; clisp-unix
 (declaim (inline closedir))
-(defun closedir (dir-stream) 
+(defun closedir (dir-stream)
   (when-not-null dir-stream (unix-funcs:closedir dir-stream)))
 
-
+; clisp-unix, dirwalk
+; DONE, changed and changes in dirwalk.lisp.
 (defun readdir (dir-stream) 
   (let ((dir-entry (unix-funcs:readdir dir-stream)))
     (if dir-entry
-      (with-slots ((name unix-funcs:name) (ino unix-funcs:ino)) dir-entry
-        (values name ino))
-      nil)))
+	(with-slots ((name unix-funcs:name) (ino unix-funcs:ino)) dir-entry
+	  (values name ino))
+	nil)))
 
+; clisp-unix, dirwalk
+; DONE, not needed anymore.
 (defmacro with-open-dir ((var dir) &body forms)
  `(let ((,var (opendir ,dir)))
     (unwind-protect
@@ -94,11 +98,15 @@
     (setf message (format nil "Unable to change to directory ~A: ~A." 
                           dir (unix-funcs:strerror unix-funcs:errno)))))
 
+; add.lisp, branch.lisp, checkout.lisp, clisp-unix.lisp, convert.lisp,
+; create.lisp, filt.lisp, generic.lisp, mapping.lisp, purge.lisp, update.lisp
+; DONE
 (defun chdir (dir)
   (if (= -1 (unix-funcs:chdir dir))
     (error (make-condition 'chdir-error :dir dir)))
     (values))
 
+; clisp-unix.lisp
 (defun fchdir (descr)
   (if (= -1 (unix-funcs:fchdir descr))
     (error (make-condition 'chdir-error 
@@ -113,11 +121,16 @@
     (setf message (format nil "Unable to determine current directory: ~A." 
                           (unix-funcs:strerror unix-funcs:errno)))))
 
+; clisp-unix.lisp, mapping.lisp
+; DONE
 (declaim (inline getcwd))
 (defun getcwd ()
   (or (unix-funcs:getcwd)
       (error (make-condition 'getcwd-error))))
 
+; add.lisp, checkout.lisp, clisp-unix.lisp, convert.lisp,
+; create.lisp, generic.lisp, mapping.lisp, update.lisp
+; DONE
 (defmacro current-dir-restore (&body forms)
   (let ((saved-dir (gensym "SAVED-DIR-")))
     `(let ((,saved-dir (unix-funcs:open "." unix-funcs:o-rdonly 0)))
@@ -151,6 +164,7 @@
     (setf message (format nil "Unable to get status of ~A: ~A." 
                           file (unix-funcs:strerror unix-funcs:errno)))))
 
+; DONE
 (defclass file-info ()
   ((file-name :initarg :file-name :accessor file-name)
    (mode-flags :initarg :mode-flags :accessor mode-flags)
@@ -158,6 +172,7 @@
    (inode :initarg :inode :accessor inode)
    (num-links :initarg :num-links :accessor num-links)))
 
+; DONE
 (defgeneric same-file-p (file1 file2))
 (defgeneric older-p (file1 file2))
 (defgeneric regular-p (file))
@@ -257,6 +272,7 @@
 (defmethod make-non-executable ((filename string))
   (make-non-executable (stat filename)))
 
+; DONE
 (defun stat (name &key through-link)
   (if (typep name 'file-info)
     name
@@ -276,6 +292,7 @@
 				  :inode inode
 				  :num-links nlink)))))
 
+; DONE
 (defun exists (name &key through-link)
   (no-existence-error (stat name :through-link through-link)))
 
@@ -293,12 +310,14 @@
                           kind to-path from-path
 			  (unix-funcs:strerror unix-funcs:errno)))))
 
+; DONE
 (defun link (from to)
   (if (zerop (unix-funcs:link from to))
     (values)
     (error (make-condition 'link-error :from-path from 
 			   :to-path to :kind "hard"))))
 
+; DONE
 (defun symlink (from to)
   (if (zerop (unix-funcs:symlink from to))
     (values)
@@ -314,6 +333,7 @@
     (setf message (format nil "Unable to read symbolic link ~A: ~A." 
                           path (unix-funcs:strerror unix-funcs:errno)))))
 
+; DONE
 (defun readlink (path)
   (let ((data (unix-funcs:readlink path)))
     (if data
@@ -331,11 +351,13 @@
     (setf message (format nil "Unable to remove ~A: ~A." 
                           path (unix-funcs:strerror unix-funcs:errno)))))
 
+; DONE
 (defun rmdir (dir)
   (if (zerop (unix-funcs:rmdir dir))
     (values)
     (error (make-condition 'rm-error :path dir))))
 
+; DONE
 (defun unlink (file)
   (if (zerop (unix-funcs:unlink file))
     (values)
@@ -375,6 +397,7 @@
 	(unwind-protect (progn ,@forms) (close ,stream-var))))))
 
 ;;; GUID generation
+; DONE
 
 (defvar *have-dev-random* t)
 (defvar *mcvs-random-state*)
@@ -394,6 +417,7 @@
     (t (random #.(expt 2 128) *mcvs-random-state*))))
 
 ;;; Environment strings
+; DONE
 (defun env-lookup (name &optional substitute-if-not-found)
   (let ((value (getenv name)))
     (if value value substitute-if-not-found)))

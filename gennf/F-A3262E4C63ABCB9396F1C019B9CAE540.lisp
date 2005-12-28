@@ -226,7 +226,7 @@
 
 ;;; Coprocesses
 
-(defconstant *shell-executable* "/bin/sh")
+(define-constant *shell-executable* "/bin/sh")
 
 (defun shell-interpreter (command)
   (setf command (coerce command 'simple-string))

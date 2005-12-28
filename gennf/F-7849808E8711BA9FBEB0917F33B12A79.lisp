@@ -2,7 +2,9 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(provide "find-bind")
+(in-package :gennf)
+
+;(provide "find-bind")
 
 (defmacro vector-bind (vars vec &rest forms)
   (do ((i 0 (1+ i))

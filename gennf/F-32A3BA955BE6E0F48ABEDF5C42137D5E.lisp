@@ -2,14 +2,16 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "dirwalk")
-(require "chatter")
-(require "split")
-(require "mapping")
-(require "types")
-(require "rcs-utils")
-(provide "convert")
+(in-package :gennf)
+
+;(require "system")
+;(require "dirwalk")
+;(require "chatter")
+;(require "split")
+;(require "mapping")
+;(require "types")
+;(require "rcs-utils")
+;(provide "convert")
 
 (defun remove-attic-component (path)
   (let ((split-path (nreverse (split-fields path "/")))
@@ -137,7 +139,7 @@
     (error "specify cvs source dir and new target dir."))
   (mcvs-convert (first mcvs-args) (second mcvs-args)))
 
-(defconstant *convert-help*
+(define-constant *convert-help*
 "Syntax:
 
   mcvs convert source-cvs-module target-mcvs-module

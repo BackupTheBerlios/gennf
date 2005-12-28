@@ -2,8 +2,10 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(provide "sync")
+(in-package :gennf)
+
+;(require "system")
+;(provide "sync")
 
 (defun synchronize-files (left-file right-file should-be-executable
 			  &key (direction :either))

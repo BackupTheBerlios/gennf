@@ -2,18 +2,20 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "dirwalk")
-(require "system")
-(require "split")
-(require "seqfuncs")
-(require "mapping")
-(require "types")
-(require "chatter")
-(require "options")
-(require "checkout")
-(require "remove")
-(require "add")
-(provide "grab")
+(in-package :gennf)
+
+;(require "dirwalk")
+;(require "system")
+;(require "split")
+;(require "seqfuncs")
+;(require "mapping")
+;(require "types")
+;(require "chatter")
+;(require "options")
+;(require "checkout")
+;(require "remove")
+;(require "add")
+;(provide "grab")
 
 (defun read-word-hash (&optional (byte-stream t))
   (let ((word-hash (make-hash-table :test #'equalp))
@@ -34,7 +36,7 @@
       (do ((byte (read-byte byte-stream nil)
 		 (read-byte byte-stream nil)))
 	  ((null byte) (if (eq state :word) (save-token)) word-hash)
-	(let ((ch (int-char byte)))
+	(let ((ch (code-char byte)))
 	  (ecase state
 	    ((:junk)
 	      (when (or (alpha-char-p ch) (digit-char-p ch)
@@ -355,16 +357,16 @@
 			nil (mapcar #'first added-symlinks)))))))))
 
 (defun mcvs-grab-wrapper (global-options command-options args)
-  (flet ((error ()
+  (flet ((fail ()
 	   (error "specify module name, and optional subdirectory.")))
     (when (zerop (length args))
-      (error))
+      (fail))
     (destructuring-bind (module &optional subdir &rest superfluous) args
       (when superfluous
-	(error))
+	(fail))
       (mcvs-grab global-options command-options module subdir))))
 
-(defconstant *grab-help*
+(define-constant *grab-help*
 "Syntax:
 
   mcvs grab { -A | -r branch-name } module-name [ subdirectory-path ]

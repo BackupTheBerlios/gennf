@@ -2,14 +2,16 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "mapping")
-(require "chatter")
-(require "dirwalk")
-(require "seqfuncs")
-(require "options")
-(require "types")
-(provide "add")
+(in-package :gennf)
+
+;(require "system")
+;(require "mapping")
+;(require "chatter")
+;(require "dirwalk")
+;(require "seqfuncs")
+;(require "options")
+;(require "types")
+;(provide "add")
 
 (defun mcvs-add (recursivep cvs-options add-options files)
   (in-sandbox-root-dir
@@ -131,7 +133,7 @@
 				     :key #'first :test #'string=)
     (mcvs-add recursivep cvs-options rest-add-options mcvs-args)))
 
-(defconstant *add-help*
+(define-constant *add-help*
 "Syntax:
 
   mcvs add [ options ] objects ...

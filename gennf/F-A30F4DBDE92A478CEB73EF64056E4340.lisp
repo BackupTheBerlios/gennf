@@ -2,9 +2,11 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "dirwalk")
-(require "mapping")
+(in-package :gennf)
+
+;(require "system")
+;(require "dirwalk")
+;(require "mapping")
 
 (defun mcvs-restore ()
   (in-sandbox-root-dir

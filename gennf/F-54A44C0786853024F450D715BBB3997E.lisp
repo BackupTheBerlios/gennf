@@ -2,11 +2,13 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "mapping")
-(require "chatter")
-(require "restart")
-(provide "move")
+(in-package :gennf)
+
+;(require "system")
+;(require "mapping")
+;(require "chatter")
+;(require "restart")
+;(provide "move")
 
 (defun source-check (expansion source)
   (let ((real (abstract-to-real-path source)))
@@ -112,7 +114,7 @@
   (declare (ignore cvs-options cvs-command-options))
   (mcvs-move mcvs-args))
 
-(defconstant *move-help*
+(define-constant *move-help*
 "Syntax:
 
   mcvs move objects ... destination

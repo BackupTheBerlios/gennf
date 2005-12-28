@@ -2,7 +2,9 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(provide "multi-hash")
+(in-package :gennf)
+
+;(provide "multi-hash")
 
 (defclass multi-hash ()
   ((dimensions :initarg :dimensions :accessor dimensions)

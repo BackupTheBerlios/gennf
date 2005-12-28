@@ -2,12 +2,14 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "dirwalk")
-(require "chatter")
-(require "sync")
-(require "options")
-(require "find-bind")
-(provide "checkout")
+(in-package :gennf)
+
+;(require "dirwalk")
+;(require "chatter")
+;(require "sync")
+;(require "options")
+;(require "find-bind")
+;(provide "checkout")
 
 (defun mcvs-checkout (module &optional subdir cvs-options checkout-options
 			     &key no-generate behave-like-export)
@@ -96,7 +98,7 @@
 	  (mcvs-checkout module subdir global-options command-options 
 			 :behave-like-export t)))))
 
-(defconstant *checkout-help*
+(define-constant *checkout-help*
 "Syntax:
 
   mcvs co [ options ] module-name [ subdirectory-path ]
@@ -140,7 +142,7 @@ Semantics:
   root directory of the sandbox will actually add a lib/libdes/foo.c file
   to the module.")
 
-(defconstant *export-help*
+(define-constant *export-help*
 "Syntax:
 
   mcvs export { -D date | -r revision } [ options ] 

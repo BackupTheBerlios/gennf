@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp,v 1.1 2005/12/27 17:28:24 florenz Exp $
+;; $Id: F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp,v 1.2 2005/12/28 16:20:40 florenz Exp $
 
 
 ;; This file is the equivalent to clisp-unix.lisp and cmucl-unix.lisp
@@ -39,10 +39,35 @@
 ;; specific ones.
 
 
-(defpackage :sbcl-unix
-  (:use :cl :port-path))
+;(defpackage :sbcl-unix
+;  (:use :cl :port-path))
 
-(in-package :sbcl-unix)
+(in-package :gennf)
+
+
+;;; Terminal
+
+(defun ctermid ()
+  "function CTERMID => string
+
+Returns name of process' terminal."
+  (osicat:terminal-id))
+
+
+(defmacro no-existence-error (&body forms)
+  "macro NO-EXISTANCE-ERROR &bodey forms
+
+Macro to catch ENOENT errors and turn them into nil 
+return value."
+  (let ((block-sym (gensym "BLOCK-")))
+    `(block ,block-sym
+      (handler-bind
+	  ((system-error #'(lambda (con)
+			     (declare (ignore con))
+			     (if (= (osicat:unix-error) 2)
+				 (return-from ,block-sym nil)))))
+	,@forms))))
+
 
 ;;; Functions for files.
 ;;;
@@ -77,6 +102,14 @@ target is returned."
 	 :inode (osicat:inode-number-of-file pathname through-link)
 	 :num-links (osicat:number-of-links-to-file
 		     pathname through-link)))))
+
+
+(defun readdir (directory)
+  "function READDIR directory => list
+
+Returns a directory listing of directory as a list of strings."
+  (with-pathname ((pathname directory))
+    (mapcar #'namestring (directory-listing pathname))))
 
 
 (defun chdir (directory)
@@ -415,6 +448,30 @@ This function only works with SBCL."
     (sb-ext:run-program shell
 			`("-c" ,command))))
 
+
+(defun execute-program (arguments)
+  "function EXECUTE-PROGRAM arguments => generalized boolean
+
+Runs arguments. The first element in arguments is
+the program to run and the subsequent is its parameters.
+
+Returns T if program terminated successfully, NIL otherwise.
+
+This function only works with SBCL."
+  (chatter-debug "invoking ~s in directory ~s~%" arguments (getcwd))
+  (let ((process (sb-ext:run-program (first arguments)
+				     (rest arguments))))
+    (if (and (eql (sb-ext:process-status process) :exited)
+	       (= (sb-ext:process-exit-code process) 0))
+	(progn
+	   (chatter-debug "successful termination~%")
+	   T)
+	(progn
+	  (chatter-debug "unsuccessful or abnormal termination~%")
+	  nil))))
+      
+      
+  
 
 (defmacro with-input-from-program ((stream arguments) &body forms)
   "macro WITH-INPUT-FROM-PROGRAM (stream arguments) &body forms.

@@ -2,6 +2,8 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
+(in-package :gennf)
+
 (defmacro with-slot-refs ((&rest slot-entries) instance-form &body forms)
 "A macro similar to with-slots, except that each occurence of any
 of the bound variables newly evaluates instance-form."

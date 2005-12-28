@@ -3,8 +3,10 @@
 ;;; Copyright 2002 Kaz Kylheku
 ;;; und ich
 
-(require "generic")
-(provide "watch")
+(in-package :gennf)
+
+;(require "generic")
+;(provide "watch")
 
 (defun mcvs-watch (mcvs-opts watch-opts files)
   (when (> (length watch-opts) 1)

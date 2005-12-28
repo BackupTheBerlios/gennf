@@ -2,9 +2,11 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "system")
-(require "restart")
-(provide "dirwalk")
+(in-package :gennf)
+
+;(require "system")
+;(require "restart")
+;(provide "dirwalk")
 
 ;; TODO: this sucks, it should put out canonicalized path names
 (defun dirwalk-fi (dir-fi func &rest keys &key norecurse postorder)
@@ -18,20 +20,28 @@
     (catch 'dirwalk-skip
       (when (not postorder)
         (funcall func dir-fi))
-      (with-open-dir (d dir-path)
-	(loop
-	  (let ((name (readdir d)) entry-path fi)
-	    (can-restart-here ("Continue processing directory ~a." dir-path)
-	      (cond
-		((null name) (return))
-		((string-equal name *this-dir*) nil)
-		((string-equal name *up-dir*) nil)
-		((and (setf entry-path (format nil "~a~a" dir-path name))
-		      (setf fi (stat entry-path))
-		      nil))
-		((and (not norecurse) (directory-p fi))
-		 (apply #'dirwalk-fi fi func keys))
-		(t (funcall func fi)))))))
+;
+;      (with-open-dir (d dir-path)
+;
+;	(loop
+;
+      (dolist (name (readdir dir-path))
+;
+;	  (let ((name (readdir d)) entry-path fi)
+;
+	(let (entry-path fi)
+	  (can-restart-here
+	   ("Continue processing directory ~a." dir-path)
+	   (cond
+	     ((null name) (return))
+	     ((string-equal name *this-dir*) nil)
+	     ((string-equal name *up-dir*) nil)
+	     ((and (setf entry-path (format nil "~a~a" dir-path name))
+		   (setf fi (stat entry-path))
+		   nil))
+	     ((and (not norecurse) (directory-p fi))
+	      (apply #'dirwalk-fi fi func keys))
+	     (t (funcall func fi))))))
       (when postorder
 	(funcall func dir-fi)))))
 

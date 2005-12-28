@@ -2,6 +2,8 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
+(in-package :gennf)
+
 #+(or clisp cmu18c) (require "posix")
 
 #+(and clisp clisp-unix-funcs) 

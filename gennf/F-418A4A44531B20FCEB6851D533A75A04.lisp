@@ -2,14 +2,16 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "dirwalk")
-(require "system")
-(require "mapping")
-(require "types")
-(require "chatter")
-(require "options")
-(require "restart")
-(provide "create")
+(in-package :gennf)
+
+;(require "dirwalk")
+;(require "system")
+;(require "mapping")
+;(require "types")
+;(require "chatter")
+;(require "options")
+;(require "restart")
+;(provide "create")
 
 (defun mcvs-create (module release &optional global-options command-options)
   (multiple-value-bind (path created) (ensure-directories-exist *mcvs-map*)
@@ -132,7 +134,7 @@
       (error "specify only module and release tag."))
     (mcvs-create module release cvs-options cvs-command-options)))
 
-(defconstant *create-help*
+(define-constant *create-help*
 "Syntax:
 
   mcvs create [ options ] module-name release-tag

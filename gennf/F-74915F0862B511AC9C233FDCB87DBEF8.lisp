@@ -2,12 +2,14 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "dirwalk")
-(require "chatter")
-(require "mapping")
-(require "options")
-(require "generic")
-(provide "update")
+(in-package :gennf)
+
+;(require "dirwalk")
+;(require "chatter")
+;(require "mapping")
+;(require "options")
+;(require "generic")
+;(provide "update")
 
 (defun mcvs-update (&optional cvs-options cvs-update-options files)
   (let ((need-sync (not (find "p" cvs-update-options 

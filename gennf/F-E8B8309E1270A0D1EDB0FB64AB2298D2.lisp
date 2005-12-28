@@ -2,25 +2,27 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "dirwalk")
-(require "system")
-(require "options")
-(require "sync")
-(require "chatter")
-(require "restart")
-(require "seqfuncs")
-(provide "mapping")
+(in-package :gennf)
+
+;(require "dirwalk")
+;(require "system")
+;(require "options")
+;(require "sync")
+;(require "chatter")
+;(require "restart")
+;(require "seqfuncs")
+;(provide "mapping")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defconstant *mcvs-dir* "MCVS")
-  (defconstant *mcvs-map-name* "MAP")
-  (defconstant *mcvs-map-local-name* "MAP-LOCAL")
-  (defconstant *mcvs-displaced-name* "DISPLACED"))
+  (define-constant *mcvs-dir* "MCVS")
+  (define-constant *mcvs-map-name* "MAP")
+  (define-constant *mcvs-map-local-name* "MAP-LOCAL")
+  (define-constant *mcvs-displaced-name* "DISPLACED"))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defconstant *mcvs-map* #.(path-cat *mcvs-dir* *mcvs-map-name*))
-  (defconstant *mcvs-map-local* #.(path-cat *mcvs-dir* *mcvs-map-local-name*))
-  (defconstant *mcvs-displaced* #.(path-cat *mcvs-dir* *mcvs-displaced-name*)))
+  (define-constant *mcvs-map* #.(path-cat *mcvs-dir* *mcvs-map-name*))
+  (define-constant *mcvs-map-local* #.(path-cat *mcvs-dir* *mcvs-map-local-name*))
+  (define-constant *mcvs-displaced* #.(path-cat *mcvs-dir* *mcvs-displaced-name*)))
 
 (defvar *displaced-path-prefix* nil)
 (defvar *displaced-path-length* nil)

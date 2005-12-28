@@ -2,9 +2,11 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "dirwalk")
-(require "mapping")
-(provide "remap")
+(in-package :gennf)
+
+;(require "dirwalk")
+;(require "mapping")
+;(provide "remap")
 
 (defun mcvs-remap ()
   (in-sandbox-root-dir

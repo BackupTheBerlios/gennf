@@ -2,17 +2,19 @@
 ;;; which is distributed under the GNU license.
 ;;; Copyright 2002 Kaz Kylheku
 
-(require "split")
-(provide "posix")
+(in-package :gennf)
+
+;(require "split")
+;(provide "posix")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defconstant *up-dir* "..")
-  (defconstant *this-dir* ".")
-  (defconstant *path-sep* "/"))
+  (define-constant *up-dir* "..")
+  (define-constant *this-dir* ".")
+  (define-constant *path-sep* "/"))
 
 (defvar *mcvs-editor* nil)
 
-(defconstant *argument-limit* (* 64 1024))
+(define-constant *argument-limit* (* 64 1024))
 
 (defun canonicalize-path (path)
 "Simplifies a POSIX path by eliminating . components, splicing out as many ..
