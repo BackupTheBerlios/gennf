@@ -69,6 +69,22 @@ three integers represent major, minor, and revision versions.")
 		   ,@forms))
 	       forms)))))
 
+;;;; Terminal
+
+(defun terminal-id ()
+  "function TERMINAL-ID => string
+
+Returns name of process' terminal."
+  (c-ctermid))
+
+;;; Error code
+
+(defun unix-error ()
+  "function UNIX-ERROR => integer
+
+Returns the last Unix error errno."
+  (c-errno))
+
 ;;;; Hopefully portable pathname manipulations
 
 (defun absolute-pathname-p (pathspec)
@@ -112,35 +128,63 @@ shared with default."
 
 ;;;; Number of links to file.
 
-(defun number-of-links-to-file (pathspec)
-  "function NUMBER-OF-LINKS-TO-FILE pathspec => number-of-links
+(defun number-of-links-to-file (pathspec &optional (follow-p t))
+  "function NUMBER-OF-LINKS-TO-FILE pathspec &optional follow-p => integer
 
 Returns the number of hard links to pathspec (i. e.
 the number of names the file has).
 
-It returns nil if pathspec does not exist."
+It returns nil if pathspec does not exist.
+
+If follow-p is NIL and pathspec is a symbolic link, the number of links
+to the symbolic link is returned. The default for follow-p is T."
   (let ((path (merge-pathnames pathspec)))
     (when (wild-pathname-p path)
       (error "Pathname is wild: ~S." path))
     (with-cstring (cfile (namestring path))
-      (let ((number-of-links (c-file-nlink cfile)))
+      (let ((number-of-links (c-file-nlink cfile (if follow-p 1 0))))
 	(unless (minusp number-of-links)
 	  number-of-links)))))
 
 ;;;; Inode number of file.
 
-(defun inode-number-of-file (pathspec)
-  "function INODE-NUMBER-OF-FILE pathspec => inode-number
+(defun inode-number-of-file (pathspec &optional (follow-p t))
+  "function INODE-NUMBER-OF-FILE pathspec &optional follow-p => integer
 
 Returns the inode number of pathspec, nil if pathspec
-does not exist."
+does not exist.
+
+If follow-p is NIL and pathspec is a symbolic link, the
+link's inode number is returned. follow-p's default is T."
   (let ((path (merge-pathnames pathspec)))
     (when (wild-pathname-p path)
       (error "Pathname is wild: ~S." path))
     (with-cstring (cfile (namestring path))
-      (let ((inode-number (c-file-ino cfile)))
+      (let ((inode-number (c-file-ino cfile (if follow-p 1 0))))
 	(unless (minusp inode-number)
 	  inode-number)))))
+
+;;;; File modification time
+
+(defun file-modification-time (pathspec &optional (follow-p t))
+  "function FILE-MODIFICATION-TIME pathspec &optional follow-p => integer
+
+Return the modification time of pathspec. If follow-p is nil and
+pathspec is a symbolic link, modification time of the link is returned.
+
+The default for follow-p is t.
+
+The Common Lisp function FILE-WRITE-DATE returns the modification
+tme of a file since January 1st, 1900 which is not Unix time.
+As it is nontrivial to convert from CL time ti Unix time (because of
+the leap seconds) this function is provided."
+  (let ((path (merge-pathnames pathspec)))
+    (when (wild-pathname-p path)
+      (error "Pathname is wild: ~S." path))
+    (with-cstring (cfile (namestring path))
+      (let ((modification-time (c-file-mtime cfile (if follow-p 1 0))))
+	(unless (minusp modification-time)
+	  modification-time)))))
 
 ;;;; FILE-KIND
 
@@ -439,6 +483,21 @@ exist, or link exists already."
 					 group-read group-write group-exec
 					 other-read other-write other-exec
 					 set-user-id set-group-id sticky))))
+
+(defun file-mode (pathspec &optional follow-p)
+  "function FILE-MODE pathspec &optional follow-p => integer
+
+Returns the file mode as an integer value. If follow-p is
+false and pathspec is a (symbolic) link, the mode of
+the link is returned. If pathspec is not a link,
+follow-p has now effect."
+  (let ((path (merge-pathnames pathspec)))
+    (when (wild-pathname-p path)
+      (error "Pathname is wild: ~S." path))
+    (with-cstring (cfile (namestring pathspec))
+      (let ((file-mode (c-file-mode cfile (if follow-p 1 0))))
+	(unless (minusp file-mode)
+	  file-mode)))))
 
 (defun file-permissions (pathspec)
   "function FILE-PERMISSIONS pathspec => list

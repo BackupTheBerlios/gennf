@@ -41,7 +41,11 @@ Concepts:
    ;; DIRECTORY is used as constant internally. Let's not confuse other packages.
    #:directory)
   (:export
-   ;;; Evironment
+   ;; Unix error
+   #:unix-error
+   ;; Terminal
+   #:terminal-id
+   ;; Evironment
    #:environment   
    #:environment-variable
    #:makunbound-environment-variable
@@ -57,10 +61,14 @@ Concepts:
    #:make-link
    ;; Hard links.
    #:number-of-links-to-file
-   ;; Inode number.
+   ;; Inode number
    #:inode-number-of-file
+   ;; File mode
+   #:file-mode
    ;; Permissions
    #:file-permissions
+   ;; Modification time (epoch time)
+   #:file-modification-time
    ;; Temporary files
    #:open-temporary-file
    #:with-temporary-file

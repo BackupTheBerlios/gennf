@@ -29,15 +29,27 @@
 
 ;;;; FOREIGN GLUE
 
+(def-function ("osicat_errno" c-errno) ()
+  :module "osicat"
+  :returning :int)
+
+(def-function ("osicat_ctermid" c-ctermid) ()
+  :module "osicat"
+  :returning :cstring)
+
 (def-function ("osicat_mode" c-file-mode) ((name :cstring) (follow-p :int))
   :module "osicat"
   :returning :int)
 
-(def-function ("osicat_nlink" c-file-nlink) ((name :cstring))
+(def-function ("osicat_mtime" c-file-mtime) ((name :cstring) (follow-p :int))
   :module "osicat"
   :returning :int)
 
-(def-function ("osicat_ino" c-file-ino) ((name :cstring))
+(def-function ("osicat_nlink" c-file-nlink) ((name :cstring) (follow-p :int))
+  :module "osicat"
+  :returning :int)
+
+(def-function ("osicat_ino" c-file-ino) ((name :cstring) (follow-p :int))
   :module "osicat"
   :returning :int)
 

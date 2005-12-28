@@ -30,6 +30,19 @@
 #include <stdlib.h>
 
 extern int
+osicat_errno ()
+{
+    return errno;
+}
+
+extern char *
+osicat_ctermid ()
+{
+    char *buf = malloc(L_ctermid+1);
+    return ctermid(buf);
+}
+
+extern int
 osicat_mode (char * name, int follow_p)
 {
     struct stat buf;
@@ -50,11 +63,36 @@ osicat_mode (char * name, int follow_p)
 }
 
 extern int
-osicat_nlink (char *name) {
+osicat_mtime (char *name, int follow_p)
+{
     struct stat buf;
     int err;
 
-    err = stat (name, &buf);
+    if (follow_p) {
+	err = stat (name, &buf);
+    }
+    else {
+	err = lstat (name, &buf);
+    }
+
+    if (! err)
+	return buf.st_mtime;
+    else
+	/* Are negative times possible? */
+	return -1;
+}
+
+extern int
+osicat_nlink (char *name, int follow_p) {
+    struct stat buf;
+    int err;
+
+    if (follow_p) {
+	err = stat (name, &buf);
+    }
+    else {
+	err = lstat (name, &buf);
+    }
 
     if (! err)
 	return buf.st_nlink;
@@ -63,11 +101,16 @@ osicat_nlink (char *name) {
 }
 
 extern int
-osicat_ino (char *name) {
+osicat_ino (char *name, int follow_p) {
     struct stat buf;
     int err;
 
-    err = stat (name, &buf);
+    if (follow_p) {
+	err = stat (name, &buf);
+    }
+    else {
+	err = lstat (name, &buf);
+    }
 
     if(! err)
 	return buf.st_ino;
