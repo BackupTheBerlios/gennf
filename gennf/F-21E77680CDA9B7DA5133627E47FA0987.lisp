@@ -87,6 +87,7 @@ or not. A value of :decline means to return normally handling the error.")
 				      command-list))))
 			  (terpri stream))))
 	     (write-string menu *interactive-error-io*)
+	     (force-output *interactive-error-io*)
 	     (loop 
 	       (write-string ">" *interactive-error-io*)
 	       (let* ((line (read-line *interactive-error-io*))

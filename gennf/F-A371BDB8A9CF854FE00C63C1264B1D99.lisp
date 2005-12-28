@@ -345,10 +345,11 @@ Commands:
        (when ,var (close ,var)))))
 
 (defun mcvs-execute (args)
-  (with-open-file-ignore-errors (*interactive-error-io* (parse-posix-namestring 
-							  (ctermid))
-							:direction :io
-							:if-does-not-exist nil)
+;  (with-open-file-ignore-errors (*interactive-error-io* (parse-posix-namestring 
+;							  (ctermid))
+;							:direction :io
+;							:if-does-not-exist nil)
+  (let ((*interactive-error-io* *debug-io*))
     (let ((*mcvs-error-treatment* (if *interactive-error-io*
 				    :interactive
 				    :terminate)))
@@ -370,6 +371,7 @@ Commands:
 	  (when (not (first global-args))
 	    (write-line "Meta-CVS requires a command argument." *error-output*)
 	    (write-line "Use mcvs -H to view help." *error-output*)
+	    (force-output *error-output*)
 	    (throw 'mcvs-terminate nil))
 
 	  (let ((command (find (first global-args) *mcvs-command-table* 
@@ -401,6 +403,15 @@ Commands:
 	    (t (mcvs-execute (split-words line #(#\space #\tab)))))
 	  (debug () :report "Return to mcvs debug shell"
 	    (terpri)))))))
+
+
+; FIXME: This should be handled by ASDF.
+#+sbcl
+(defun mcvs ()
+  (catch 'mcvs-terminate
+    (or (mcvs-execute (rest sb-ext:*posix-argv*))
+	*mcvs-error-occured-p*))
+  (sb-ext:quit))
 
 #+clisp
 (defun mcvs ()
