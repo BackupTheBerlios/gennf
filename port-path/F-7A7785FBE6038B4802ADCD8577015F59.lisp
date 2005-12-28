@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.1 2005/12/27 16:06:27 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.2 2005/12/28 16:03:02 florenz Exp $
 
 
 (in-package :port-path)
@@ -113,3 +113,52 @@ the root directory is the root itself."
 	  (make-pathname :defaults pathspec
 			 :name nil
 			 :type nil))))
+
+
+(defun directory-wildcard (directory)
+  "function DIRECTORY-WILDCARD directory => pathname
+
+Returns a pathname with wildcards in the file name
+element suitable to produce a directory listing
+with DIRECTORY."
+  (with-directory-form ((pathname directory))
+    (make-pathname
+     :name :wild
+     :type #-clisp :wild #+ clisp :nil
+     :defaults pathname)))
+
+
+(defun directory-listing (directory)
+  "function DIRECTORY-LISTING directory => list
+
+Returns the directory listing as a pathname list including both
+directories and files."
+  (with-directory-form ((pathname directory))
+    (when (wild-pathname-p pathname)
+      (error "Can not list content of a wildcard path."))
+    (let ((directory-wildcard (directory-wildcard pathname)))
+      #+(or sbcl cmu lispworks)
+      (directory directory-wildcard)
+      #+openmcl
+      (directory wildcard :directories t)
+      #+allegro
+      (directory wildcard :directories-are-files t)
+      #+clisp
+      (nconc
+       (directory wildcard)
+       (directory (subdirectory-wildcard wildcard)))
+      #-(or sbcl cmu lispworks openmcl allegro clisp)
+      (error "DIRECTORY-LISTING only available for SBCL, CMUCL, LispWorks, OpenMCL, Allegro, CLISP"))))
+
+
+#+clisp
+(defun subdirectory-wildcard (wildcard)
+  "function SUBDIRECTORY-WILDCARD wildcard => pathname
+
+Returns a pathname to produce a directory listings with
+all subdirectories of wildcard with CLISP."
+  (make-pathname
+   :name nil
+   :type nil
+   :directory (append (pathname-directory wildcard) (list :wild))
+   :defaults wildcard))

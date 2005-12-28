@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.1 2005/12/27 16:06:27 florenz Exp $
+;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.2 2005/12/28 16:03:02 florenz Exp $
 
 (defpackage :port-path
   (:use :cl)
@@ -26,4 +26,5 @@
    :with-pathname
    :with-directory-form
    :root-p
-   :get-parent-directory))
+   :get-parent-directory
+   :directory-listing))
