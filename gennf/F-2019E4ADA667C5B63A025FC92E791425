@@ -1,0 +1,40 @@
+# Copyright 2005 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+#
+# This file is part of gennf.
+#
+# gennf is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# gennf is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with gennf; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# $Id: F-2019E4ADA667C5B63A025FC92E791425,v 1.1 2005/12/29 15:20:41 florenz Exp $
+
+LISP = sbcl
+EVALOPT = --eval
+SOURCES = add.lisp branch.lisp chatter.lisp checkout.lisp \
+	clisp-unix.lisp cmucl-unix.lisp commit.lisp convert.lisp \
+	create.lisp dirwalk.lisp error.lisp filt.lisp find-bind.lisp \
+	generic.lisp gennf-commit.lisp grab.lisp link.lisp mapping.lisp \
+	mcvs-main.lisp memoize.lisp meta-cvs-system.lisp move.lisp \
+	multi-hash.lisp options.lisp packages.lisp posix.lisp \
+	print.lisp prop.lisp purge.lisp rcs-utils.lisp remap.lisp \
+	remove.lisp restart.lisp restore.lisp sbcl-unix.lisp \
+	seqfuncs.lisp slot-refs.lisp split.lisp sync.lisp system.lisp \
+	types.lisp update.lisp watch.lisp
+IMAGES = gennf.run
+
+all: $(IMAGES)
+
+%.run: %.asd $(SOURCES)
+	$(LISP) $(EVALOPT) "(require :asdf)" \
+		$(EVALOPT) "(asdf:operate 'asdf:load-op :$*)" \
+		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\")"
