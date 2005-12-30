@@ -4,6 +4,8 @@
 
 (in-package :gennf)
 
+;; FIXME: This should be handledby ASDF.
+
 #+(or clisp cmu18c) (require "posix")
 
 #+(and clisp clisp-unix-funcs) 

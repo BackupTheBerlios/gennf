@@ -45,7 +45,7 @@
     (chatter-debug "not writing to ~a because of -n global option.~%" 
 		   *mcvs-types*)
     (return-from types-write))
-  (with-open-file (file filename :direction :output)
+  (with-open-file (file filename :direction :output :if-exists :supersede)
     (let ((sorted-types (sort (copy-list types)
 			      #'string-lessp :key #'first)))
       (when comments

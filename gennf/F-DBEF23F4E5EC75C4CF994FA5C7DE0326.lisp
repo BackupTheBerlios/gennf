@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp,v 1.2 2005/12/28 16:20:40 florenz Exp $
+;; $Id: F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp,v 1.3 2005/12/30 18:08:01 florenz Exp $
 
 
 ;; This file is the equivalent to clisp-unix.lisp and cmucl-unix.lisp
@@ -109,7 +109,17 @@ target is returned."
 
 Returns a directory listing of directory as a list of strings."
   (with-pathname ((pathname directory))
-    (mapcar #'namestring (directory-listing pathname))))
+    (mapcar (lambda (pathname)
+	      (if (port-path:directory-pathname-p pathname)
+		  (first (last (pathname-directory pathname)))
+		  (format nil "~a~a"
+			  (if (pathname-name pathname)
+			      (pathname-name pathname)
+			      "")
+			  (if (pathname-type pathname)
+			      (format nil ".~a" (pathname-type pathname))
+			      ""))))
+	    (directory-listing pathname))))
 
 
 (defun chdir (directory)
@@ -117,7 +127,10 @@ Returns a directory listing of directory as a list of strings."
 
 Change current working directory."
   (with-pathname ((pathspec directory))
-    (setf (osicat:current-directory) pathspec)))
+    (setf (osicat:current-directory) pathspec)
+    (setf *default-pathname-defaults*
+	  (pathname-to-directory-form
+	   (merge-pathnames pathspec *default-pathname-defaults*)))))
 
 
 (defun getcwd ()
@@ -332,7 +345,8 @@ Checks if file exists."
 
 new-name is a new name (hard link) for old-name."
   (with-pathname ((old-pathname old-name) (new-pathname new-name))
-    (osicat:make-link new-pathname :target old-pathname :hard t)))
+    (osicat:make-link (merge-pathnames new-pathname)
+		      :target (merge-pathnames old-pathname) :hard t)))
 
 
 (defun symlink (file link)
@@ -460,7 +474,11 @@ Returns T if program terminated successfully, NIL otherwise.
 This function only works with SBCL."
   (chatter-debug "invoking ~s in directory ~s~%" arguments (getcwd))
   (let ((process (sb-ext:run-program (first arguments)
-				     (rest arguments))))
+				     (rest arguments)
+				     :search t
+				     :output t
+				     :error t
+				     :input t)))
     (if (and (eql (sb-ext:process-status process) :exited)
 	       (= (sb-ext:process-exit-code process) 0))
 	(progn
@@ -469,9 +487,7 @@ This function only works with SBCL."
 	(progn
 	  (chatter-debug "unsuccessful or abnormal termination~%")
 	  nil))))
-      
-      
-  
+
 
 (defmacro with-input-from-program ((stream arguments) &body forms)
   "macro WITH-INPUT-FROM-PROGRAM (stream arguments) &body forms.
