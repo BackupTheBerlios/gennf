@@ -90,8 +90,11 @@ We decided to build on \textsc{metacvs} because it is, in turn, based on
 \textsc{cvs} which we know quite well and because it is written in
 \textsc{Common~Lisp} which makes rapid development at least possible.
 
+Our work is based on \textsc{metacvs} version 1.0.13 which was
+\emph{latest stable} in december 2005.
+
 In the end we would of course like to integrate our development back
-into \textsc{metacvs} if convenient for the \textsc{metacvs} developers.
+into \textsc{metacvs} if convenient for the \textsc{metacvs} developer.
 Hence the \ldots
 
 \subsection{Naming issue}
@@ -99,7 +102,7 @@ For the course of development, the \emph{thing} will be called
 \textsc{gennf} just to have a name (gennf is the name of the gas emitted
 by the time snails in Zamonia).
 
-\subsection{Technical stuff}
+\subsection{\textsc{Common Lisp} implementation issues}
 \textsc{metacvs} is implemented in \textsc{clisp} which is now installed
 in \texttt{/home/pub/bin} in the IRB-network. \textsc{metacvs} is
 installed in the same location to get familiar with it and for testing
@@ -119,9 +122,50 @@ can be used by putting
 
 into \texttt{\textasciitilde/.emacs}.
 
+The trouble is that the originial \textsc{metacvs} build system
+creates a pre-image which contains \textsc{unix} bindings first to use
+this image to compile and image-dump \textsc{metacvs}.
+
+The script \texttt{create\_image} can be used to build this image
+and \texttt{unix-bindings-linking-set/clisp\_mcvs} is a shell script
+to invoke \textsc{clisp} with this image. Using \texttt{clisp\_mcvs}
+as \textsc{slime}'s \texttt{inferior-lisp-program} makes loading
+and exploration of the original code handy.
+
+We decided to use \textsc{sbcl} for our development because it's
+foreign function interface seems to be easier and is compatible with
+\textsc{uffi} which also support \textsc{allegro}, \textsc{lispworks},
+\textsc{openmcl} and others.
+
+The port to \textsc{sbcl} is nearly complete but not sufficiently
+tested yet. The original build system is replaced by \textsc{asdf}
+and the \textsc{unix} bindings are replaced by calls to a patched version of
+\textsc{osicat}, \textsc{port-path} (based on Peter Seibel's
+\textsc{pathname} library with some home grown extensions) and some
+\textsc{sbcl} specific extensions for interprocess communication.
+
+The \textsc{osicat} patch can be retrieved from \textsc{cvs}
+module \texttt{osicat-patch} and \textsc{port-path} from
+module \texttt{port-path}. Both systems come with \textsc{asdf}
+definitions and are made available to \textsc{sbcl} by symlinking
+the \texttt{.asd} file to \texttt{\textasciitilde{}/.sbcl/systems}.
+
+The \textsc{metacvs} port can be loaded with
+
+\begin{verbatim}
+(require :asdf)
+(asdf:operate 'asdf:load-op :gennf)
+\end{verbatim}
+
+A \texttt{Makefile} to build an image \texttt{gennf.run}
+is available and can be started with a shell script \texttt{gennf}
+which behaves like the \texttt{mcvs} binary.
+
+
 \subsection{Communication}
 Everyone participating in the project is free to mess up this file to
 record relevant thoughts, ideas, \ldots
+
 Day-to-day communication will be done using
 \texttt{gennf-devel@lists.berlios.de}.
 
@@ -129,18 +173,23 @@ There is a regular meeting tuesdays at 12 o'clock in the i-caf\'e if
 not announced differently.
 
 \subsection{Schedule \label{schedule}}
-There is no real schedule yet but\ldots
 
 \begin{tabular}{|p{.3\textwidth}|p{.6\textwidth}|}
 \hline
 \textmd{When} & \textmd{What} \\
 \hline\hline
-Nov. 7 &
+Nov. 7 2005 &
 Meeting at 12 o'clock in FR5017 to discuss design issues. \\
 \hline
-Nov. 4 to Nov. 15 &
+Nov. 4 to Nov. 15, 2005 &
 Getting familiar with the code of \textsc{metacvs}
 and drafting a design for distributiveness and signing. \\
+\hline
+Jan. 24 to Jan. 30, 2005 & Preparation of the intermediate
+presentation. \\
+\hline
+Apr. 1 to Apr. 17, 2006 & Finishing the project's report
+and preparing the presentation for final colloquium. \\
 \hline
 \end{tabular}
 
@@ -252,19 +301,20 @@ features:
 \item \textsc{gennf} will provide a possibility to \emph{inherit} from an
 already existing repository which means to create a branch
 at another site. It is not necessary for this new site to store the
-whole history of the project: \textsc{gennf} will establish a link between the two.
+whole history of the project: \textsc{gennf} will establish
+a link between the two.
 Whenever someone at the new repository requests a version not locally
 available, it will be fetched from the original site. It is of course
 possible to replicate large parts of or the whole history to improve
-performance or redundancy. However, duplicated parts of the history still
+performance or redundancy. However, replicated parts of the history still
 know where they come from.
 
-\item The different lines of development can be merged together, of course.
+\item The different lines of development can be merged together.
 \textsc{gennf} keeps track of the origin of the code merged in. The mechanism
-of merge is used to create branches, too. In fact, a merge is the only
-basic operation \textsc{gennf} knows about, apart from ordinary changes (which
+of merge is used to create branches. In fact, a merge is the only
+basic operation \textsc{gennf} knows about, apart from ordinary commits (which
 do not come from another site but out of some developer's head).
-Both -- changes and merges -- are called commits.
+Both -- commits and merges -- are called changes.
 \end{itemize}
 
 
@@ -275,24 +325,24 @@ repositories and their interaction. It is still incomplete
 especially concerning sandbox-repository interaction but gives already
 some implementation hints.
 
-\subsubsection{The basic notions: Repository, branch and commit}
+\subsubsection{The basic notions: Repository, branch and change}
 
 A \emph{repository} $r$ for a certain project is the set of development
 branches the project consists of.
 
 A \emph{branch} $b$ is an ordered pair $[\beta, s]$ with $\beta$ being
 a \emph{branch identifier} and $s$ being
-a sequence of commits.
+a sequence of changes..
 
-A \emph{commit} $c$ is the building block of repositories.
-Addition of commits to a repository is the basic modification
+A \emph{change} $c$ is the building block of repositories.
+Addition of changes to a repository is the basic modification
 of repositories.
 
-A commit can be a change or a merge.
+A change can be a commit or a merge.
 
-A \emph{change} is a 4-tuple $[\nu, \beta, \alpha, f]$ with
+A \emph{commit} is a 4-tuple $[\nu, \beta, \alpha, f]$ with
 \begin{itemize}
-\item $\nu$ being the branch-unique commit-number,
+\item $\nu$ being the branch-unique change-number,
 \item $\beta$ being the branch identifier of the branch
 this commit belongs to,
 \item $\alpha$ being an access identifier and
@@ -311,30 +361,45 @@ repository is stored, the corresponding authentication method
 and functions to checkin and -out files to and from this backend.
 
 A \emph{merge} is a change with two ancestors:
-One is its predecessing commit in the same branch the merge
-goes to. The second one is the commit being merged in which is
+One is its predecessing change in the same branch the merge
+goes to. The second one is the change being merged in which is
 called \emph{origin} of the merge.
 
 The origin of a merge was a change at some
 point in history to another branch. Consequently, a merge $m$ is
 a 5-tuple $[\nu, \beta, \alpha, f, o]$. The first four elements
-have the same meaning as in a change, the fifth links this commit
+have the same meaning as in a commit, the fifth links this change
 to its origin.
 
-The origin $o$ is a 4-tuple $[\nu, \beta, \alpha, d]$. The meaning
-of $\nu$, $\beta$, $\alpha$ is the same as for changes. But
+The origin $o$ is a 4-tuple $[\nu, \beta, \alpha, \varrho]$. The meaning
+of $\nu$, $\beta$, $\alpha$ is the same as for commits. But
 in this case they establish a link to a (possibly remote)
-commit with number $\nu$
+change with number $\nu$
 on branch $\beta$ reachable via access identifier $\alpha$.
 
-$d$ indicates if the change-part of a merge \emph{d}uplicates
-the change part of its origin. In this case traversing history
+$\varrho$ indicates if the change-part of a merge $\varrho$eplicates
+the commit part of its origin. In this case traversing history
 along the merge's branch leads to the same result as traversing
 the origin's history -- at least for the one commit.
-This feature is useful as merges are used for inheritance, i.~e.
-duplication. It is not necessary for inheritance to work but
+This feature is useful as merges are used for inheritance.
+$\varrho$ is not necessary for inheritance to work but
 is convenient as it indicates that traversing the origin's history
 is the same as traversing the merge's history.
+
+changes, merges and commits can be implemented as classes like the following
+diagram shows:
+
+\begin{center}
+\setlength{\unitlength}{1mm}
+\begin{picture}(25, 50)
+\put(0, 40){\framebox(25,10){\texttt{change}}}
+\put(12.5, 30){\vector(0, 1){10}}
+\put(0, 20){\framebox(25,10){\texttt{commit}}}
+\put(12.5, 10){\vector(0, 1){10}}
+\put(0, 0){\framebox(25, 10){\texttt{merge}}}
+\end{picture}
+\end{center}
+
 
 \subsubsection{Properties of the basic notions}
 
@@ -351,24 +416,24 @@ A symbolic name for this branch.
 \item $\mathnormal{de}:\ \mathnormal{branch} \rightarrow \mathnormal{string}$ \\
 A description of this branch.
 \item $\mathnormal{nu}:\ \mathnormal{commit} \rightarrow \mathbb{N}$ \\
-The number of a commit.
+The number of a change.
 \item $\mathnormal{br}:\ \mathnormal{commit} \rightarrow \mathnormal{branch\_identifier}$ \\
-The branch identifier of the branch the commit belongs to.
+The branch identifier of the branch the change belongs to.
 \item $\mathnormal{ac}:\ \mathnormal{commit} \rightarrow \mathnormal{access\_identifier}$ \\
-The access identifier of the commit.
+The access identifier of the change.
 \item $\mathnormal{fi}:\ \mathnormal{commit} \rightarrow (\mathnormal{filename}
 \rightarrow \mathnormal{revision\_number})$ \\
-The filename-revision-map of this commit.
+The filename-revision-map of this change.
 \item $\mathnormal{oi}:\ \mathnormal{merge} \rightarrow \mathnormal{origin}$ \\
 The origin of the merge.
 \item $\mathnormal{nu}:\ \mathnormal{origin} \rightarrow \mathbb{N}$ \\
-The origin's commit-number.
+The origin's change-number.
 \item $\mathnormal{br}:\ \mathnormal{origin} \rightarrow \mathnormal{branch\_identifier}$ \\
 The origin's branch identifier.
 \item $\mathnormal{ac}:\ \mathnormal{origin} \rightarrow \mathnormal{access\_identifier}$ \\
 How to access the origin (its access identifier).
-\item $\mathnormal{du}:\ \mathnormal{origin} \rightarrow \mathbb{B}$ \\
-The duplication identifier. If $\mathnormal{du}(o) = \mathtt{true}$
+\item $\mathnormal{re}:\ \mathnormal{origin} \rightarrow \mathbb{B}$ \\
+The replication identifier. If $\mathnormal{re}(o) = \mathtt{true}$
 histories are equal. In general it is $\mathtt{false}$.
 \end{itemize}
 
@@ -376,7 +441,7 @@ This abbreviation is used for merges:
 
 $\hat c = [\nu', \beta', \alpha', f', o]$ with $o=[\nu, \beta, \alpha, d]$ and
 $c=[\nu, \beta, \alpha, f]$. That means $\hat c$ is the result of mergeing
-commit $c$ to some other branch $\beta'$.
+change $c$ to some other branch $\beta'$.
 
 Now follow important properties for repositories and their elements.
 
@@ -392,16 +457,16 @@ Branch numbers must be unique:
 \forall b_1, b_2 \in r:\, \mathnormal{nu}\ b_1 \neq \mathnormal{nu}\ b_2
 \end{displaymath}
 
-A branch $b$ is a sequence of commits, which all belong to
+A branch $b$ is a sequence of changes, which all belong to
 $b$ and are accessible in the same way:
 
 \begin{displaymath}
-b\ \mbox{\textsc{isa}}\ \mathnormal{commit}\ \mathnormal{sequence}\ \wedge\
+b\ \mbox{\textsc{isa}}\ \mathnormal{change}\ \mathnormal{sequence}\ \wedge\
 \forall c_1, c_2 \in b:\, \mathnormal{br}\ c_1 = \mathnormal{br}\ c_2\ \wedge
 \mathnormal{ac}\ c_1 = \mathnormal{ac}\ c_2
 \end{displaymath}
 
-Commit numbers in a branch must be unique:
+Change numbers in a branch must be unique:
 
 \begin{displaymath}
 \forall c_1, c_2 \in b:\, \mathnormal{nu}\ c_1 \neq
@@ -426,10 +491,10 @@ $\triangledown c$.
 An operation $\underline\triangledown_n c$ with $n>0$ is called inheriting from c.
 If all predecessors of $c$ are inherited this is denoted
 by $\underline\triangledown_\star$
-and called total inheritance and in fact is duplication. A
+and called total inheritance and in fact is replication. A
 $\underline\triangledown_n$ operation is the only one to cause
-$\mathnormal{du}(\hat c)\neq \mathtt{false}$. For convenience,
-$d$ is always false if not mentioned in the tuple $o$ ($[\nu, \beta, \alpha,
+$\mathnormal{re}(\hat c)\neq \mathtt{false}$. For convenience,
+$\varrho$ is always false if not mentioned in the tuple $o$ ($[\nu, \beta, \alpha,
 \mathtt{false}]=[\nu, \beta, \alpha]$)
 or indicated otherwise.
 \end{itemize}
@@ -454,14 +519,14 @@ $r'=\{[\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_{n-k}, m'_{n-k+1}\rangle]\}$
 $m'_i=[\nu'_i, \beta'_i, \alpha'_i, f, \hat c_{i+k-1}]$ and
 $c_{i}=[\nu_i, \beta_i, \alpha_i, f_i]$, $k<n$.
 
-\item Create a \emph{branch} from a commit $c_k$ inside $r$
+\item Create a \emph{branch} from a change $c_k$ inside $r$
 ($\triangledown c_k$):
 
 $r = \{[\beta, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [\beta^2, \langle m_1^2
 \rangle]\}$ with $m_1^2=[\nu_1^2, \beta_1^2, \alpha_1^2, f_1^2, \hat c_k]$ and
 $\mathnormal{du}(\hat c_k)=\mathtt{false}$.	
 
-After doing some commits to the new branch the repository looks like
+After doing some changes to the new branch the repository looks like
 
 $r = \{[\beta, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [\beta^2, \langle m_1^2,
 c_2^2, c_3^2, \ldots, c_m^2\rangle ]\}$
@@ -475,7 +540,7 @@ Before the merge, the repository has this form:
 $\{[\beta^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
 [\beta^2, \langle c_1^2, c_2^2, \ldots, c_m^2\rangle]\}$	
 
-After the merge, branch $b^2$ has one more commit:
+Afterwards branch $b^2$ has one more change:
 
 $\{[\beta^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
 [\beta^2, \langle c_1^2, c_2^2, \ldots, c_m^2, m_{m+1}^2\rangle]\}$
@@ -483,13 +548,13 @@ $\{[\beta^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
 with $m_{m+1}^2=[\nu_{m+1}^2, \beta_{m+1}^2, \alpha_{m+1}^2, f_{m+1}^2,
 \hat c_n^1]$
 
-It is obvious that the result looks the same when commits
+It is obvious that the result looks the same when changes
 from different repositories are merged. Given
 
 $r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$ and \\
 $r' = \{[\beta', \langle c'_1, c'_2, c'_3, \ldots, c'_m\rangle]\}$,
 
-merging their heads $c'_m \rhd c_n$ leads to one more commit in
+merging their heads $c'_m \rhd c_n$ leads to one more change in
 $r$:
 
 $r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n, m_{n+1}\rangle]\}$
@@ -513,7 +578,6 @@ called \texttt{MAP} which has the format:
 \begin{verbatim}
 (mapping*)
 \end{verbatim}
-
 
 A \texttt{mapping} is a list which stores the F-filename,
 the ``physical'' filename and meta information like
@@ -586,8 +650,8 @@ directory keeps all F-files.
 
 The trick is to hard link the F-files into the project's
 sandbox according to the \texttt{MAP}-file. Now moving or
-renaming files is done with \textsc{metacvs} command which
-rename the hard links and modify the mappings. A move conflict
+renaming files is done by a \textsc{metacvs} command which
+renames the hard links and modifies the mappings. A move conflict
 appears as a conflict in the \texttt{MAP}-file.
 
 As gotcha, \texttt{MAP} enables version control of links and
@@ -629,16 +693,17 @@ branch $b$ with identifier $\beta$ have the same suffix.
 
 As said, a branch is $[\beta, s]$. To completely store a branch
 $s$ has to be put somewhere. This will be done in a file
-$\mathtt{COMMIT}.\beta$ which is just a list of commits (merges
-and changes) stored in reversed order that the last commit is
+$\mathtt{CHANGE}.\beta$ which is just a list of changes (merges
+and commits) stored in reversed order that the last change is
 accessible as head of the list.
 
-To complete a repository, a file $\mathtt{BRANCHES.}\beta$ is installed,
+To complete a repository, a file $\mathtt{BRANCH.}\beta$ is installed,
 which contains a list of existing branches in reversed order,
 i.~e. the branch created last is head of the list.
 For each branch, its identifier $\beta$ ($nu$), a symbolic name
 ($sy$), a description ($de$) and the name of it's
 \texttt{MAP}-file ($ma$) is stored.
+
 
 \subsection{Case study}
 
@@ -682,7 +747,7 @@ Digging deeper into this structure brings to light:
 \mathnormal{ma}\ \beta &=& \mathtt{MAP.1}
 \end{eqnarray*}
 
-\item $c_1\ \mbox{\textsc{isa}}\ \mathnormal{change}$ and
+\item $c_1\ \mbox{\textsc{isa}}\ \mathnormal{commit}$ and
 $c_1=[\nu_1, \beta, \alpha, f_1]$.
 \begin{eqnarray*}
 \mathnormal{nu}\ c_1 &=& 1 \\
@@ -725,9 +790,9 @@ Examination of $r'$ retrieves this information:
 \item $[\beta',\langle m'_1\rangle]\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
 \begin{eqnarray*}
 \mathnormal{sy}\ \beta' &=& \mbox{``optimizer''} \\
-\mathnormal{de}\ \beta' &=& \mbox{``includes tail-recursivion elimination''} \\
+\mathnormal{de}\ \beta' &=& \mbox{``includes tail-recursion elimination''} \\
 \mathnormal{nu}\ \beta' &=& 1 \\
-\mathnormal{ma}\ \beta' &=& \mathtt{MAP.1}
+\mathnormal{ma}\ \beta' &=& \mathtt{MAP.1}a
 \end{eqnarray*}
 
 \item $m'_1\ \mbox{\textsc{isa}}\ \mathnormal{merge}$ and
@@ -756,7 +821,7 @@ $m'_1=[\nu_1, \beta', \alpha', f'_1, o'_1]$.
 \end{itemize}
 
 The optimizer code is partly performed on the Absy and partly
-on the backend's intermediate language. Thus, the first change
+on the backend's intermediate language. Thus, the first commit
 moves the file \texttt{absy.lisp} up one level in the directory
 structure to reflect that it is manipulated in the frontend
 as well as in the backend. Lots of new code is inserted into
@@ -927,14 +992,14 @@ update in detail.
 
 \subsubsection{Sandbox and Repository}
 
-The sandbox the checked out copy of a certain commit
+The sandbox contains the checked out copy of a certain change
 of a certain branch. The information which branch and
 commit lives in the sandbox is stored in the administrative
 directory.
 
 \subsubsection{checkin}
 
-A checkin adds a new change to a branch. Checking in is a
+A checkin adds a new commit to a branch. Checking in is a
 several step procedure:
 
 \begin{enumerate}
