@@ -290,7 +290,7 @@ Probably an \textsc{emacs}-integration for \textsc{metacvs}, including the
 audit-part, would be useful.
 
 
-\section{Distributed repositories}
+\section{Distributed repositories \label{distrib}}
 
 \subsection{Outline}
 
@@ -985,7 +985,7 @@ following maps:
 \end{eqnarray*}
 
 
-\subsection{Repository actions}
+\subsection{Repository actions \label{ops}}
 
 This section describes the basic actions branch, checkin, merge,
 update in detail.
@@ -997,43 +997,155 @@ of a certain branch. The information which branch and
 commit lives in the sandbox is stored in the administrative
 directory.
 
+Two kinds of operations have to be distinguished:
+\begin{itemize}
+\item \emph{Repository only} operations which do
+neither necessarily require any sandbox nor do changes
+in a sandbox effect the result of an operation.
+Branching and merging are such operations.
+\item \emph{Sandbox} operations may cause changes
+in the repository but not necessarily have to but they
+either change the sandbox or changes in the sandbox effect
+the repository. Update, checkin belong to this category.
+\end{itemize}
+
 \subsubsection{checkin}
 
 A checkin adds a new commit to a branch. Checking in is a
 several step procedure:
 
 \begin{enumerate}
-\item Get the latest $\mathtt{COMMITS.}\beta$.
-\item Comparison of the latest $\mathtt{COMMITS.}\beta$ with 
+\item Get the latest $\mathtt{CHANGE.}\beta$.
+\item Comparison of the latest $\mathtt{CHANGE.}\beta$ with 
 the one present in the sandbox gives the files changed
 in the meantime from other commits.
 \item Check which files are modified locally.
 \item The intersection of the two file sets gives potential
 conflicts. If this intersection is empty create a new commit
-and prepend it to the current $\mathtt{COMMITS.}\beta$
+and prepend it to the current $\mathtt{CHANGE.}\beta$
 The file map for the new commit is generated out of
 the revision numbers the backend assigns to each file on
 checkin.
 
-Check in the modified $\mathtt{COMMITS.}\beta$ on throw
+Check in the modified $\mathtt{CHANGE.}\beta$ and throw
 away the old one.
 \item If the intersection is not empty check if potential
-conflicts are real conflicts. (\emph{How will this be done?})
-\item \emph{To be continued.}
+conflicts are real conflicts. That means to merge to last
+repository version of all possibly conflicting files with 
+the one in the working copy temporarily. If none of the merges
+fails a new commit is added as indicated above.
+\item If the merging fails for at least one file tell the user about
+it and mark the conflicing parts. No file will be checked in and
+the $\mathtt{CHANGE.}\beta$ file is reverted to the original one.
 \end{enumerate}
 
 
 \subsubsection{branch}
-\emph{To be written.}
+Branching is a repository only operation but some temporary
+hard disk space will be necessary.
+
+As branching cannot conflict it is a pretty straight forward
+procedure:
+\begin{enumerate}
+\item Get the latest $\mathtt{BRANCH}$ file from the repository.
+\item Add a new branch with the appropriate information (branch
+identifier, name, description etc.)
+\item Create a new \texttt{MAP}- and \texttt{CHANGE}-file for
+this branch.
+\item Get the the \texttt{CHANGE}-file of the branch which
+is branched from and extract the change which is head of the new
+branch.
+\item Retrieve all files revisions indicated in this changes
+file map.
+\item Replace the branch identifier in the F-file names and the
+retrieved \texttt{MAP}-file by the branch identifier for the
+new branch.
+\item Put the content of the retrieved \texttt{MAP}-file into
+the new \texttt{MAP}-file.
+\item Check in the retrieved F-files with the new branch identifier
+and create a corresponding merge with modified file map
+and the branch's origin.
+\item Check in the \texttt{CHANGE}- and modified \texttt{BRANCH}-files.
+\end{enumerate}
+
+If replication takes places the steps 4 to 8 are repeated for all
+changes to be replicated starting with the oldest one. For all
+changes incorporated $\varrho$ will hold.
+
+\emph{Problem:} There might be a problem because the file map can
+obly be set upa after checking in the files because the revision
+number is not known before. If -- for some reason -- the checkin
+of the new \texttt{BRANCH}- and \texttt{MAP}-files fails these
+commits cannot be reverted. To solve this a dry-run checkin is necessary
+which returns the revision numbers but does no repository modification.
+This again may lead to inconcistencies.
 
 \subsubsection{merge}
-\emph{To be written.}
+Merging is -- like branching -- a repository only
+operation.
+
+Merging is essentially a checkin of a certain change to a certain
+branch without a sandbox and creating a merge instead of a commit:
+
+\begin{enumerate}
+\item Put the change to merge into a temporary sandbox.
+\item Get the \texttt{CHANGE}-file from the change to which
+the merge will be applied.
+\item In the case of a merge, conflicts cannot in general
+be uncovered by comparing the \texttt{CHANGE}-files. Instead
+dry-run merges have to be done. If all goes well a new merge
+is created and prepended to the \texttt{CHANGE}-file and all files
+including the \texttt{MAP}-file are checked in.
+\item If conflicts arise the user has to resolve them in the
+temporary sandbox and the merge has to be restarted. This point
+may cause trouble.
+\end{enumerate}
 
 \subsubsection{update}
-\emph{To be written.}
+
+The update operation is a sandbox only operation but may cause
+conflicts.
+
+\begin{enumerate}
+\item Get the latest \texttt{CHANGE}-file for the sandbox' branch
+and compare it to the \texttt{CHANGE}-file in the sandbox.
+\item If changes were made to the branch check out the
+changed files and merge them into the files in
+the snadbox. Conflicts are marked and have to be handled by
+the user.
+\end{enumerate}
+
+\subsection{How to put this into \textsc{metacvs}}
+Basically the operations \texttt{mcvs-commit},
+\texttt{mcvs-branch}, \texttt{mcvs-merge} and \texttt{mcvs-update}
+have to be replaced. Other routines like \texttt{mcvs-switch} or
+\texttt{mcvs-list-branches} and many others should be disabled
+until the are replaced by appropriate new ones.
+
+As far as I can see things, all operations should be possible with
+the four discussed previously except for two:
+
+\begin{itemize}
+\item A history and log message browsing operation was not
+discussed.
+\item The \texttt{mcvs-create} operation has to be upgraded that
+it created the appropriate branch and change handling infrastructure.
+\end{itemize}
 
 \subsection{Access identifier -- backend abstraction}
-\emph{To be written.}
+
+As a first approximation for \textsc{cvs} as the only backend
+it is sufficient to store a function in $\alpha$ which is able to
+set the environment-variable \texttt{CVSROOT} (and perhaps
+\texttt{CVS\_RSH}). This function is called before \textsc{cvs}
+is invoked to set up the necessary environment.
+All those functions should be stored in a table (a file called
+\texttt{ACCESSOR}) with increasing numbers such that access
+identifiers in changes contain the appropriate number.
+
+If a repository is moved on another machine or something the like
+the function is exchanged and a new revision of \texttt{ACCESSOR} is
+stored (this way even movements of repositories are recorded).
 
 
 \section{Comments on other software}
@@ -1058,17 +1170,39 @@ contain diffs between two or more change sets.
 \section{Todo and milestones}
 
 \subsection{Zeroth milestone}
-Specification for commits (or patch sets or however). This includes
+Specification for changes. This includes
 the handling of branches and merges.
+\ldots and is finished by now.
 
 \subsection{First milestone}
-The first thing to do is implementing change sets and writing an
+The first thing to do is implementing change and branch handling as describes
+in section \ref{distrib} and writing an
 interface to the \textsc{gpgme} library. At this point, we have to decide
 what \textsc{Common Lisp} implementation will be used because calls
 to foreign functions is not included in the ANSI standard.
 Documentation for \textsc{clisp} can be found at
 \texttt{http://clisp.sourceforge.net/impnotes.html\#dffi} and the like
 for \textsc{cmucl} at \texttt{http://common-lisp.net/project/cmucl/doc/cmu-user/aliens.html}.
+The decision has been taken and \textsc{sbcl} will be the implementation of
+choice. For all FFI-stuff \textsc{UFFI} should be taken and proper
+\textsc{ASDF} definition be written.
+
+\subsection{Second milestone}
+Specification and implementation of the code signing features.
+
+\subsection{Third milestone}
+Optional things:
+\begin{itemize}
+\item Convenient wrappers for the most common use cases based
+on the basic operations described in section \ref{ops} like
+branching and haveing the branch as sandbox and the same for merging
+etc.
+\item Integration of other backends than \textsc{cvs}.
+\item Makeing the code compatible (especially buildable!) with
+other \textsc{Common Lisp} implementations.
+\item \textsc{emacs} integration.
+\item Something else from the \emph{nice features to have section}.
+\end{itemize}
 
 \subsection{Other things}
 \begin{itemize}
@@ -1082,13 +1216,16 @@ We could patch this.
 \textsc{metacvs} is to fire the debugger. Perhaps it is sensible to
 just pass those commands to the \textsc{cvs} binary and end up in the debugger
 only if the command is unknown to \textsc{cvs} too.
-\item The user should not see any F-files.
+(I don't think we should do this. Invoking \textsc[cvs] directly
+is somewhat dangerous and all relevant calls should be wrapped [Florian]).
+\item The user should not see any F-files. Especially not in
+expanded keywords like \texttt{\$Id\$} and the commit message.
 \end{itemize}
 
 \subsection{Nice features to have}
 
 \begin{itemize}
-\item An operation to gather all $\mathnormal{lsets}$s as
+\item An operation to gather all origins with $\neg \varrho$ as
 local copies into a repository (ending the distributiveness, perhaps
 for a restart).
 \item A possibility to generate a graph to show the links between
