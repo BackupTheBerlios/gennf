@@ -197,3 +197,39 @@ osicat_tmpfile (void)
     if (fp == NULL) return -1;
     return fileno (fp);
 }
+
+extern int
+osicat_setenv (const char *name, const char* value, int overwrite)
+{
+    int err;
+    char *string;
+    char *existing_value;
+
+    err = 0;
+    existing_value = getenv(name);
+
+    if(existing_value == NULL || overwrite) {
+        string = malloc(sizeof(char)*(strlen(name)+strlen(value)+2));
+        if(string == NULL) return -1;
+        strcpy(string, name);
+        strcat(string, "=");
+        strcat(string, value);
+        err = putenv(string);
+    }
+    return err;
+}
+
+extern int
+osicat_unsetenv (char *name)
+{
+    int err;
+    char *existing_value;
+
+    err = 0;
+    existing_value = getenv(name);
+
+    if(existing_value != NULL) {
+        err = putenv(name);
+    }
+    return err;
+}

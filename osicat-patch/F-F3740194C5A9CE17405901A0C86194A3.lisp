@@ -372,7 +372,7 @@ strings. Signals an error on failure."
 (defun (setf environment-variable) (value name)
   (with-c-name (cname name)
     (with-c-name (cvalue value)
-      (if (zerop (setenv cname cvalue 1))
+      (if (zerop (c-setenv cname cvalue 1))
 	  (convert-from-cstring cvalue)
 	  (error "Could not set environment variable ~S to ~S." name value)))))
 
@@ -383,7 +383,7 @@ Removes the environment variable identified by name from the current
 environment. name can be either a string or a symbol. Returns the
 string designated by name. Signals an error on failure."
   (with-c-name (cname name)
-    (if (zerop (unsetenv cname))
+    (if (zerop (c-unsetenv cname))
 	(string name)
 	(error "Could not remove environment variable ~S." name))))
 
@@ -401,8 +401,8 @@ of SETF ENVIRONMENT."
       (loop for i from 0 by 1
 	    for string = (convert-from-cstring
 			  (deref-array environ 'cstring-ptr i))
-	    for split = (position #\= string)
 	    while string
+	    for split = (position #\= string)
 	    collecting (cons (subseq string 0 split) 
 			     (subseq string (1+ split))))
     (error (e)

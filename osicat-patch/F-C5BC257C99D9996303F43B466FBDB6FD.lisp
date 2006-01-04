@@ -57,6 +57,15 @@
   :module "osicat"
   :returning (* :unsigned-char))
 
+(def-function ("osicat_setenv" c-setenv)
+    ((name :cstring) (value :cstring) (replace :int))
+  :module "osicat"
+  :returning :int)
+
+(def-function ("osicat_unsetenv" c-unsetenv) ((name :cstring))
+  :module "osicat"
+  :returning :int)
+
 (def-function "osicat_dirent_name" ((entry :pointer-void))
   :module "osicat"
   :returning :cstring)
@@ -114,14 +123,6 @@
 (def-function "getenv" ((name :cstring))
   :module "osicat"
   :returning :cstring)
-
-(def-function "setenv" ((name :cstring) (value :cstring) (replace :int))
-  :module "osicat"
-  :returning :int)
-
-(def-function "unsetenv" ((name :cstring))
-  :module "osicat"
-  :returning :int)
 
 (def-foreign-type cstring-ptr (* :cstring))
 (def-foreign-var "environ" 'cstring-ptr "osicat")
