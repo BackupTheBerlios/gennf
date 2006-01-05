@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.2 2005/12/28 16:03:02 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.3 2006/01/05 12:39:34 florenz Exp $
 
 
 (in-package :port-path)
@@ -83,6 +83,26 @@ i. e. it is converted into directory-form."
        :type nil
        :defaults pathname)
       pathname)))
+
+
+(defun pathname-to-file-form (pathspec)
+  "function PATHNAME-TO-FILE-FORM pathspec => pathname
+
+If pathspec is in directory-form it is converted to
+file-form, i. e. the last directory-component is
+put into the name- and type-components."
+  (with-pathname ((pathname pathspec))
+    (when (wild-pathname-p pathspec)
+      (error "Cannot convert pathnames with wildcards into file-form."))
+    (if (directory-pathname-p pathspec)
+	(let*
+	    ((directories (pathname-directory pathspec))
+	     (file-name (pathname (first (last directories)))))
+	  (make-pathname
+	   :directory (butlast directories)
+	   :name (pathname-name file-name)
+	   :type (pathname-type file-name)))
+	pathspec)))
 
 
 ; I am not sure about this method:
@@ -162,3 +182,22 @@ all subdirectories of wildcard with CLISP."
    :type nil
    :directory (append (pathname-directory wildcard) (list :wild))
    :defaults wildcard))
+
+
+(defun path-exists-p (pathspec)
+  "function PATH-EXISTS-P pathspec => generalized boolean
+
+Tests if the given pathspec exists (be it a file or a directory)
+and return a pathname in either directory- or file-form if so."
+  (with-pathname ((pathname pathspec))
+    #+(or sbcl lispworks openmcl)
+    (probe-file pathname)
+    #+(or allegro cmucl)
+    (or (probe-file (pathname-to-directory-form pathname))
+	(probe-file pathname))
+    #+clisp
+    (or (ignore-errors
+	  (probe-file (pathname-to-file-form pathname)))
+	(ignore-errors
+	  (when (ext:probe-directory (pathname-to-directory-form pathname))
+	    pathname)))))
