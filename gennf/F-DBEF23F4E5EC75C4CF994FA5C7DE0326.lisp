@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp,v 1.3 2005/12/30 18:08:01 florenz Exp $
+;; $Id: F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp,v 1.4 2006/01/09 18:19:16 florenz Exp $
 
 
 ;; This file is the equivalent to clisp-unix.lisp and cmucl-unix.lisp
@@ -62,10 +62,14 @@ return value."
   (let ((block-sym (gensym "BLOCK-")))
     `(block ,block-sym
       (handler-bind
-	  ((system-error #'(lambda (con)
-			     (declare (ignore con))
-			     (if (= (osicat:unix-error) 2)
-				 (return-from ,block-sym nil)))))
+	  (
+;	   (system-error #'(lambda (con)
+;			     (declare (ignore con))
+;			     (if (= (osicat:unix-error) 2)
+;				 (return-from ,block-sym nil))))
+	   (sb-int:simple-file-error #'(lambda (con)
+					 (declare (ignore con))
+					 (return-from ,block-sym nil))))
 	,@forms))))
 
 
@@ -94,14 +98,16 @@ target is returned."
   (if (typep name 'file-info)
       name
       (with-pathname ((pathname name))
-	(make-instance
-	 'file-info
-	 :file-name (namestring pathname)
-	 :mode-flags (osicat:file-mode pathname through-link)
-	 :mod-time (osicat:file-modification-time pathname through-link)
-	 :inode (osicat:inode-number-of-file pathname through-link)
-	 :num-links (osicat:number-of-links-to-file
-		     pathname through-link)))))
+	(if (path-exists-p pathname)
+	    (make-instance
+	     'file-info
+	     :file-name (namestring pathname)
+	     :mode-flags (osicat:file-mode pathname through-link)
+	     :mod-time (osicat:file-modification-time pathname through-link)
+	     :inode (osicat:inode-number-of-file pathname through-link)
+	     :num-links (osicat:number-of-links-to-file
+			 pathname through-link))
+	    nil))))
 
 
 (defun readdir (directory)
@@ -137,7 +143,7 @@ Change current working directory."
   "function GETCWD => string
 
 Get current working directory."
-  (osicat:current-directory))
+  (namestring (osicat:current-directory)))
 
 
 (defgeneric same-file-p (file1 file2)
@@ -192,6 +198,10 @@ Checks if file is a regular file."))
   (regular-p (file-name file)))
 
 
+(defmethod regular-p ((file null))
+  nil)
+
+
 (defgeneric directory-p (file)
   (:documentation
 "generic function DIRECTORY-P file => generalized boolean
@@ -209,6 +219,10 @@ Checks if file is a directory."))
   (directory-p (file-name file)))
 
 
+(defmethod directory-p ((file null))
+  nil)
+
+
 (defgeneric symlink-p (file)
   (:documentation
 "generic function SYMLINK-P file => generalized boolean
@@ -224,6 +238,10 @@ Checks if file is a symbolic link."))
 
 (defmethod symlink-p ((file file-info))
   (symlink-p (file-name file)))
+
+
+(defmethod symlink-p ((file null))
+  nil)
 
 
 (defgeneric is-root-p (file)
@@ -332,12 +350,14 @@ Removes all executable bits from file."))
 Checks if file exists."
   (with-pathname ((pathname file))
     (let ((kind (osicat:file-kind pathname)))
-      (if (and through-link (eql kind :symbolic-link))
-	  ; Pathnames have to be merged because the result of
-	  ; osicat:read-link may be relative to pathname.
-	  (osicat:file-kind
-	   (merge-pathnames (osicat:read-link pathname) pathname))
-	  kind))))
+      (if (if (and through-link (eql kind :symbolic-link))
+	      ; Pathnames have to be merged because the result of
+	      ; osicat:read-link may be relative to pathname.
+	      (osicat:file-kind
+	       (merge-pathnames (osicat:read-link pathname) pathname))
+	      kind)
+	  (stat pathname :through-link through-link)
+	  nil))))
 
 
 (defun link (old-name new-name)

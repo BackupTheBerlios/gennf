@@ -26,6 +26,7 @@
 ;	(loop
 ;
       (dolist (name (readdir dir-path))
+;	(write-line name)
 ;
 ;	  (let ((name (readdir d)) entry-path fi)
 ;

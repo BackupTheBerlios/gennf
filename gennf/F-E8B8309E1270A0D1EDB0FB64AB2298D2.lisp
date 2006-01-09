@@ -312,7 +312,7 @@ for duplicate entries"
 			#'string< :key #'mapping-entry-id)))
   (let ((raw-filemap (mapping-convert-out filemap)))
     (handler-case 
-      (with-open-file (file filename :direction :output)
+      (with-open-file (file filename :direction :output :if-exists :supersede)
 	(let ((*print-right-margin* 1))
 	  (prin1 raw-filemap file)
 	  (terpri file)))

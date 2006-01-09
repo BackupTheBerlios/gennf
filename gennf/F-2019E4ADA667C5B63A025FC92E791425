@@ -16,7 +16,7 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-2019E4ADA667C5B63A025FC92E791425,v 1.1 2005/12/29 15:20:41 florenz Exp $
+# $Id: F-2019E4ADA667C5B63A025FC92E791425,v 1.2 2006/01/09 18:19:16 florenz Exp $
 
 LISP = sbcl
 EVALOPT = --eval
@@ -30,6 +30,16 @@ SOURCES = add.lisp branch.lisp chatter.lisp checkout.lisp \
 	remove.lisp restart.lisp restore.lisp sbcl-unix.lisp \
 	seqfuncs.lisp slot-refs.lisp split.lisp sync.lisp system.lisp \
 	types.lisp update.lisp watch.lisp
+FASLS = add.fasl branch.fasl chatter.fasl checkout.fasl \
+	cfasl-unix.fasl cmucl-unix.fasl commit.fasl convert.fasl \
+	create.fasl dirwalk.fasl error.fasl filt.fasl find-bind.fasl \
+	generic.fasl gennf-commit.fasl grab.fasl link.fasl mapping.fasl \
+	mcvs-main.fasl memoize.fasl meta-cvs-system.fasl move.fasl \
+	multi-hash.fasl options.fasl packages.fasl posix.fasl \
+	print.fasl prop.fasl purge.fasl rcs-utils.fasl remap.fasl \
+	remove.fasl restart.fasl restore.fasl sbcl-unix.fasl \
+	seqfuncs.fasl slot-refs.fasl split.fasl sync.fasl system.fasl \
+	types.fasl update.fasl watch.fasl
 IMAGES = gennf.run
 
 all: $(IMAGES)
@@ -38,3 +48,6 @@ all: $(IMAGES)
 	$(LISP) $(EVALOPT) "(require :asdf)" \
 		$(EVALOPT) "(asdf:operate 'asdf:load-op :$*)" \
 		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\")"
+
+clean:
+	rm $(FASLS)

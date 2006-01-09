@@ -4,6 +4,10 @@
 
 (in-package :gennf)
 
+;; Full debugging.
+(eval-when (:execute :compile-toplevel :load-toplevel)
+  (proclaim '(optimize (debug 3))))
+
 ;; Clear out requires for mcvs-upgrade to work right.
 ;(setf *modules* nil)
 
@@ -411,7 +415,8 @@ Commands:
   (catch 'mcvs-terminate
     (or (mcvs-execute (rest sb-ext:*posix-argv*))
 	*mcvs-error-occured-p*))
-  (sb-ext:quit))
+;  (sb-ext:quit)
+)
 
 #+clisp
 (defun mcvs ()
