@@ -2,6 +2,12 @@
   "MCVS/F-01BFC84C7B5AA5916B1FC95B481B0DEC.lisp"
   "src/types.lisp")
  (:FILE
+  "MCVS/F-03018E8471DDD49AD47174CF158A9286.lisp"
+  "prototype/change.lisp")
+ (:FILE
+  "MCVS/F-080CF3710F46A1C94984A6BD78462AC7.lisp"
+  "prototype/branch.lisp")
+ (:FILE
   "MCVS/F-13ACBEE85F44E6335A8A14F12C82ECA9.c"
   "src/unix-bindings/wrap.c")
  (:FILE
@@ -28,6 +34,9 @@
   "MCVS/F-24AFFF4D581EFC1C6EF802B4AAB5D27B.lisp"
   "src/system.lisp")
  (:FILE
+  "MCVS/F-251FB522127FF9A2E037DC904E011C8D.lisp"
+  "prototype/backend.lisp")
+ (:FILE
   "MCVS/F-30CE3B42F628E6E185661335E4018306.lisp"
   "src/gpgme/gpgme.lisp")
  (:FILE
@@ -52,8 +61,20 @@
   "MCVS/F-418A4A44531B20FCEB6851D533A75A04.lisp"
   "src/create.lisp")
  (:FILE
+  "MCVS/F-42DFD065A78C998A3E47C9493FF221E7.lisp"
+  "prototype/packages.lisp")
+ (:FILE
+  "MCVS/F-48D1C070D93800E7560AEE00EF78D0B2.lisp"
+  "prototype/miscallenous.lisp")
+ (:FILE
+  "MCVS/F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp"
+  "prototype/access.lisp")
+ (:FILE
   "MCVS/F-4A3E7EA0D66193EB3C63340BB6150E24"
   "src/gpgme/Makefile")
+ (:FILE
+  "MCVS/F-4E51556B59366B0B171CCB0B1F4F10A9.lisp"
+  "prototype/backend-cvs.lisp")
  (:FILE
   "MCVS/F-4F2D9B26F5FB9FA0F66EBB82BE7E8EF1.lisp"
   "src/prop.lisp")
@@ -87,11 +108,20 @@
   "MCVS/F-74915F0862B511AC9C233FDCB87DBEF8.lisp"
   "src/update.lisp")
  (:FILE
+  "MCVS/F-769D6330165D17D4921D9970720734B7.lisp"
+  "prototype/configuration.lisp")
+ (:FILE
   "MCVS/F-7849808E8711BA9FBEB0917F33B12A79.lisp"
   "src/find-bind.lisp")
  (:FILE
   "MCVS/F-7FC7BAE8FEAFAA140D1560EE6A936C40.sh"
   "src/unix-bindings/link.sh")
+ (:FILE
+  "MCVS/F-83B842F2203F2AE6157E430B77F56938.lisp"
+  "prototype/files.lisp")
+ (:FILE
+  "MCVS/F-88B873BF8C20BA949EB0547CD571F5B0.lisp"
+  "prototype/sbcl.lisp")
  (:FILE
   "MCVS/F-8E73F07FB339A6981C69AF06C278B49A.lisp"
   "src/rcs-utils.lisp")
@@ -137,6 +167,9 @@
   "MCVS/F-CA4E16937768388DD32FAD6ADA8B6A2F.lisp"
   "src/clisp-unix.lisp")
  (:FILE
+  "MCVS/F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp"
+  "prototype/directories.lisp")
+ (:FILE
   "MCVS/F-D3884C19BD6F4028992C7EE4A564DCA3.lisp"
   "src/restart.lisp")
  (:FILE
@@ -164,6 +197,9 @@
   "MCVS/F-E9DFED59ECE7621E4773E6B51E9D2881.lisp"
   "src/posix.lisp")
  (:FILE
+  "MCVS/F-EADDB60DB86A4481CF5D126F61D78F8E.lisp"
+  "prototype/commit.lisp")
+ (:FILE
   "MCVS/F-F0479D3BD4B6A3EB301F19E55A829B7E"
   "src/unix-bindings-linking-set/clisp_mcvs"
   (:EXEC
@@ -174,6 +210,9 @@
  (:FILE
   "MCVS/F-FABFD2A24671001E7FA5E630FED91059.lisp"
   "src/multi-hash.lisp")
+ (:FILE
+  "MCVS/F-FC7FF8AB6284EA194323C1565C752386.lisp"
+  "prototype/gennf.lisp")
  (:FILE
   "MCVS/F-FD67F73260C22A0EC7EF43A6F702E80F.lisp"
   "src/seqfuncs.lisp"))

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.1 2006/01/16 07:47:42 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.2 2006/01/16 10:52:17 florenz Exp $
 
 (in-package :gennf)
 
@@ -25,24 +25,13 @@
 (defparameter *cvs-import-release-tag* "fresh-repository")
 (defparameter *cvs-command-name* "cvs")
 
-(defmacro with-cvs-output ((output arguments) &body forms)
+(defmacro with-cvs-output ((arguments &key exit-code
+				      output error) &body forms)
   `(with-program-output (*cvs-command-name*
 			 ,arguments
-			 :output ,output)
-    ,@forms))
-
-(defmacro with-cvs-exit-code ((exit-code arguments) &body forms)
-  `(with-program-output (*cvs-command-name*
-			 ,arguments
+			 :output ,output
+			 :error ,error
 			 :exit-code ,exit-code)
-    ,@forms))
-
-(defmacro with-cvs-exit-code-and-output ((exit-code output arguments)
-						    &body forms)
-  `(with-program-output (*cvs-command-name*
-			 ,arguments
-			 :exit-code ,exit-code
-			 :output ,output)
     ,@forms))
 
 (defmacro cvs-default-error-handling (&rest arguments)
@@ -75,47 +64,33 @@
 				  "-d" "."
 				  path))))
 
-(defun cvs-commit ()
-  ())
-
-;(defun cvs-commit (message access files)
-;  (let (file-list argument-list)
-;    (dolist (file files)
-;      (ensure-string-pathname file)
-;      (unless (cvs-known-file-p access file)
-;	(cvs-add access file))
-;      (push file file-list))
-;    (setf argument-list (append (list "-d" (extract :root access) "ci")
-;				file-list))
-;    (with-cvs-exit-code-and-output (exit-code output argument-list)
-;      (unless (= exit-code 0)
-;	(let ((outdated-files ()))
-;	  (loop for line = (read-line output nil)
-;		while line do
-;		(when (search "Up-to-date check failed" line)
-;		  (setf outdated-files (concatenate
-;					(search-multiple file-list line)
-;					outdated-files))
-		  
-		    
-		 
-				 
-
-;  (let ((outdated-files ()))
-;    (dolist (file files)
- 
-;      (unless (up-to-date-p access file)
-;	(push file outdated-files)))
-;    (when outdated-files
-;      (error 'backend-outdated-error :files outdated-files))
-
+(defun cvs-commit (message access files)
+  (let (file-list argument-list)
+    (dolist (file files)
+      (ensure-string-pathname file)
+      (unless (cvs-known-file-p access file)
+	(cvs-add access file))
+      (push file file-list))
+    (setf argument-list (append (list "-d" (extract :root access)
+				      "ci" "-m" message)
+				file-list))
+    (with-cvs-output (argument-list :error error :exit-code exit-code)
+      (unless (= exit-code 0)
+	(let ((outdated-files
+	       (loop for line = (read-line error nil)
+		     while line
+		     when (search "Up-to-date check failed" line)
+		     append (search-multiple file-list line))))
+	  (setf outdated-files (mapcar #'pathname outdated-files))
+	  (error 'backend-outdated-error :code exit-code
+		 :description "Some files are outdated."
+		 :files outdated-files))))))
 
 (defun cvs-up-to-date-p (access file)
   (ensure-string-pathname file)
-  (with-cvs-output (stream (list "-d" (extract :root access)
-				 "-n"
-				 "up"
-				 file))
+  (with-cvs-output ((list "-d" (extract :root access)
+			  "-n" "up" file)
+		    :output stream)
     (let ((output (read-line stream nil)))
       (not (and output 
 		(char/= (aref output 0) #\A)
@@ -123,9 +98,9 @@
 	  
 (defun cvs-known-file-p (access file)
   (ensure-string-pathname file)
-  (with-cvs-exit-code (exit-code (list "-d" (extract :root access)
-				       "log"
-				       "file"))
+  (with-cvs-output ((list "-d" (extract :root access)
+			     "log" file)
+		       :exit-code exit-code)
     (= exit-code 0)))
 
 (defun cvs-add (access files)

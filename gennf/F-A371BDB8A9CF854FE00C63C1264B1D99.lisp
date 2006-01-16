@@ -8,33 +8,6 @@
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (proclaim '(optimize (debug 3))))
 
-;; Clear out requires for mcvs-upgrade to work right.
-;(setf *modules* nil)
-
-;(require "create")
-;(require "checkout")
-;(require "grab")
-;(require "add")
-;(require "remove")
-;(require "move")
-;(require "link")
-;(require "update")
-;(require "filt")
-;(require "generic")
-;(require "convert")
-;(require "branch")
-;(require "remap")
-;(require "purge")
-;(require "restore")
-;(require "prop")
-;(require "watch")
-;(require "split")
-;(require "restart")
-;(require "error")
-;(require "options")
-;(require "find-bind")
-;(provide "mcvs-main")
-
 (define-option-constant *global-options* 
   (0 arg "H" "help" "Q" "q" "r" "w" "l" "n" "t" "v" "f" "version"
 	 "meta" "metaonly" "nometa" "error-continue" "error-terminate" "debug")
@@ -349,10 +322,6 @@ Commands:
        (when ,var (close ,var)))))
 
 (defun mcvs-execute (args)
-;  (with-open-file-ignore-errors (*interactive-error-io* (parse-posix-namestring 
-;							  (ctermid))
-;							:direction :io
-;							:if-does-not-exist nil)
   (let ((*interactive-error-io* *debug-io*))
     (let ((*mcvs-error-treatment* (if *interactive-error-io*
 				    :interactive
@@ -421,4 +390,4 @@ Commands:
 #+clisp
 (defun mcvs ()
   (exit (catch 'mcvs-terminate (or (mcvs-execute ext:*args*)
-				   *mcvs-errors-occured-p*))))
+p				   *mcvs-errors-occured-p*))))

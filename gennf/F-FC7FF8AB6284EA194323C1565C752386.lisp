@@ -16,13 +16,15 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.1 2006/01/16 07:47:43 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.2 2006/01/16 10:52:17 florenz Exp $
 
 (in-package :gennf)
 
 ;; For development purposes only.
 (defparameter *devel-root*
   "/home/uebb/uebb/infet/admin/florenz/ti/ossi/prototype/repo")
+(defparameter *devel-access*
+  (create-new-access :identifier 0 :root *devel-root*))
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (proclaim '(optimize (debug 3))))
 ;; End of development only section.
