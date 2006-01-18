@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.2 2006/01/16 10:52:17 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.3 2006/01/18 18:22:54 florenz Exp $
 
 (in-package :gennf)
 
@@ -67,9 +67,8 @@
 (defun cvs-commit (message access files)
   (let (file-list argument-list)
     (dolist (file files)
-      (ensure-string-pathname file)
       (unless (cvs-known-file-p access file)
-	(cvs-add access file))
+	(cvs-add access (list file)))
       (push file file-list))
     (setf argument-list (append (list "-d" (extract :root access)
 				      "ci" "-m" message)
@@ -104,8 +103,15 @@
     (= exit-code 0)))
 
 (defun cvs-add (access files)
+  "Do a cvs add for all files. Files may be have a
+directory part. In this case, all directories are added
+to the repository."
   (dolist (file files)
-    (ensure-string-pathname file)
-    (invoke-cvs "-d" (extract :root access)
-		"add"
-		file)))
+    (let ((directory-prefixes (cdr (pathname-prefixes file)))
+	  (paths (append directory-prefixes (list file))))
+      (dolist (path paths)
+	(ensure-string-pathname path)
+	(invoke-cvs "-d" (extract :root access)
+		    "add"
+		    path)))))
+    

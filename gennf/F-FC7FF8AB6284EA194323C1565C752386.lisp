@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.2 2006/01/16 10:52:17 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.3 2006/01/18 18:22:54 florenz Exp $
 
 (in-package :gennf)
 
@@ -35,20 +35,27 @@
     (create-meta-directory)
     (in-meta-directory
       (let ((access (create-new-access :root root)))
-	(backend-get module access *branch-file* *access-file*))
+	(backend-get module access (list *branch-file* *access-file*)))
       (let* ((identifier (get-new-branch-identifier *branch-file*))
 	     (branch (create-new-branch
 		      :identifier identifier
 		      :symbolic-name symbolic-name
 		      :description description))
 	     (branch-directory
-	      (merge-pathnames
-	       (make-pathname :directory
-			      (list :relative (format nil "~A" identifier))))))
+	      (make-pathname :directory
+			     (list :relative (format nil "~A" identifier))))
+	     (change-file (merge-pathnames branch-directory *change-file*)))
 	(add-branch branch *branch-file*)
 	(create-directory branch-directory)
-	(create-new-change-file (merge-pathnames *change-file*
-						 branch-directory))))))
+	(create-new-change-file change-file)
+	(handler-case (backend-commit module access
+				      (list change-file branch-file))
+	  (backend-outdated-error (condition)
+				  (backend-update module access
+						  (files condition))
+				  (backend-commit module access
+						  (list change-file
+							branch-file))))
 
 (defun create-empty-repository (module root)
   ;; It should be checked if module already exists.

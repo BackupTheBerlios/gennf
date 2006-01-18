@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.1 2006/01/16 07:47:42 florenz Exp $
+;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.2 2006/01/18 18:22:54 florenz Exp $
 
 (in-package :gennf)
 
@@ -27,7 +27,7 @@
 (define-condition backend-outdated-error (backend-error)
   ((files :initarg :files :reader files)))
 
-(defun backend-get (module access &rest files)
+(defun backend-get (module access files)
   (let ((backend (extract :backend access)))
     (cond ((eql backend :cvs) (cvs-get module access files))
 	  (t (error "Backend ~S not implemented." backend)))))
@@ -37,7 +37,22 @@
     (cond ((eql backend :cvs) (cvs-import module access))
 	  (t (error "Backend ~S not implemented." backend)))))
 
-(defun backend-commit (module access &rest files)
+(defun backend-commit (module access files)
+  "files are commited to the given repository.
+file pathnames have to be relative to the given working
+directory and must be in file-form. All files and
+the directories they are stored in have to exist.
+This means in particular that it is not possible to
+commit empty directories.
+
+If it is not possible to commit a file because
+it is outdated a backend-outdated-error is signalled.
+No file will committed in this case."
   (let ((backend (extract :backend access)))
-    (cond ((eql backend :cvs) (cvs-commit module access files))
+    (cond ((eql backend :cvs)
+	   (handler-case (cvs-commit module access files)
+	     (backend-outdated-error (condition)
+				     (cvs-update module access
+						 (files condition))
+				     (cvs-commit module access files)))
 	  (t (error "Backend ~S not implemented." backend)))))
