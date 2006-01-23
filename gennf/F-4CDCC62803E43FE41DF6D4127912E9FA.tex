@@ -1,0 +1,155 @@
+\documentclass[german]{beamer}
+
+\newcommand{\GENNF}{\textsc{gennf}}
+\newcommand{\METACVS}{\textsc{metacvs}}
+\newcommand{\CVS}{\textsc{cvs}}
+\newcommand{\LISP}{\textsc{lisp}}
+\newcommand{\COMMONLISP}{\textsc{common lisp}}
+\newcommand{\LIBGPGME}{\textsc{libgpgme}}
+\newcommand{\OSICAT}{\textsc{osicat}}
+\newcommand{\PORTPATH}{\textsc{portpath}}
+
+\usepackage{babel}
+\usetheme{Rochester}
+\usefonttheme{serif}
+\usecolortheme[RGB={120,0,16}]{structure}
+
+\setbeamertemplate{navigation symbols}{}
+
+\author{Fabian~Otto~{\scriptsize (\texttt{sigsegv@cs.tu-berlin.de})}
+  \and Hannes~Mehnert~{\scriptsize (\texttt{mehnert@cs.tu-berlin.de})}
+  \and Florian~Lorenzen~{\scriptsize (\texttt{florenz@cs.tu-berlin.de})}}
+
+\title{\GENNF}
+\subtitle{Verteiltes Versionsmanagement mit Code Signierung}
+\institute{TU~Berlin, FG Formale Modelle, Logik und Programmierung, \\
+Infrastrukturen zur Open Source Softwareentwicklung WS05/06 \\
+Bernd Mahr, Steffen Evers}
+\date{31.~Januar~2006}
+
+
+\begin{document}
+\AtBeginSection[]
+{
+  \begin{frame}{"Ubersicht}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}{"Ubersicht}
+    \tableofcontents[currentsubsection]
+  \end{frame}
+}
+
+\frame[plain]{\titlepage}
+
+\begin{frame}{"Ubersicht}
+  \tableofcontents
+\end{frame}
+
+\section{Idee}
+
+\begin{frame}{Zielsetzung}
+  \begin{itemize}
+  \item Sicherstellung der Herkunft des verwalteten Codes
+  \item Kein zentrales Repository:
+    \begin{itemize}
+    \item Anpassung der Repository- an die Arbeitsstruktur des Projektes
+    \item Keine vollst"andige Replikation von Repositories $\rightarrow$
+      Vernetzung durch Links
+    \item Einfaches Verzweigen und Zusammenf"uhren von Entwicklungslinien
+    \end{itemize}
+  \item Gro"se Verf"ugbarkeit
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Umfeld}
+  \begin{itemize}
+  \item Zumeist vollst"andige Replikation des Repositories
+  \item Keine Vernetzung
+  \item 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Planung}
+  \begin{enumerate}
+  \item Festlegung des Projektziels
+  \item Konzeptionierung:
+    \begin{itemize}
+    \item Verteilung
+    \item Code Signierung
+    \end{itemize}
+  \item Implementierung eines Prototypens
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{\METACVS}
+  L"ost Problem der Verzeichnisversionierung in \CVS:
+  \begin{itemize}
+  \item Abspeicherung einer flachen Struktur
+  \item Verzeichnishierarchie wird "uber separate Abblidung
+    gespeichert
+  \item Clientseitige Erweiterung, ben"otigt \CVS{} als Backend
+    $\rightarrow$ gute Verf"ugbarkeit
+  \item \emph{Diese Ideen "ubernehmen wir}
+  \end{itemize}
+\end{frame}
+
+\section{Konzept}
+
+\begin{frame}{Entwurf}
+  \begin{itemize}
+  \item Verteilung
+    \begin{itemize}
+    \item Abstraktes Modell f"ur verteilte Repositories
+    \item Entwurf der Datenstrukturen und Operationen
+    \item Implementierungshinweise
+    \item Typische Anwendungsf"alle
+    \end{itemize}
+  \item Code Signierung
+  \end{itemize}
+\end{frame}
+
+\subsection{Verteiltes Versionsmanagement}
+
+\begin{frame}{Strukturen}
+  
+\end{frame}
+
+\begin{frame}{Operationen}
+  
+\end{frame}
+
+\begin{frame}{Beispiele}
+
+\end{frame}
+
+\subsection{Code Signierung}
+
+\begin{frame}{Workflow}
+  
+\end{frame}
+
+\section{Implementierung}
+
+\begin{frame}{Orthoganale Entwicklung}
+  
+\end{frame}
+
+\begin{frame}{Technik}
+  \begin{itemize}
+  \item \COMMONLISP{}
+  \item \LIBGPGME{}
+  \item \OSICAT{}
+  \item \PORTPATH{}
+  \end{itemize}
+\end{frame}
+
+\section{Zusammenfassung}
+
+\begin{frame}{Zusammenfassung}
+  
+\end{frame}
+\end{document}
