@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.1 2006/01/16 07:47:43 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.2 2006/01/23 18:20:22 florenz Exp $
 
 (in-package :gennf)
 
@@ -75,3 +75,39 @@
 	    (error "Could not create fresh directory ~S, already existent."
 		   absolute-directory)
 	    path)))))
+
+(defun find-all-files (pathspec)
+  "pathspec is interpreted as a directory and a list
+of all files with full pathname below this directory is
+returned. That means all pathnames are in file form."
+  (port-path:with-directory-form ((directory pathspec))
+    (let* ((listing (port-path:directory-listing directory))
+	   (files (remove-if #'port-path:directory-pathname-p listing))
+	   (directories (remove-if-not #'port-path:directory-pathname-p
+				       listing))
+	   (file-lists (mapcar #'find-all-files directories)))
+      (append files (apply #'append file-lists)))))
+
+(defun move-directory-tree (source-pathspec destination-pathspec)
+  "source-pathspec and destination-pathspec are interpreted as
+pathnames in directory form. All files and directories below
+source-pathspec are moved below destination-pathspec. The
+last directory of source-pathspec still exists afterwards."
+  (port-path:with-directory-form ((source (merge-pathnames source-pathspec))
+				  (destination (merge-pathnames
+						destination-pathspec)))
+    (let* ((all-sources (find-all-files source))
+	   (all-sources-relative
+	    (mapcar #'(lambda (file)
+			(parse-namestring (enough-namestring file source)))
+		    all-sources))
+	   (all-destinations
+	    (mapcar #'(lambda (file)
+			(merge-pathnames file destination))
+		    all-sources-relative)))
+      (mapcar #'(lambda (source-file destination-file)
+		  (ensure-directories-exist destination-file)
+		  (rename-file source-file destination-file))
+	      all-sources all-destinations)
+      (mapcar #'delete-directory-tree
+	      (port-path:directory-listing source)))))

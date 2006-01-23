@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.2 2006/01/18 18:22:54 florenz Exp $
+;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.3 2006/01/23 18:20:22 florenz Exp $
 
 (in-package :gennf)
 
@@ -27,9 +27,9 @@
 (define-condition backend-outdated-error (backend-error)
   ((files :initarg :files :reader files)))
 
-(defun backend-get (module access files)
+(defun backend-get (module access files destination)
   (let ((backend (extract :backend access)))
-    (cond ((eql backend :cvs) (cvs-get module access files))
+    (cond ((eql backend :cvs) (cvs-get module access files destination))
 	  (t (error "Backend ~S not implemented." backend)))))
 
 (defun backend-import (module access)
@@ -50,9 +50,5 @@ it is outdated a backend-outdated-error is signalled.
 No file will committed in this case."
   (let ((backend (extract :backend access)))
     (cond ((eql backend :cvs)
-	   (handler-case (cvs-commit module access files)
-	     (backend-outdated-error (condition)
-				     (cvs-update module access
-						 (files condition))
-				     (cvs-commit module access files)))
+	   (cvs-commit module access files))
 	  (t (error "Backend ~S not implemented." backend)))))
