@@ -16,7 +16,9 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.3 2006/01/23 18:20:22 florenz Exp $
+;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.4 2006/01/24 18:24:41 florenz Exp $
+
+;; BOGUS
 
 (in-package :gennf)
 
