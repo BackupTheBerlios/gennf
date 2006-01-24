@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.4 2006/01/23 18:20:22 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.5 2006/01/24 13:10:14 florenz Exp $
 
 (in-package :gennf)
 
@@ -56,14 +56,14 @@
 			      *cvs-import-release-tag*))
 
 (defun cvs-get (module access files destination)
-  ;; For some reason  co -d . ist not possible with cvs using
-  ;; ssh as transport layer. That means that all files
-  ;; are checked out into gennf-tmp/module/. The whole content of
-  ;; gennf-tmp/module is moved to the current working directory
-  ;; (especially including the cvs meta directory (because
-  ;; cvs-commit would not work otherwise).
-  ;; temporary-directory should be generated using some
-  ;; save routine.
+  "For some reason  co -d . ist not possible with cvs using
+ssh as transport layer. That means that all files
+are checked out into gennf-tmp/module/. The whole content of
+gennf-tmp/module is moved to destination,
+especially including the cvs meta directory, because
+cvs-commit would not work otherwise.
+temporary-directory should be generated using some
+save routine."
   (in-temporary-directory
     (let* ((file-list (mapcar #'(lambda (file)
 				  (format nil "~A/~A" module
@@ -81,28 +81,8 @@
 	(move-directory-tree module-path
 			     destination-directory)
 	(delete-directory-tree module-path)))))
-				     
-				
-;  (let* ((temporary-directory (make-pathname :directory
-;					     (list :relative "gennf-tmp")))
-;	 (module-path (make-pathname :directory
-;				     (list :relative module)))
-;	 (file-list (mapcar #'(lambda (file)
-;				(format nil "~A/~A" module (namestring file)))
-;			    files))
-;	 (cvs-command (append (list 'cvs-default-error-handling
-;				    "-d" (extract :root access)
-;				    "co"
-;				    "-d" (namestring temporary-directory))
-;			      file-list)))
-;    (eval cvs-command)
-;    (move-directory-tree (merge-pathnames module-path temporary-directory)
-;			 (current-directory))
-;    (delete-directory-tree temporary-directory)))
-    
-    
 
-(defun cvs-commit (message-file access files)
+(defun cvs-commit (message access files)
   "If files are not known to cvs they are added.
 The current working directory has to be a result of a cvs-get.
 If some files are outdated a condition backend-outdated-error
@@ -113,9 +93,9 @@ case no files are committed at all."
       (unless (cvs-known-file-p access file)
 	(cvs-add access (list file)))
       (push file file-list))
-    (ensure-string-pathname message-file)
+    ;(ensure-string-pathname message-file)
     (setf argument-list (append (list "-d" (extract :root access)
-				      "ci" "-F" message-file)
+				      "ci" "-m" message)
 				(mapcar #'namestring file-list)))
     (with-cvs-output (argument-list :error error :exit-code exit-code)
       (unless (= exit-code 0)
@@ -159,4 +139,3 @@ to the repository."
 	(invoke-cvs "-d" (extract :root access)
 		    "add"
 		    path)))))
-    

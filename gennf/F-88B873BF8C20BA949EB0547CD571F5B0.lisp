@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.1 2006/01/16 07:47:43 florenz Exp $
+;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.2 2006/01/24 13:10:15 florenz Exp $
 
 (in-package :gennf)
 
@@ -43,4 +43,6 @@
 			    `(,output (sb-ext:process-output ,process)))
 			  (when error
 			    `(,error (sb-ext:process-error ,process)))))
-	,@forms))))
+	,@forms
+	,@(remove () (list (when output `(close ,output))
+			   (when error `(close ,error))))))))
