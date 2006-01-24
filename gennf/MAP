@@ -73,6 +73,9 @@
   "MCVS/F-4A3E7EA0D66193EB3C63340BB6150E24"
   "src/gpgme/Makefile")
  (:FILE
+  "MCVS/F-4CDCC62803E43FE41DF6D4127912E9FA.tex"
+  "doc/folien.tex")
+ (:FILE
   "MCVS/F-4E51556B59366B0B171CCB0B1F4F10A9.lisp"
   "prototype/backend-cvs.lisp")
  (:FILE
@@ -125,6 +128,9 @@
  (:FILE
   "MCVS/F-8E73F07FB339A6981C69AF06C278B49A.lisp"
   "src/rcs-utils.lisp")
+ (:FILE
+  "MCVS/F-972969458DDA322E03A1AAD19BF8ADC0.asd"
+  "prototype/gennf.asd")
  (:FILE
   "MCVS/F-97770D7ED2DFF388BC60EAB380950A77.lisp"
   "src/dirwalk.lisp")

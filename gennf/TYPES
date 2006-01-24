@@ -1,4 +1,5 @@
-(("aux" :IGNORE)
+(("asd" :DEFAULT)
+ ("aux" :IGNORE)
  ("c" :DEFAULT)
  ("dvi" :IGNORE)
  ("html" :DEFAULT)
