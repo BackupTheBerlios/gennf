@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.2 2006/01/18 18:22:54 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.3 2006/01/24 17:38:07 sigsegv Exp $
 
 (in-package :gennf)
 
@@ -63,3 +63,16 @@ all directory-prefixes is generated:
 			     :name nil :type nil
 			     :defaults pathname) pathname-prefixes))
       pathname-prefixes)))
+
+
+;; Does this macro leak?
+;; More conditions could be supported.
+(defmacro retry-until-finished ((condition cleanup) &body body) 
+  (let  ((retry (gensym))
+	 (condi (gensym)))
+    `(loop with ,retry do
+      (setf ,retry nil)
+      (handler-case (progn ,@body)
+	(,condition (,condi) (funcall ,cleanup ,condi)
+		       (setf ,retry t)))
+     while ,retry)))

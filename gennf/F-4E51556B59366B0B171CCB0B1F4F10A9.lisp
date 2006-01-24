@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.5 2006/01/24 13:10:14 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.6 2006/01/24 17:38:07 sigsegv Exp $
 
 (in-package :gennf)
 
@@ -34,18 +34,23 @@
 			 :exit-code ,exit-code)
     ,@forms))
 
-(defmacro cvs-default-error-handling (&rest arguments)
-  (let ((exit-code (gensym "exit-code-")))
-    `(let ((,exit-code
-	    (invoke-cvs ,@arguments)))
-      (cvs-default-error-handler ,exit-code))))
+;; (defmacro cvs-default-error-handling (&rest arguments)
+;;   (let ((exit-code (gensym "exit-code-")))
+;;     `(let ((,exit-code
+;; 	    (invoke-cvs ,@arguments)))
+;;       (cvs-default-error-handler ,exit-code))))
 
+  
 (defun cvs-default-error-handler (exit-code)
   (cond ((= exit-code 0) exit-code)
 	(t (error "cvs had exit code ~S." exit-code))))
 
 (defun invoke-cvs (&rest arguments)
   (invoke-program *cvs-command-name* arguments))
+
+(defun cvs-default-error-handling (&rest args)
+  (cvs-default-error-handler (apply #'invoke-cvs args)))
+
 
 (defun cvs-import (module access)
   (cvs-default-error-handling "-d" (extract :root access)
@@ -69,13 +74,16 @@ save routine."
 				  (format nil "~A/~A" module
 					  (namestring file)))
 			      files))
-	   (cvs-command (append (list 'cvs-default-error-handling
-				      "-d" (extract :root access)
-				      "co")
-				file-list))
+	   (argument-list (append (list "-d" (extract :root access) "co")
+				  file-list))
+	   ;;    (cvs-command (append (list 'cvs-default-error-handling
+	   ;; 				      "-d" (extract :root access)
+	   ;; 				      "co")
+	   ;; 				file-list))
 	   (module-path (make-pathname :directory
 				       (list :relative module))))
-      (eval cvs-command)
+      (apply #'cvs-default-error-handling argument-list)
+      ;;       (eval cvs-command)		
       (port-path:with-directory-form ((destination-directory
 				       destination))
 	(move-directory-tree module-path

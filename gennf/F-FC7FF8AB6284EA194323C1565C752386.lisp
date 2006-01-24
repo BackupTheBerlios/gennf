@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.4 2006/01/23 18:20:22 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.5 2006/01/24 17:38:07 sigsegv Exp $
 
 (in-package :gennf)
 
@@ -29,8 +29,9 @@
   (proclaim '(optimize (debug 3))))
 ;; End of development only section.
 
+;; Restart koennte hier eine Optionen um das retry zu verhindern.
 (defun create-empty-branch (module root
-				   &key (symbolic-name "") (description ""))
+			    &key (symbolic-name "") (description ""))
   (in-temporary-directory
     (create-meta-directory)
     (in-meta-directory
