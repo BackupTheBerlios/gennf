@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.6 2006/01/25 17:49:10 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.7 2006/01/25 19:55:02 florenz Exp $
 
 (in-package :gennf)
 
@@ -45,38 +45,19 @@
 	(push item results)))
     results))
 
-(defun pathname-prefixes (pathspec)
-  "Given a pathspec /dir1/dir2/dir3/file a list of
-all directory-prefixes is generated:
-/, /dir1/, /dir1/dir2/, /dir1/dir2/dir3/."
-  (port-path:with-pathname ((pathname pathspec))
-    (let ((directory-prefixes
-	   ;; Generate alle prefixes in reverse order. The longest
-           ;; prefix is first and all directories appear in reverse
-	   ;; order, too.
-	   (maplist #'identity (reverse (pathname-directory pathname))))
-	  pathname-prefixes)
-      (dolist (prefix directory-prefixes)
-	;; By using push, the shortest prefix is first in list and
-	;; by reversing prefix, directories are put in correct order.
-	(push (make-pathname :directory (reverse prefix)
-			     :name nil :type nil
-			     :defaults pathname) pathname-prefixes))
-      pathname-prefixes)))
 
 ;; Does this macro leak?
 ;; More conditions could be supported.
 (defmacro retry-until-finished ((condition variable &rest cleanup-forms)
 				&body body) 
-  (let  ((retry (gensym))
-	 (pass-through-condition (gensym)))
+  (with-gensyms (retry pass-through-condition)
     `(loop with ,retry do
       (setf ,retry nil)
       (handler-case (progn ,@body)
-	(,condition (,condi)	
-	  (let ((,variable ,pass-through-condition))
-	    ,@cleanup-forms)
-	  (setf ,retry t)))
+	(,condition (,pass-through-condition)	
+		    (let ((,variable ,pass-through-condition))
+		      ,@cleanup-forms)
+		    (setf ,retry t)))
       while ,retry)))
 
 ;; This macro is a generalization of retry-until-finished.
@@ -100,7 +81,7 @@ all directory-prefixes is generated:
 ;;                      :cleanup (progn (inspect error) (repair-the-stuff)))
 ;;         ('another-exception :cleanup (failure-recover)))
 ;;   (do-some-work)
-;;   (do-some-more-work)))
+;;   (do-some-more-work))
 ;;
 ;; Macroexpansion yields:
 ;;
@@ -119,6 +100,22 @@ all directory-prefixes is generated:
 ;;                         (INCF (NTH 1 #:G1844)))))
 ;;        WHILE
 ;;        #:G1843))
+;;
+;; Another hint: If a variable, which is used in the macro's
+;; body, is to be used in cleanup, too, there is no other choice as
+;; to either make is special or to wrap the whole macro with a let
+;; to introduce the variable lexically:
+;;
+;; (let ((some-variable some-initialization))
+;;   (retry ((exception :cleanup (some-form-using-some-variable)))
+;;     (some-code-also-using-some-variable)))
+;;
+;; (This documentation should go in the documentation string, but
+;; unfortunately, SLIME has trouble with (, ) in documentation strings.
+;; Perhaps this should be fixed by someone.)
+;;
+;; (If one of the maximums is exceeded a condition should be thrown.)
+;;
 (defmacro retry (retry-specifications &body forms)
   (with-gensyms (retry counters)
     (let ((conditions nil)
@@ -137,26 +134,31 @@ all directory-prefixes is generated:
 	     (setf maxima (cons maximum maxima))
 	     (setf cleanups (cons cleanup cleanups))))
        retry-specifications)
-      `(let ((,counters (list ,(make-list
-				(length conditions) :initial-element 0))))
-	(loop with ,retry do
-	      (setf ,retry nil)
-	      (handler-case (progn ,@forms)
-		,@(mapcar (lambda (condition-number)
-			    `(,(nth condition-number conditions)
-			      ,(if (nth condition-number condition-variables)
-				   `(,(nth condition-number
-					   condition-variables))
-				   `())
-			      ,(nth condition-number cleanups)
-			      ,(cond ((nth condition-number maxima)
-				      `(when (< (nth ,condition-number
-						 ,counters)
-					      ,(nth condition-number maxima))
-					(setf ,retry t)
-					(incf (nth ,condition-number
-					       ,counters))))
-				     (t `(set ,retry t)))))
-			  (loop for i from 0 to (1- (length conditions))
-				collect i)))
-	      while ,retry)))))
+      (let ((loop-code
+	     `(loop with ,retry do
+	       (setf ,retry nil)
+	       (handler-case (progn ,@forms)
+		 ,@(mapcar (lambda (condition-number)
+			     `(,(nth condition-number conditions)
+			       ,(if (nth condition-number condition-variables)
+				    `(,(nth condition-number
+					    condition-variables))
+				    `())
+			       ,(nth condition-number cleanups)
+			       ,(cond ((nth condition-number maxima)
+				       `(when (< (nth ,condition-number
+						  ,counters)
+					       ,(nth condition-number maxima))
+					 (setf ,retry t)
+					 (incf (nth ,condition-number
+						,counters))))
+				      (t `(set ,retry t)))))
+			   (loop for i from 0 to (1- (length conditions))
+				 collect i)))
+	       while ,retry)))
+	(if (eval (cons 'or maxima))
+	    `(let ((,counters
+		    (list ,@(make-list
+			     (length conditions) :initial-element 0))))
+	      ,loop-code)
+	    loop-code)))))

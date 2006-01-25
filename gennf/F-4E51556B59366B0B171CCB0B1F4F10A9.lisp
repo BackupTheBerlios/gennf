@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.18 2006/01/24 20:17:25 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.19 2006/01/25 19:55:02 florenz Exp $
 
 (in-package :gennf)
 
@@ -140,7 +140,7 @@ file-form, no directories! Files may be have a
 directory part. In this case, all directories are added
 to the repository."
   (dolist (file files)
-    (let* ((directory-prefixes (cdr (pathname-prefixes file)))
+    (let* ((directory-prefixes (cdr (port-path:pathname-prefixes file)))
 	   (paths (append directory-prefixes (list file))))
       (dolist (path paths)
 	(ensure-string-pathname path)
