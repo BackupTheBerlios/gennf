@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.5 2006/01/25 13:08:56 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.6 2006/01/25 17:49:10 florenz Exp $
 
 (in-package :gennf)
 
@@ -64,53 +64,99 @@ all directory-prefixes is generated:
 			     :defaults pathname) pathname-prefixes))
       pathname-prefixes)))
 
-
-;; Does this macro leak?
-;; More conditions could be supported.
-;(defmacro retry-until-finished ((condition cleanup) &body body) 
-;  (let  ((retry (gensym))
-;	 (condi (gensym)))
-;    `(loop with ,retry do
-;      (setf ,retry nil)
-;      (handler-case (progn ,@body)
-;	(,condition (,condi) (funcall ,cleanup ,condi)
-;		       (setf ,retry t)))
-;     while ,retry)))
-
-
 ;; Does this macro leak?
 ;; More conditions could be supported.
 (defmacro retry-until-finished ((condition variable &rest cleanup-forms)
 				&body body) 
   (let  ((retry (gensym))
-	 (condi (gensym)))
+	 (pass-through-condition (gensym)))
     `(loop with ,retry do
       (setf ,retry nil)
       (handler-case (progn ,@body)
 	(,condition (,condi)	
-	  (let ((,variable ,condi))
+	  (let ((,variable ,pass-through-condition))
 	    ,@cleanup-forms)
 	  (setf ,retry t)))
       while ,retry)))
 
-
-;(defmacro retry (retry-specifications &body forms)
-;  (mapcar '#(lambda (entry) 
-;(loop
-;    with retry
-;    with counter1 = 0
-;    with counter2 = 0
-;    do
-;    (setf retry nil)
-;    (handler-case (progn ,@forms)
-;      (,condition1 (,condition-variable1) ,@cleanup-forms1
-;		   (when (< counter1 retries1) (incf counter1) (setf retry t)))
-;      (,condition2 (,condition-variable2) ,@cleanup-forms2 (setf retry t)))
-;    while ,retry)
-
-
-;(retry-case ((outdated-error :variable condition :maximum 5
-;			     :cleanup (progn (undo) (prepare)))
-;	     (file-error :cleanup (delete-file)))
-;	    (do-something)
-;	    (do more))
+;; This macro is a generalization of retry-until-finished.
+;; It takes several conditions and clean-up forms. If one
+;; of those conditions is signalled its cleanup form is
+;; executed and the macro's body repeated.
+;; It also takes a maximum repetition argument per
+;; condition.
+;; The form of one retry-specification is
+;;
+;; (condition &key condition-variable maximum cleanup)
+;;
+;; condition-variable is available for cleanup. cleanup
+;; must be a single form, progn may be useful.
+;; If maximum is omitted the corresponding condition will
+;; always cause cleanup and repitition.
+;;
+;; An example looks like this:
+;;
+;; (retry (('some-error :maximum 5 :condition-variable error
+;;                      :cleanup (progn (inspect error) (repair-the-stuff)))
+;;         ('another-exception :cleanup (failure-recover)))
+;;   (do-some-work)
+;;   (do-some-more-work)))
+;;
+;; Macroexpansion yields:
+;;
+;; (LET ((#:G1844 (LIST (0 0))))
+;;  (LOOP WITH
+;;        #:G1843
+;;        DO
+;;        (SETF #:G1843 NIL)
+;;        (HANDLER-CASE (PROGN (DO-SOME-WORK) (DO-SOME-MORE-WORK))
+;;                      ('ANOTHER-EXCEPTION NIL (FAILURE-RECOVER)
+;;                       (SET #:G1843 T))
+;;                      ('SOME-ERROR (ERROR)
+;;                       (PROGN (INSPECT ERROR) (REPAIR-THE-STUFF))
+;;                       (WHEN (< (NTH 1 #:G1844) 5)
+;;                         (SETF #:G1843 T)
+;;                         (INCF (NTH 1 #:G1844)))))
+;;        WHILE
+;;        #:G1843))
+(defmacro retry (retry-specifications &body forms)
+  (with-gensyms (retry counters)
+    (let ((conditions nil)
+	  (condition-variables nil)
+	  (maxima nil)
+	  (cleanups nil))
+      (mapcar
+       #'(lambda (specification)
+	   (destructuring-bind
+		 (condition
+		  &key condition-variable maximum cleanup)
+	       specification
+	     (setf conditions (cons condition conditions))
+	     (setf condition-variables (cons condition-variable
+					     condition-variables))
+	     (setf maxima (cons maximum maxima))
+	     (setf cleanups (cons cleanup cleanups))))
+       retry-specifications)
+      `(let ((,counters (list ,(make-list
+				(length conditions) :initial-element 0))))
+	(loop with ,retry do
+	      (setf ,retry nil)
+	      (handler-case (progn ,@forms)
+		,@(mapcar (lambda (condition-number)
+			    `(,(nth condition-number conditions)
+			      ,(if (nth condition-number condition-variables)
+				   `(,(nth condition-number
+					   condition-variables))
+				   `())
+			      ,(nth condition-number cleanups)
+			      ,(cond ((nth condition-number maxima)
+				      `(when (< (nth ,condition-number
+						 ,counters)
+					      ,(nth condition-number maxima))
+					(setf ,retry t)
+					(incf (nth ,condition-number
+					       ,counters))))
+				     (t `(set ,retry t)))))
+			  (loop for i from 0 to (1- (length conditions))
+				collect i)))
+	      while ,retry)))))
