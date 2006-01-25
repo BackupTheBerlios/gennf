@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.5 2006/01/24 17:38:07 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.6 2006/01/25 13:08:56 florenz Exp $
 
 (in-package :gennf)
 
@@ -29,7 +29,34 @@
   (proclaim '(optimize (debug 3))))
 ;; End of development only section.
 
-;; Restart koennte hier eine Optionen um das retry zu verhindern.
+(defun create-empty-branch2 (module root &key (symbolic-name "") 
+			     (description ""))
+  (in-temporary-directory
+    (create-meta-directory)
+    (in-meta-directory
+      (retry-until-finished (backend-outdated-error c
+						    (delete-file *branch-file*)
+						    (delete-directory-tree branch-directory))
+	(let ((access (create-new-access :root root)))
+	  (backend-get module access
+		       (list *branch-file* *access-file*) *meta-directory*)
+	  (let* ((identifier (get-new-branch-identifier *branch-file*))
+		 (branch (create-new-branch
+			  :identifier identifier
+			  :symbolic-name symbolic-name
+			  :description description))
+		 (branch-directory
+		  (make-pathname :directory
+				 (list :relative
+				       (format nil "~A" identifier))))
+		 (change-file
+		  (merge-pathnames branch-directory *change-file*)))
+	    (add-branch branch *branch-file*)
+	    (create-directory branch-directory)
+	    (create-new-change-file change-file))))
+      (remove-meta-directory))))
+	 
+
 (defun create-empty-branch (module root
 			    &key (symbolic-name "") (description ""))
   (in-temporary-directory

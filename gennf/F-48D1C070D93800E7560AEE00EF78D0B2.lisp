@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.4 2006/01/25 12:19:26 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.5 2006/01/25 13:08:56 florenz Exp $
 
 (in-package :gennf)
 
@@ -67,31 +67,50 @@ all directory-prefixes is generated:
 
 ;; Does this macro leak?
 ;; More conditions could be supported.
-(defmacro retry-until-finished ((condition cleanup) &body body) 
+;(defmacro retry-until-finished ((condition cleanup) &body body) 
+;  (let  ((retry (gensym))
+;	 (condi (gensym)))
+;    `(loop with ,retry do
+;      (setf ,retry nil)
+;      (handler-case (progn ,@body)
+;	(,condition (,condi) (funcall ,cleanup ,condi)
+;		       (setf ,retry t)))
+;     while ,retry)))
+
+
+;; Does this macro leak?
+;; More conditions could be supported.
+(defmacro retry-until-finished ((condition variable &rest cleanup-forms)
+				&body body) 
   (let  ((retry (gensym))
 	 (condi (gensym)))
     `(loop with ,retry do
       (setf ,retry nil)
       (handler-case (progn ,@body)
-	(,condition (,condi) (funcall ,cleanup ,condi)
-		       (setf ,retry t)))
-     while ,retry)))
-
-(loop
-    with retry
-    with counter1 = 0
-    with counter2 = 0
-    do
-    (setf retry nil)
-    (handler-case (progn ,@forms)
-      (,condition1 (,condition-variable1) ,@cleanup-forms1
-		   (when (< counter1 retries1) (incf counter1) (setf retry t)))
-      (,condition2 (,condition-variable2) ,@cleanup-forms2 (setf retry t)))
-    while ,retry)
+	(,condition (,condi)	
+	  (let ((,variable ,condi))
+	    ,@cleanup-forms)
+	  (setf ,retry t)))
+      while ,retry)))
 
 
-(retry-case ((outdated-error :variable condition :maximum 5
-			     :cleanup (progn (undo) (prepare)))
-	     (file-error :cleanup (delete-file)))
-	    (do-something)
-	    (do more))
+;(defmacro retry (retry-specifications &body forms)
+;  (mapcar '#(lambda (entry) 
+;(loop
+;    with retry
+;    with counter1 = 0
+;    with counter2 = 0
+;    do
+;    (setf retry nil)
+;    (handler-case (progn ,@forms)
+;      (,condition1 (,condition-variable1) ,@cleanup-forms1
+;		   (when (< counter1 retries1) (incf counter1) (setf retry t)))
+;      (,condition2 (,condition-variable2) ,@cleanup-forms2 (setf retry t)))
+;    while ,retry)
+
+
+;(retry-case ((outdated-error :variable condition :maximum 5
+;			     :cleanup (progn (undo) (prepare)))
+;	     (file-error :cleanup (delete-file)))
+;	    (do-something)
+;	    (do more))
