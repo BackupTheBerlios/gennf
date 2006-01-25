@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.3 2006/01/05 12:39:34 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.4 2006/01/25 19:51:15 florenz Exp $
 
 
 (in-package :port-path)
@@ -201,3 +201,22 @@ and return a pathname in either directory- or file-form if so."
 	(ignore-errors
 	  (when (ext:probe-directory (pathname-to-directory-form pathname))
 	    pathname)))))
+
+(defun pathname-prefixes (pathspec)
+  "Given a pathspec /dir1/dir2/dir3/file a list of
+all directory-prefixes is generated:
+/, /dir1/, /dir1/dir2/, /dir1/dir2/dir3/."
+  (with-pathname ((pathname pathspec))
+    (let ((directory-prefixes
+	   ;; Generate alle prefixes in reverse order. The longest
+           ;; prefix is first and all directories appear in reverse
+	   ;; order, too.
+	   (maplist #'identity (reverse (pathname-directory pathname))))
+	  pathname-prefixes)
+      (dolist (prefix directory-prefixes)
+	;; By using push, the shortest prefix is first in list and
+	;; by reversing prefix, directories are put in correct order.
+	(push (make-pathname :directory (reverse prefix)
+			     :name nil :type nil
+			     :defaults pathname) pathname-prefixes))
+      pathname-prefixes)))
