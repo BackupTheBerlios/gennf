@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.3 2006/01/24 17:38:07 sigsegv Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.4 2006/01/25 12:19:26 florenz Exp $
 
 (in-package :gennf)
 
@@ -76,3 +76,22 @@ all directory-prefixes is generated:
 	(,condition (,condi) (funcall ,cleanup ,condi)
 		       (setf ,retry t)))
      while ,retry)))
+
+(loop
+    with retry
+    with counter1 = 0
+    with counter2 = 0
+    do
+    (setf retry nil)
+    (handler-case (progn ,@forms)
+      (,condition1 (,condition-variable1) ,@cleanup-forms1
+		   (when (< counter1 retries1) (incf counter1) (setf retry t)))
+      (,condition2 (,condition-variable2) ,@cleanup-forms2 (setf retry t)))
+    while ,retry)
+
+
+(retry-case ((outdated-error :variable condition :maximum 5
+			     :cleanup (progn (undo) (prepare)))
+	     (file-error :cleanup (delete-file)))
+	    (do-something)
+	    (do more))
