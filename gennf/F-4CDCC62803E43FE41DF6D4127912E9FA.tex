@@ -18,9 +18,19 @@
 \usepackage{babel}
 \usetheme{Rochester}
 \usefonttheme{serif}
-\usecolortheme[RGB={120,0,16}]{structure}
 
+\usecolortheme[RGB={120,0,16}]{structure}
 \setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{footline}{
+  \setbeamercolor{footer}{fg=white,bg=structure}
+  \begin{beamercolorbox}{footer}
+    \vskip2pt
+    \hspace{1em}Infrastrukturen zur Open Source Softwareentwicklung\hfill
+    \insertframenumber\,/\,\inserttotalframenumber\hspace{1em}
+    \vskip2pt
+  \end{beamercolorbox}
+}
 
 \author{Fabian~Otto~{\scriptsize (\texttt{sigsegv@cs.tu-berlin.de})}
   \and Hannes~Mehnert~{\scriptsize (\texttt{mehnert@cs.tu-berlin.de})}
@@ -33,8 +43,8 @@ Infrastrukturen zur Open Source Softwareentwicklung WS05/06 \\
 Bernd Mahr, Steffen Evers}
 \date{31.~Januar~2006}
 
-
 \begin{document}
+
 \AtBeginSection[] {
   \begin{frame}
     \frametitle{"Ubersicht}
@@ -54,6 +64,9 @@ Bernd Mahr, Steffen Evers}
 \begin{frame}
   \frametitle{"Ubersicht}
   \tableofcontents
+
+
+
 \end{frame}
 
 \section{Idee}
@@ -164,6 +177,9 @@ Bernd Mahr, Steffen Evers}
 
 \subsection{Verteiltes Versionsmanagement}
 \newcommand{\STRUCT}[1]{\ensuremath{\mathnormal{#1}}}
+\newcommand{\NORMAL}[1]{\ensuremath{\mbox{\textnormal{#1}}}}
+\def\APPEND{:\mathrel\cdot}
+
 \begin{frame}
   \frametitle{Strukturen}
 
@@ -209,11 +225,30 @@ Bernd Mahr, Steffen Evers}
 \begin{frame}
   \frametitle{Operationen}
 
-  \begin{block}{Definition: Basis-Operationen}
+  \begin{block}{Definition: Branching und Merging}
     \medskip
-    $\begin{array}{lrcl}
-    \STRUCT{merging}:   & C \rhd C'       & \equiv \\
-    \STRUCT{branching}: & \triangledown C & \equiv
+    Seien $b, b'$ Branches und $r=\{b, b'\}$ ein Repository mit
+
+    $b=(\beta, \langle C_1, \ldots, C_k\rangle)$ und $b'$ analog.
+    \medskip
+
+    $\begin{array}{@{}lrcl}
+    \STRUCT{branching}    & \triangledown C_i          & \equiv &
+    r \leadsto r\ \cup \{b_2\}\ \NORMAL{mit} \\
+                          &                            &        &
+                          \begin{array}{@{}lcl}
+                          b_2 &=& (\beta_2, \langle m\rangle), \\
+                          m   &=& (\nu, \beta_2, \alpha, f, o), \\
+                          o   &=& (\nu_i, \beta_i, \alpha_i) \\
+                          \end{array} \medskip \\
+    \STRUCT{merging}      & C_i \rhd C_k'              & \equiv &
+    (\beta', s') \leadsto
+    (\beta', s'\APPEND m)\ \NORMAL{mit} \\
+                          &                            &        &
+                          \begin{array}{@{}lcl}
+                          m   &=& (\nu, \beta', \alpha, f, o), \\
+                          o   &=& (\nu_i, \beta_i, \alpha_i) \\
+                          \end{array} \\
     \end{array}$
   \end{block}
   
