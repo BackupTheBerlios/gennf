@@ -70,23 +70,45 @@ Bernd Mahr, Steffen Evers}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Umfeld}
-  \begin{itemize}
-  \item Zumeist vollst"andige Replikation des Repositories
-  \item Keine Vernetzung
-  \end{itemize}
-  vorhandene verteilte Software:
-  \begin{itemize}
-  \item darcs
-  \item tal (GNU Arch)
-  \end{itemize}
+%%  \frametitle{Umfeld/existierende L"osungen}
+  \frametitle{CVS, darcs, GNU Arch, Mercurial, SVK, MCVS}
+%   \begin{itemize}
+%   \item
+%   \end{itemize}
+  \begin{block}{Verteilung}
+    \begin{itemize}
+    \item Verteilung
+    \item Benutzung vorhandener Infrastruktur (SourceForge, Berlios,...)
+    \item Portabilit"at
+    \end{itemize}
+  \end{block}
+  \begin{block}{Signierung}
+    \begin{itemize}
+    \item Signierung von Sourcecode
+    \item Buchpr"ufung von Sourcecode (Auditing)
+    \end{itemize}
+  \end{block}
+  
+%   \begin{block}{Verteilung}
+%     \begin{itemize}
+%     \item Zumeist vollst"andige Replikation des Repositories
+%     \item Keine Vernetzung?
+%     \item vorhandene Infrastrukturen nicht immer genutzt.
+%     \end{itemize}
+%   \end{block}
+%   \begin{block}{Signierung}
+%     \begin{itemize}
+%     \item Darcs (mail)
+%     \item GNU Arch (Repositories)
+%     \end{itemize}
+%   \end{block}
 \end{frame}
 
 \begin{frame}
   \frametitle{\METACVS}
   L"ost Problem der Verzeichnisversionierung in \CVS:
   \begin{itemize}
-  \item Abspeicherung einer flachen Struktur
+  \item Abspeicherung einer flachen Struktur (F-files)
   \item Verzeichnishierarchie wird "uber separate Abblidung
     gespeichert
   \item Clientseitige Erweiterung, ben"otigt \CVS{} als Backend
@@ -152,7 +174,19 @@ Bernd Mahr, Steffen Evers}
 
 \begin{frame}
   \frametitle{Orthoganale Entwicklung}
-  
+  \begin{columns}
+    \begin{column}{5cm}
+      
+    \end{column}
+    \begin{column}{7cm}
+      \begin{block}{Orthogonaler Entwurf}
+        \begin{itemize}
+        \item
+        \end{itemize}
+      \end{block}
+
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}
@@ -168,7 +202,20 @@ Bernd Mahr, Steffen Evers}
 \section{Zusammenfassung}
 
 \begin{frame}
-  \frametitle{Zusammenfassung}
-  
+  \frametitle{Weiter Informationen}
+  \begin{block}{Gennf}
+    \begin{itemize}
+    \item \tt{http://gennf.berlios.de}
+    \item \tt{http://gennf.berlios.de/scratchpad.pdf}
+    \end{itemize}
+  \end{block}
+  \begin{block}{Refernzen}
+    \begin{itemize}
+    \item \tt{http://www.gnupg.org/related\_software/gpgme/}
+    \item \tt{http://http:users.footprints.net/\~kaz/mcvs.html}
+    \item \tt{http://sbcl.sourceforge.net/}
+    \end{itemize}
+  \end{block}
 \end{frame}
+
 \end{document}
