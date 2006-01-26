@@ -1,6 +1,6 @@
 \documentclass[german]{beamer}
 
-\newcommand{\GPG}{\textsc{GPG}}
+\newcommand{\GPG}{\textsc{gpg}}
 \newcommand{\SBCL}{\textsc{sbcl}}
 \newcommand{\GENNF}{\textsc{gennf}}
 \newcommand{\METACVS}{\textsc{metacvs}}
@@ -168,25 +168,59 @@ Bernd Mahr, Steffen Evers}
   \frametitle{Strukturen}
 
   \begin{block}{Definition: Meta-Datenstrukturen}
+    \medskip
     $\begin{array}{lccl}
-      \STRUCT{repository} & r & : & \{b\ |\ b : \STRUCT{branch}\} \\
-      \STRUCT{branch}     & b & : &
+      \STRUCT{repository} & r & \equiv & \{b\ |\ b : \STRUCT{branch}\} \\
+      \STRUCT{branch}     & b & \equiv &
       (\beta, s),\ s : \STRUCT{change\,sequence} \\
-      \STRUCT{change}     & c & : &
+      \STRUCT{change}     & C & \equiv &
+      \STRUCT{commit}\oplus\STRUCT{merge} \\
+      \STRUCT{commit}     & c & \equiv &
       (\nu, \beta, \alpha, f),\ f : \STRUCT{filename}\rightarrow
-      \STRUCT{revision}
+      \STRUCT{revision} \\
+      \STRUCT{merge}      & m & \equiv &
+      (\nu, \beta, \alpha, f, o),\ o : \STRUCT{origin} \\
+      \STRUCT{origin}     & o & \equiv &
+      (\nu, \beta, \alpha)      \end{array}$
+  \end{block}
+
+  \begin{block}{Beispiel: Neu angelegtes Projekt}
+    \medskip
+    \begin{tabular}{ll}
+      $\begin{array}{lcl}
+        r   &=& \{b_1\} \\
+        b_1 &=& (1, \langle c_1 \rangle) \\
+        c_1 &=& (1, 1, \mathsf{cvs}, f_1)
+      \end{array}$ &
+      $\begin{array}{lcl}
+        f_1 &=& \left[
+          \begin{array}{lcl}
+            \mathtt{F-}a & \mapsto & \mathsf{r1.1} \\
+            \mathtt{F-}b & \mapsto & \mathsf{r1.1} \\
+            \mathtt{F-}c & \mapsto & \mathsf{r1.1} \\
+            \mathtt{MAP} & \mapsto & \mathsf{r1.1}
+          \end{array}
+        \right]
       \end{array}$
+    \end{tabular}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Operationen}
+
+  \begin{block}{Definition: Basis-Operationen}
+    \medskip
+    $\begin{array}{lrcl}
+    \STRUCT{merging}:   & C \rhd C'       & \equiv \\
+    \STRUCT{branching}: & \triangledown C & \equiv
+    \end{array}$
   \end{block}
   
 \end{frame}
 
 \begin{frame}
-  \frametitle{Operationen}
-  
-\end{frame}
-
-\begin{frame}
-  \frametitle{Beispiele}
+  \frametitle{Beispiel-Vernetzung}
 
 \end{frame}
 
@@ -196,14 +230,15 @@ Bernd Mahr, Steffen Evers}
   \frametitle{Workflow}
   \begin{itemize}
   \item Entwickler signiert Change mit \GPG
-  \item Auditor kann Code mit \GPG signieren
+  \item Auditor kann Code mit \GPG{} signieren
   \item Speicherung der Signaturen im Repository
   \item Verifikation der Signaturen des Codes durch Benutzer
-  \item Feststellung der (pers"onlich) am wenigsten vertrauensw"urdigen Codezeilen
+  \item Feststellung der (pers"onlich)
+    am wenigsten vertrauensw"urdigen Codezeilen
   \item M"ogliche Authentifizierung anhand des \GPG{}-Keys
   \end{itemize}
-\end{frame}
 
+\end{frame}
 \begin{frame}
   \frametitle{Trust Model}
   \begin{itemize}
