@@ -31,27 +31,31 @@ Bernd Mahr, Steffen Evers}
 \begin{document}
 \AtBeginSection[]
 {
-  \begin{frame}{"Ubersicht}
+  \begin{frame}
+    \frametitle{"Ubersicht}
     \tableofcontents[currentsection]
   \end{frame}
 }
 
 \AtBeginSubsection[]
 {
-  \begin{frame}{"Ubersicht}
+  \begin{frame}
+    \frametitle{"Ubersicht}
     \tableofcontents[currentsubsection]
   \end{frame}
 }
 
 \frame[plain]{\titlepage}
 
-\begin{frame}{"Ubersicht}
+\begin{frame}
+  \frametitle{"Ubersicht}
   \tableofcontents
 \end{frame}
 
 \section{Idee}
 
-\begin{frame}{Zielsetzung}
+\begin{frame}
+  \frametitle{Zielsetzung}
   \begin{itemize}
   \item Sicherstellung der Herkunft des verwalteten Codes
   \item Kein zentrales Repository:
@@ -65,27 +69,21 @@ Bernd Mahr, Steffen Evers}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Umfeld}
+\begin{frame}
+  \frametitle{Umfeld}
   \begin{itemize}
   \item Zumeist vollst"andige Replikation des Repositories
   \item Keine Vernetzung
-  \item 
+  \end{itemize}
+  vorhandene verteilte Software:
+  \begin{itemize}
+  \item darcs
+  \item tal (GNU Arch)
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Planung}
-  \begin{enumerate}
-  \item Festlegung des Projektziels
-  \item Konzeptionierung:
-    \begin{itemize}
-    \item Verteilung
-    \item Code Signierung
-    \end{itemize}
-  \item Implementierung eines Prototypens
-  \end{enumerate}
-\end{frame}
-
-\begin{frame}{\METACVS}
+\begin{frame}
+  \frametitle{\METACVS}
   L"ost Problem der Verzeichnisversionierung in \CVS:
   \begin{itemize}
   \item Abspeicherung einer flachen Struktur
@@ -97,9 +95,23 @@ Bernd Mahr, Steffen Evers}
   \end{itemize}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Planung}
+  \begin{enumerate}
+  \item Festlegung des Projektziels
+  \item Konzeptionierung:
+    \begin{itemize}
+    \item Verteilung
+    \item Code Signierung
+    \end{itemize}
+  \item Implementierung eines Prototypens
+  \end{enumerate}
+\end{frame}
+
 \section{Konzept}
 
-\begin{frame}{Entwurf}
+\begin{frame}
+  \frametitle{Entwurf}
   \begin{itemize}
   \item Verteilung
     \begin{itemize}
@@ -114,31 +126,37 @@ Bernd Mahr, Steffen Evers}
 
 \subsection{Verteiltes Versionsmanagement}
 
-\begin{frame}{Strukturen}
+\begin{frame}
+  \frametitle{Strukturen}
   
 \end{frame}
 
-\begin{frame}{Operationen}
+\begin{frame}
+  \frametitle{Operationen}
   
 \end{frame}
 
-\begin{frame}{Beispiele}
+\begin{frame}
+  \frametitle{Beispiele}
 
 \end{frame}
 
 \subsection{Code Signierung}
 
-\begin{frame}{Workflow}
+\begin{frame}
+  \frametitle{Workflow}
   
 \end{frame}
 
 \section{Implementierung}
 
-\begin{frame}{Orthoganale Entwicklung}
+\begin{frame}
+  \frametitle{Orthoganale Entwicklung}
   
 \end{frame}
 
-\begin{frame}{Technik}
+\begin{frame}
+  \frametitle{Technik}
   \begin{itemize}
   \item \COMMONLISP{}
   \item \LIBGPGME{}
@@ -149,7 +167,8 @@ Bernd Mahr, Steffen Evers}
 
 \section{Zusammenfassung}
 
-\begin{frame}{Zusammenfassung}
+\begin{frame}
+  \frametitle{Zusammenfassung}
   
 \end{frame}
 \end{document}
