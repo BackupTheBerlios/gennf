@@ -57,7 +57,11 @@ Bernd Mahr, Steffen Evers}
 \begin{frame}
   \frametitle{Zielsetzung}
   \begin{itemize}
-  \item Sicherstellung der Herkunft des verwalteten Codes
+  \item Verifikation der Herkunft des verwalteten Codes
+    \begin{itemize}
+    \item Bisher mu\"s dem Repository server vertraut werden
+    \item Code soll vertrauensw\"urdig sein, durch Signaturen von Entwicklern
+    \end{itemize}
   \item Kein zentrales Repository:
     \begin{itemize}
     \item Anpassung der Repository- an die Arbeitsstruktur des Projektes
@@ -167,7 +171,34 @@ Bernd Mahr, Steffen Evers}
 
 \begin{frame}
   \frametitle{Workflow}
-  
+  \begin{itemize}
+  \item Entwickler signiert Code mit GPG
+  \item Auditor signiert Code mit GPG
+  \item zentrale Speicherung der Signaturen
+  \item Verifikation des Codes durch Benutzer
+  \item Feststellung der am wenigsten vertrauensw\"urdigen Codezeilen
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Trust model}
+  \begin{itemize}
+  \item Bisher wird dem Rechner, auf dem das Repository liegt, vertraut
+  \item Einbr\"uche in diesen Rechner hat verheerende Folgen
+  \item Vertrauen wird vom Repository zum Rechner der einzelnen Entwickler \"ubertragen
+  \item Durch Web of trust kann bestimmten Leuten mehr vertraut werden als anderen Leuten
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Konzept}
+  \begin{itemize}
+  \item Signatur erfolgt zeilenbasiert pro Datei
+  \item Alle verfuegbaren Signaturen werden verifiziert
+  \item Jeder Change wird signiert
+  \item Externe koennen Code reviewen und signieren
+  \item M\"ogliche Authentifizierung anhand des GPG-Keys
+  \end{itemize}
 \end{frame}
 
 \section{Implementierung}
