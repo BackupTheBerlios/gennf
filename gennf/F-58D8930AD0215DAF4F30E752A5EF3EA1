@@ -2,22 +2,24 @@
 #
 
 NAME = scratchpad
-OUTPUT = $(NAME).dvi $(NAME).ps $(NAME).pdf
+OUTPUT = $(NAME).pdf
 USER = $(shell if [ $(BERLIOS_USER) ]; then echo $(BERLIOS_USER)@; fi)
 SERVER = shell.berlios.de
 ROOT = /home/groups/gennf/htdocs
 
 all : $(OUTPUT)
 
-%.pdf : %.dvi
-	dvipdf $<
+folien.pdf : folien.tex beispiel0.pdf_t beispiel1.pdf_t
+	pdflatex $<
+	pdflatex $<
 
-%.ps : %.dvi
-	dvips -f $< > $@
+%.pdf : %.tex
+	pdflatex $<
+	pdflatex $<
 
-%.dvi : %.tex
-	latex $<
-	latex $<
+%.pdf_t : %.fig
+	fig2dev -L pdftex -p dummy $< $*.pdf
+	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
 
 publish : $(NAME).pdf
 	scp $(NAME).pdf $(USER)$(SERVER):$(ROOT)

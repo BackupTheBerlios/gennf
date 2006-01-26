@@ -16,9 +16,10 @@
 \newcommand{\PORTPATH}{\textsc{portpath}}
 
 \usepackage{babel}
+\usepackage{stmaryrd}
+
 \usetheme{Rochester}
 \usefonttheme{serif}
-
 \usecolortheme[RGB={120,0,16}]{structure}
 \setbeamertemplate{navigation symbols}{}
 
@@ -133,7 +134,7 @@ Bernd Mahr, Steffen Evers}
   \begin{block}{Verzeichnisversionierung in \CVS}
     \begin{itemize}
     \item Wird durch \METACVS gel"ost
-    \item Abspeicherung einer flachen Struktur (F-files)
+    \item Abspeicherung einer flachen Struktur (F-Dateien)
     \item Verzeichnishierarchie wird "uber separate Abblidung
       gespeichert
     \item Clientseitige Erweiterung, ben"otigt \CVS{} als Backend
@@ -185,7 +186,7 @@ Bernd Mahr, Steffen Evers}
 
   \begin{block}{Definition: Meta-Datenstrukturen}
     \medskip
-    $\begin{array}{lccl}
+    $\begin{array}{@{\hspace{1em}}lccl}
       \STRUCT{repository} & r & \equiv & \{b\ |\ b : \STRUCT{branch}\} \\
       \STRUCT{branch}     & b & \equiv &
       (\beta, s),\ s : \STRUCT{change\,sequence} \\
@@ -202,8 +203,8 @@ Bernd Mahr, Steffen Evers}
 
   \begin{block}{Beispiel: Neu angelegtes Projekt}
     \medskip
-    \begin{tabular}{ll}
-      $\begin{array}{lcl}
+    \begin{tabular}{@{\hspace{1em}}ll}
+      $\begin{array}{@{}lcl}
         r   &=& \{b_1\} \\
         b_1 &=& (1, \langle c_1 \rangle) \\
         c_1 &=& (1, 1, \mathsf{cvs}, f_1)
@@ -227,20 +228,12 @@ Bernd Mahr, Steffen Evers}
 
   \begin{block}{Definition: Branching und Merging}
     \medskip
-    Seien $b, b'$ Branches und $r=\{b, b'\}$ ein Repository mit
+    \hspace{1em}Seien $b, b'$ Branches und $r=\{b, b'\}$ ein Repository mit
 
-    $b=(\beta, \langle C_1, \ldots, C_k\rangle)$ und $b'$ analog.
+    \hspace{1em}$b=(\beta, \langle C_1, \ldots, C_k\rangle)$ und $b'$ analog.
     \medskip
 
-    $\begin{array}{@{}lrcl}
-    \STRUCT{branching}    & \triangledown C_i          & \equiv &
-    r \leadsto r\ \cup \{b_2\}\ \NORMAL{mit} \\
-                          &                            &        &
-                          \begin{array}{@{}lcl}
-                          b_2 &=& (\beta_2, \langle m\rangle), \\
-                          m   &=& (\nu, \beta_2, \alpha, f, o), \\
-                          o   &=& (\nu_i, \beta_i, \alpha_i) \\
-                          \end{array} \medskip \\
+    $\begin{array}{@{\hspace{1em}}lrcl}
     \STRUCT{merging}      & C_i \rhd C_k'              & \equiv &
     (\beta', s') \leadsto
     (\beta', s'\APPEND m)\ \NORMAL{mit} \\
@@ -249,14 +242,56 @@ Bernd Mahr, Steffen Evers}
                           m   &=& (\nu, \beta', \alpha, f, o), \\
                           o   &=& (\nu_i, \beta_i, \alpha_i) \\
                           \end{array} \\
+    \STRUCT{branching}    & \triangledown C_i          & \equiv &
+    C_i\rhd \boxempty \quad \NORMAL{mit $\boxempty$ leerer Branch}
+%
+% Dies war zuviel (ausserdem sieht es genauso aus wie bei merging).
+%     R \Leadsto R\ \Cup \{B_2\}\ \Normal{Mit} \\
+%                           &                            &        &
+%                           \Begin{Array}{@{}Lcl}
+%                           B_2 &=& (\Beta_2, \Langle M\Rangle), \\
+%                           M   &=& (\Nu, \Beta_2, \Alpha, F, O), \\
+%                           O   &=& (\Nu_I, \Beta_I, \Alpha_I) \\
+%                           \end{Array}
+%
     \end{array}$
   \end{block}
-  
+
+  \begin{block}{Anmerkungen}
+    \begin{itemize}
+    \item Interaktion Repository $\leftrightarrow$ Sandbox:
+      $\STRUCT{commit}$, $\STRUCT{update}$
+    \item Bei einem Merge kann es Konflikte geben
+    \item Bei einem Branch kann Replikation stattfinden:
+      $\underline\triangledown_nC_i$
+    \end{itemize}
+  \end{block}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Beispiel-Vernetzung}
-
+  \frametitle{Beispiele}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{flushleft}
+        \only<1>{\input{beispiel0.pdf_t}}
+        \only<2>{\input{beispiel1.pdf_t}}
+      \end{flushleft}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{block}<1->{Stern-Topologie}
+        \begin{itemize}
+        \item Ein Haupt-Repository f\"ur "`gereiften"' Code
+        \item Lokale Repositories bei jedem Entwickler/Team
+        \end{itemize}
+      \end{block}
+      \begin{block}<2>{Baum-Topologie}
+        \begin{itemize}
+        \item Weitere Hierarchien f"ur Teilprojekte
+        \item Code wandert nach oben
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \subsection{Code Signierung}
