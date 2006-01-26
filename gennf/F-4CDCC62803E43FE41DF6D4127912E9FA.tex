@@ -157,6 +157,7 @@ Bernd Mahr, Steffen Evers}
   \begin{block}{Code Signierung}
     \begin{itemize}
     \item Workflow
+    \item Trust Model
     \end{itemize}
   \end{block}
 \end{frame}
@@ -194,11 +195,12 @@ Bernd Mahr, Steffen Evers}
 \begin{frame}
   \frametitle{Workflow}
   \begin{itemize}
-  \item Entwickler signiert Code mit \GPG
-  \item Auditor signiert Code mit \GPG
-  \item Zentrale Speicherung der Signaturen
-  \item Verifikation des Codes durch Benutzer
-  \item Feststellung der am wenigsten vertrauensw"urdigen Codezeilen
+  \item Entwickler signiert Change mit \GPG
+  \item Auditor kann Code mit \GPG signieren
+  \item Speicherung der Signaturen im Repository
+  \item Verifikation der Signaturen des Codes durch Benutzer
+  \item Feststellung der (pers"onlich) am wenigsten vertrauensw"urdigen Codezeilen
+  \item M"ogliche Authentifizierung anhand des \GPG{}-Keys
   \end{itemize}
 \end{frame}
 
@@ -206,24 +208,18 @@ Bernd Mahr, Steffen Evers}
   \frametitle{Trust Model}
   \begin{itemize}
   \item Bisher wird dem Rechner, auf dem das Repository liegt, vertraut
-  \item Einbr"uche in diesen Rechner haben verheerende Folgen
+  \item Einbrecher in diesen Rechner kann beliebig Code "andern,
+    ohne bemerkt zu werden
   \item Vertrauen wird vom Repository zum Rechner
     der einzelnen Entwickler "ubertragen
-  \item Durch Web of Trust kann bestimmten Leuten mehr
-    vertraut werden als anderen Leuten
+  \item Wenn der private Key eines Entwicklers oder Auditors
+    leakt, kann dieser revoked werden
+  \item Alle Signaturen bis zu diesem Zeitpunkt sind noch g"ultig
+  \item Durch Web of Trust wird Leuten ein trust value zugeteilt,
+    daher kann verschiedenen Leuten verschieden viel vertraut werden
   \end{itemize}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Konzept}
-  \begin{itemize}
-  \item Signatur erfolgt zeilenbasiert pro Datei
-  \item Alle verfuegbaren Signaturen werden verifiziert
-  \item Jeder Change wird signiert
-  \item Externe k"onnen Code reviewen und signieren
-  \item M"ogliche Authentifizierung anhand des \GPG{}-Keys
-  \end{itemize}
-\end{frame}
 
 \section{Implementierung}
 
