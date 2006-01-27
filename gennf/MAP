@@ -40,6 +40,9 @@
   "MCVS/F-2AAD1C1E791A31FF4200BDBC0A9E3ED6.fig"
   "doc/beispiel0.fig")
  (:FILE
+  "MCVS/F-2BC2C357A250EFF4CA5E7EA9E9FE09B2.png"
+  "doc/orthogonal.png")
+ (:FILE
   "MCVS/F-30CE3B42F628E6E185661335E4018306.lisp"
   "src/gpgme/gpgme.lisp")
  (:FILE

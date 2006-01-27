@@ -8,6 +8,7 @@
  ("latex" :DEFAULT)
  ("lisp" :DEFAULT)
  ("log" :IGNORE)
+ ("png" :BINARY)
  ("sh" :DEFAULT)
  ("tex" :DEFAULT)
  ("txt" :DEFAULT))
