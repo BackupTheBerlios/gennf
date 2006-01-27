@@ -2,6 +2,7 @@
  ("aux" :IGNORE)
  ("c" :DEFAULT)
  ("dvi" :IGNORE)
+ ("fig" :DEFAULT)
  ("html" :DEFAULT)
  ("ist" :DEFAULT)
  ("latex" :DEFAULT)

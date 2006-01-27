@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.7 2006/01/25 19:55:02 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.8 2006/01/27 14:54:00 florenz Exp $
 
 (in-package :gennf)
 
@@ -128,11 +128,10 @@
 		 (condition
 		  &key condition-variable maximum cleanup)
 	       specification
-	     (setf conditions (cons condition conditions))
-	     (setf condition-variables (cons condition-variable
-					     condition-variables))
-	     (setf maxima (cons maximum maxima))
-	     (setf cleanups (cons cleanup cleanups))))
+	     (push condition conditions)
+	     (push condition-variable condition-variables)
+	     (push maximum maxima)
+	     (push cleanup cleanups)))
        retry-specifications)
       (let ((loop-code
 	     `(loop with ,retry do

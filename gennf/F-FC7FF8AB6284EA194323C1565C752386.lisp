@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.7 2006/01/25 19:55:02 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.8 2006/01/27 14:54:00 florenz Exp $
 
 (in-package :gennf)
 
@@ -54,6 +54,7 @@
 				   (list :relative
 					 (format nil "~A" identifier))))
 	      (add-branch branch *branch-file*)
+	      (format t "Created dir ~A" branch-directory)
 	      (create-directory branch-directory)
 	      (create-new-change-file change-file)
 	      (backend-commit module access

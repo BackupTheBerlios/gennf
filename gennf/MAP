@@ -37,6 +37,9 @@
   "MCVS/F-251FB522127FF9A2E037DC904E011C8D.lisp"
   "prototype/backend.lisp")
  (:FILE
+  "MCVS/F-2AAD1C1E791A31FF4200BDBC0A9E3ED6.fig"
+  "doc/beispiel0.fig")
+ (:FILE
   "MCVS/F-30CE3B42F628E6E185661335E4018306.lisp"
   "src/gpgme/gpgme.lisp")
  (:FILE
@@ -96,6 +99,9 @@
  (:FILE
   "MCVS/F-5D53AE4674717BF80056E24988D89A49.lisp"
   "src/unix-bindings/unix.lisp")
+ (:FILE
+  "MCVS/F-64F03E4083CDA7BB01BEE06595ED006F.fig"
+  "doc/beispiel1.fig")
  (:FILE
   "MCVS/F-6763C87866B0E9BE56C154839D6FAB55.lisp"
   "src/purge.lisp")
@@ -181,6 +187,9 @@
  (:FILE
   "MCVS/F-D3DC1953503E35C4D11154495DE074FB.lisp"
   "src/grab.lisp")
+ (:FILE
+  "MCVS/F-D636EE3C0CFBE5D4BF3AE6987E95B71A.fig"
+  "doc/beispiel2.fig")
  (:FILE
   "MCVS/F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp"
   "src/sbcl-unix.lisp")
