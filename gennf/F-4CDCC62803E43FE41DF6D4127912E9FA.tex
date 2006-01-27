@@ -172,6 +172,7 @@ Bernd Mahr, Steffen Evers}
     \begin{itemize}
     \item Workflow
     \item Trust Model
+    \item Konzept
     \end{itemize}
   \end{block}
 \end{frame}
@@ -298,33 +299,65 @@ Bernd Mahr, Steffen Evers}
 
 \begin{frame}
   \frametitle{Workflow}
-  \begin{itemize}
-  \item Entwickler signiert Change mit \GPG
-  \item Auditor kann Code mit \GPG{} signieren
-  \item Speicherung der Signaturen im Repository
-  \item Verifikation der Signaturen des Codes durch Benutzer
-  \item Feststellung der (pers"onlich)
-    am wenigsten vertrauensw"urdigen Codezeilen
-  \item M"ogliche Authentifizierung anhand des \GPG{}-Keys
-  \end{itemize}
-
+  \begin{block}{Entwickler}
+    \begin{itemize}
+      \item Signiert Change mit \GPG
+    \end{itemize}
+  \end{block}
+  \begin{block}{Benutzer}
+    \begin{itemize}
+      \item Verifikation der Signaturen des Codes
+      \item Erkennung der wenig vertrauensw"urdigen Codestellen
+    \end{itemize}
+  \end{block}
+  \begin{block}{Auditor}
+    \begin{itemize}
+      \item Vertraut gelesenem Code, signiert ihn mit \GPG{}
+      \item Benutzer kann somit zum Auditor werden
+    \end{itemize}
+  \end{block}
 \end{frame}
+
 \begin{frame}
   \frametitle{Trust Model}
-  \begin{itemize}
-  \item Bisher wird dem Rechner, auf dem das Repository liegt, vertraut
-  \item Einbrecher in diesen Rechner kann beliebig Code "andern,
-    ohne bemerkt zu werden
-  \item Vertrauen wird vom Repository zum Rechner
-    der einzelnen Entwickler "ubertragen
-  \item Wenn der private Key eines Entwicklers oder Auditors
-    leakt, kann dieser revoked werden
-  \item Alle Signaturen bis zu diesem Zeitpunkt sind noch g"ultig
-  \item Durch Web of Trust wird Leuten ein trust value zugeteilt,
-    daher kann verschiedenen Leuten verschieden viel vertraut werden
-  \end{itemize}
+  \begin{block}{Bisher}
+    \begin{itemize}
+      \item Repository-Rechner mu"s vertraut werden
+      \item Ein m"oglicher Einbruch kann beliebig Code "andern
+      \item Einbruch wird m"oglicherweise erst sp"at oder garnicht bemerkt
+    \end{itemize}
+  \end{block}
+  \begin{block}{Neues Trust Model}
+    \begin{itemize}
+      \item Vertrauen wird vom Repository Rechner zu den
+         der einzelnen Signierer "ubertragen
+      \item Privater Schl"ussel eines Signierers kann widerrufen werden
+      \item Web of Trust, jeder Benutzer kann jedem Signierer
+         einen (pers"onlichen) Trust value zuteilen
+    \end{itemize}
+  \end{block}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Code Signierung - Implementationskonzept}
+%  \begin{block}{foo}
+    \begin{itemize}
+      \item Changes
+      \item \GPG{}-Wrapper f"ur \SBCL
+      \item Metadata Datei, in der die Signaturen gespeichert werden
+%    \end{itemize}
+%  \end{block}
+%  \begin{block}{bar}
+%    \begin{itemize}
+      \item Authentifizierung "uber \GPG{}, damit ein Auditor keinen Zugriff
+        auf das Repository braucht (um zu signieren)
+      \item Automatische Verifikation der Changes, auf dem Server
+      \item Automatisierte Suchen von wenig signierten und wenig
+        vertrauensvoll signierten Codest"ucken
+      \item Revocation von Signaturen
+    \end{itemize}
+%  \end{block}
+\end{frame}
 
 \section{Implementierung}
 
