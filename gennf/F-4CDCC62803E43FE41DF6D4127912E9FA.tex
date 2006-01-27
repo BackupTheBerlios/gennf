@@ -14,6 +14,7 @@
 \newcommand{\LIBGPGME}{\textsc{libgpgme}}
 \newcommand{\OSICAT}{\textsc{osicat}}
 \newcommand{\PORTPATH}{\textsc{portpath}}
+\newcommand{\POSIX}{\textsc{posix}}
 
 \usepackage{babel}
 \usepackage{stmaryrd}
@@ -65,10 +66,8 @@ Bernd Mahr, Steffen Evers}
 \begin{frame}
   \frametitle{"Ubersicht}
   \tableofcontents
-
-
-
 \end{frame}
+
 
 \section{Idee}
 
@@ -101,14 +100,14 @@ Bernd Mahr, Steffen Evers}
   % \end{itemize}
   \begin{block}{Vertrauen}
     \begin{itemize}
-    \item teilweise Signierung von Sourcecode
-    \item \alert{keine} Buchpr"ufung von Sourcecode (Auditing)
+    \item Teilweise Signierung von Sourcecode
+    \item \alert{Keine} Buchpr"ufung von Sourcecode (Auditing)
     \end{itemize}
   \end{block}
 
   \begin{block}{Verteilung}
     \begin{itemize}
-    \item \alert{keine} Benutzung vorhandener Infrastruktur\\
+    \item \alert{Keine} Benutzung vorhandener Infrastruktur\\
       (SourceForge, BerliOS, \ldots)
     \item Portabilit"at
     \end{itemize}
@@ -134,7 +133,7 @@ Bernd Mahr, Steffen Evers}
   \frametitle{\METACVS}
   \begin{block}{Verzeichnisversionierung in \CVS}
     \begin{itemize}
-    \item Wird durch \METACVS gel"ost
+    \item Wird durch \METACVS{} gel"ost
     \item Abspeicherung einer flachen Struktur (F-Dateien)
     \item Verzeichnishierarchie wird "uber separate Abbildung
       gespeichert
@@ -346,7 +345,7 @@ Bernd Mahr, Steffen Evers}
     \begin{itemize}
       \item Changes
       \item \GPG{}-Wrapper f"ur \SBCL
-      \item Metadata Datei, in der die Signaturen gespeichert werden
+      \item Meta-Datei, in der die Signaturen gespeichert werden
     \end{itemize}
   \end{block}
   \begin{block}{Features}
@@ -389,9 +388,9 @@ Bernd Mahr, Steffen Evers}
     \item \SBCL\\
       Steel Bank Common Lisp
     \item \OSICAT\\
-      POSIX CL Library
+      \POSIX{} Bibliothek f"ur CL
     \item \PORTPATH\\
-      Peter Seibels Portable Pfad Library
+      Portable CL-Bibliothek f"ur Pfadnamen von Peter Seibel
       \pause
     \item \LIBGPGME\\
       Open \GPG{} Made Easy
