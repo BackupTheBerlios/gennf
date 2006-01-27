@@ -340,15 +340,15 @@ Bernd Mahr, Steffen Evers}
 
 \begin{frame}
   \frametitle{Code Signierung - Implementationskonzept}
-%  \begin{block}{foo}
+  \begin{block}{Erste Schritte}
     \begin{itemize}
       \item Changes
       \item \GPG{}-Wrapper f"ur \SBCL
       \item Metadata Datei, in der die Signaturen gespeichert werden
-%    \end{itemize}
-%  \end{block}
-%  \begin{block}{bar}
-%    \begin{itemize}
+    \end{itemize}
+  \end{block}
+  \begin{block}{Features}
+    \begin{itemize}
       \item Authentifizierung "uber \GPG{}, damit ein Auditor keinen Zugriff
         auf das Repository braucht (um zu signieren)
       \item Automatische Verifikation der Changes, auf dem Server
@@ -356,7 +356,7 @@ Bernd Mahr, Steffen Evers}
         vertrauensvoll signierten Codest"ucken
       \item Revocation von Signaturen
     \end{itemize}
-%  \end{block}
+  \end{block}
 \end{frame}
 
 \section{Implementierung}
