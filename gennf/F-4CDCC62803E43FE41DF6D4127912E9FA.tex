@@ -1,6 +1,7 @@
 \documentclass[german]{beamer}
 
 \newcommand{\GPG}{\textsc{gpg}}
+\newcommand{\PGP}{\textsc{pgp}}
 \newcommand{\SBCL}{\textsc{sbcl}}
 \newcommand{\GENNF}{\textsc{gennf}}
 \newcommand{\METACVS}{\textsc{metacvs}}
@@ -15,9 +16,11 @@
 \newcommand{\OSICAT}{\textsc{osicat}}
 \newcommand{\PORTPATH}{\textsc{portpath}}
 \newcommand{\POSIX}{\textsc{posix}}
+\newcommand{\HAKEN}{\ding{51}}
 
 \usepackage{babel}
 \usepackage{stmaryrd}
+\usepackage{pifont}
 
 \usetheme{Rochester}
 \usefonttheme{serif}
@@ -73,7 +76,6 @@ Bernd Mahr, Steffen Evers}
 
 \begin{frame}
   \frametitle{Zielsetzung}
-
   \begin{block}{Verifikation der Herkunft des verwalteten Codes}
     \begin{itemize}
     \item Bisher mu"s dem Repository Server vertraut werden
@@ -92,69 +94,76 @@ Bernd Mahr, Steffen Evers}
   \end{block}
 \end{frame}
 
-\begin{frame}
-  %% \frametitle{Umfeld/existierende L"osungen}
-  \frametitle{\CVS, \DARCS, \GNUARCH, \MERCURIAL, \SVK, \METACVS}
-  % \begin{itemize}
-  % \item
-  % \end{itemize}
-  \begin{block}{Vertrauen}
-    \begin{itemize}
-    \item Teilweise Signierung von Sourcecode
-    \item \alert{Keine} Buchpr"ufung von Sourcecode (Auditing)
-    \end{itemize}
-  \end{block}
+% \begin{frame}
+%   %% \frametitle{Umfeld/existierende L"osungen}
+%   \frametitle{\CVS, \DARCS, \GNUARCH, \MERCURIAL, \SVK, \METACVS}
+%   % \begin{itemize}
+%   % \item
+%   % \end{itemize}
+%   \begin{block}{Vertrauen}
+%     \begin{itemize}
+%     \item Teilweise Signierung von Sourcecode
+%     \item \alert{Keine} Buchpr"ufung von Sourcecode (Auditing)
+%     \end{itemize}
+%   \end{block}
 
-  \begin{block}{Verteilung}
-    \begin{itemize}
-    \item \alert{Keine} Benutzung vorhandener Infrastruktur\\
-      (SourceForge, BerliOS, \ldots)
-    \item Portabilit"at
-    \end{itemize}
-  \end{block}
+%   \begin{block}{Verteilung}
+%     \begin{itemize}
+%     \item \alert{Keine} Benutzung vorhandener Infrastruktur\\
+%       (SourceForge, BerliOS, \ldots)
+%     \item Portabilit"at
+%     \end{itemize}
+%   \end{block}
   
-  % \begin{block}{Verteilung}
-  %   \begin{itemize}
-  %   \item Zumeist vollst"andige Replikation des Repositories
-  %   \item Keine Vernetzung?
-  %   \item vorhandene Infrastrukturen nicht immer genutzt.
-  %   \end{itemize}
-  % \end{block}
-  % \begin{block}{Signierung}
-  %   \begin{itemize}
-  %   \item Darcs (mail)
-  %   \item GNU Arch (Repositories)
-  %   \end{itemize}
-  % \end{block}
-\end{frame}
+%   % \begin{block}{Verteilung}
+%   %   \begin{itemize}
+%   %   \item Zumeist vollst"andige Replikation des Repositories
+%   %   \item Keine Vernetzung?
+%   %   \item vorhandene Infrastrukturen nicht immer genutzt.
+%   %   \end{itemize}
+%   % \end{block}
+%   % \begin{block}{Signierung}
+%   %   \begin{itemize}
+%   %   \item Darcs (mail)
+%   %   \item GNU Arch (Repositories)
+%   %   \end{itemize}
+%   % \end{block}
+% \end{frame}
 
-
-\begin{frame}
+\begin{frame}<1,2>
   \frametitle{\METACVS}
-  \begin{block}{Verzeichnisversionierung in \CVS}
+  \begin{block}{Vorteile}% von \METACVS}
     \begin{itemize}
-    \item Wird durch \METACVS{} gel"ost
-    \item Abspeicherung einer flachen Struktur (F-Dateien)
-    \item Verzeichnishierarchie wird "uber separate Abbildung
-      gespeichert
-    \item Clientseitige Erweiterung, ben"otigt \CVS{} als Backend
-      $\to$ gute Verf"ugbarkeit
-    \item \emph{Diese Ideen "ubernehmen wir}
+    \item Gute Verf"ugbarkeit, da \CVS{} als Backend
+    \item Versionierte Dateien in einer flachen Struktur (F-Dateien)
+    \item Verzeichnise werden durch sepearate Abbildung versionniert
+    \item<2> \emph{Diese Ideen "ubernehmen wir}
+    \end{itemize}
+  \end{block}
+  \begin{block}{Nachteile}<2>
+    \begin{itemize}
+    \item "Anderungen nur auf Dateienebene
+    \item Starke Bindung an das ausf"uhrbare Programm (\CVS{})
     \end{itemize}
   \end{block}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}<1,2->
   \frametitle{Planung}
   \begin{enumerate}
-  \item Festlegung des Projektziels
+  \item Festlegung des Projektziels \only<2>{\HAKEN}
   \item Konzeptionierung:
     \begin{itemize}
-    \item Verteilung
-    \item Code Signierung
+    \item Verteilung \only<2>{\HAKEN}
+    \item Code Signierung \only<2>{\HAKEN}
     \end{itemize}
   \item Implementierung eines Prototypens
+    \begin{itemize}
+    \item \CVS{}-Anbindung
+    \item Verteilung
+    \item Abindiung zur Signierung
+    \end{itemize}
   \end{enumerate}
 \end{frame}
 
@@ -372,8 +381,8 @@ Bernd Mahr, Steffen Evers}
       \begin{block}{Orthogonaler Entwurf}
         \begin{enumerate}
         \item Verteilung 
-        \item Struktur
         \item Signierung
+        \item Struktur
         \end{enumerate}
       \end{block}
 
@@ -385,20 +394,20 @@ Bernd Mahr, Steffen Evers}
   \frametitle{Technik}
   \begin{block}{\COMMONLISP}
     \begin{itemize}
-    \item \SBCL\\
-      Steel Bank Common Lisp
-    \item \OSICAT\\
-      \POSIX{} Bibliothek f"ur CL
-    \item \PORTPATH\\
-      Portable CL-Bibliothek f"ur Pfadnamen von Peter Seibel
-      \pause
-    \item \LIBGPGME\\
-      Open \GPG{} Made Easy
+    \item \SBCL{} (Steel Bank Common Lisp)
+    \item \OSICAT{} (\POSIX{} Bibliothek)
+    \item \PORTPATH{} (Pfadnamen Bibliothek)
+    \item \LIBGPGME{} (\PGP{} Bibliothek)
+    \end{itemize}
+  \end{block}
+  \begin{block}{}
+    \begin{itemize}
+    \item \CVS{} (Concurrent Versions System)
     \end{itemize}
   \end{block}
 \end{frame}
 
-\section{Zusammenfassung}
+%%\section{Zusammenfassung}
 
 \begin{frame}
   \frametitle{Weitere Informationen}
@@ -413,6 +422,7 @@ Bernd Mahr, Steffen Evers}
     \item \tt{http://www.gnupg.org/related\_software/gpgme/}
     \item \tt{http://http:users.footprints.net/\~kaz/mcvs.html}
     \item \tt{http://sbcl.sourceforge.net/}
+    \item \tt{http://www.cvshome.org/}
     \end{itemize}
   \end{block}
 \end{frame}
