@@ -49,6 +49,9 @@
   "MCVS/F-32A3BA955BE6E0F48ABEDF5C42137D5E.lisp"
   "src/convert.lisp")
  (:FILE
+  "MCVS/F-33C67BEF1362B79C16D45FA01A9E6CC4.fig"
+  "doc/orthogonal.fig")
+ (:FILE
   "MCVS/F-389E31FE3917AE1504A5DED502AE3D51.lisp"
   "src/print.lisp")
  (:FILE

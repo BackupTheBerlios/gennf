@@ -9,7 +9,7 @@ ROOT = /home/groups/gennf/htdocs
 
 all : $(OUTPUT)
 
-folien.pdf : folien.tex beispiel0.pdf_t beispiel1.pdf_t
+folien.pdf : folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
 	pdflatex $<
 	pdflatex $<
 
