@@ -1,6 +1,6 @@
 ((:FILE
   "MCVS/F-01BFC84C7B5AA5916B1FC95B481B0DEC.lisp"
-  "src/types.lisp")
+  "sbcl-port/types.lisp")
  (:FILE
   "MCVS/F-03018E8471DDD49AD47174CF158A9286.lisp"
   "prototype/change.lisp")
@@ -9,30 +9,30 @@
   "prototype/branch.lisp")
  (:FILE
   "MCVS/F-13ACBEE85F44E6335A8A14F12C82ECA9.c"
-  "src/unix-bindings/wrap.c")
+  "sbcl-port/unix-bindings/wrap.c")
  (:FILE
   "MCVS/F-1474E393BE5A7EE83A4D941FA7F9346D.lisp"
-  "src/watch.lisp")
+  "sbcl-port/watch.lisp")
  (:FILE
   "MCVS/F-14CAFC7D376F98290437724D067E63D4.lisp"
-  "src/remap.lisp")
+  "sbcl-port/remap.lisp")
  (:FILE
   "MCVS/F-1923CF213AD21CBF66474E7C068BFECD.lisp"
-  "src/split.lisp")
+  "sbcl-port/split.lisp")
  (:FILE
   "MCVS/F-2019E4ADA667C5B63A025FC92E791425"
-  "src/Makefile")
+  "sbcl-port/Makefile")
  (:FILE
   "MCVS/F-21E77680CDA9B7DA5133627E47FA0987.lisp"
-  "src/error.lisp")
+  "sbcl-port/error.lisp")
  (:FILE
   "MCVS/F-22C92A155BD388578902893F5FF7091C"
-  "src/make_image"
+  "sbcl-port/make_image"
   (:EXEC
    T))
  (:FILE
   "MCVS/F-24AFFF4D581EFC1C6EF802B4AAB5D27B.lisp"
-  "src/system.lisp")
+  "sbcl-port/system.lisp")
  (:FILE
   "MCVS/F-251FB522127FF9A2E037DC904E011C8D.lisp"
   "prototype/backend.lisp")
@@ -44,31 +44,34 @@
   "doc/orthogonal.png")
  (:FILE
   "MCVS/F-30CE3B42F628E6E185661335E4018306.lisp"
-  "src/gpgme/gpgme.lisp")
+  "sbcl-port/gpgme/gpgme.lisp")
  (:FILE
   "MCVS/F-32A3BA955BE6E0F48ABEDF5C42137D5E.lisp"
-  "src/convert.lisp")
+  "sbcl-port/convert.lisp")
  (:FILE
   "MCVS/F-33C67BEF1362B79C16D45FA01A9E6CC4.fig"
   "doc/orthogonal.fig")
  (:FILE
   "MCVS/F-389E31FE3917AE1504A5DED502AE3D51.lisp"
-  "src/print.lisp")
+  "sbcl-port/print.lisp")
+ (:FILE
+  "MCVS/F-38E4AB860E2104E93E1CDDB0936CECA9.asd"
+  "sbcl-port/gennf.asd")
  (:FILE
   "MCVS/F-3C5788EDE4B0D9B8845BDDF41278246B.lisp"
-  "src/options.lisp")
+  "sbcl-port/options.lisp")
  (:FILE
   "MCVS/F-3CDB81902ABA8CED95DEEBDA8590315E.lisp"
-  "src/chatter.lisp")
+  "sbcl-port/chatter.lisp")
  (:FILE
   "MCVS/F-3E293DB4FDF7D70F72EC266B13D28C65.txt"
   "doc/description.txt")
  (:FILE
   "MCVS/F-40CE98E89C297E85E8209004EE49D372.lisp"
-  "src/checkout.lisp")
+  "sbcl-port/checkout.lisp")
  (:FILE
   "MCVS/F-418A4A44531B20FCEB6851D533A75A04.lisp"
-  "src/create.lisp")
+  "sbcl-port/create.lisp")
  (:FILE
   "MCVS/F-42DFD065A78C998A3E47C9493FF221E7.lisp"
   "prototype/packages.lisp")
@@ -80,7 +83,7 @@
   "prototype/access.lisp")
  (:FILE
   "MCVS/F-4A3E7EA0D66193EB3C63340BB6150E24"
-  "src/gpgme/Makefile")
+  "sbcl-port/gpgme/Makefile")
  (:FILE
   "MCVS/F-4CDCC62803E43FE41DF6D4127912E9FA.tex"
   "doc/folien.tex")
@@ -89,48 +92,48 @@
   "prototype/backend-cvs.lisp")
  (:FILE
   "MCVS/F-4F2D9B26F5FB9FA0F66EBB82BE7E8EF1.lisp"
-  "src/prop.lisp")
+  "sbcl-port/prop.lisp")
  (:FILE
   "MCVS/F-4F34E424D04A8DF9D18E24CFE19D425C.lisp"
-  "src/memoize.lisp")
+  "sbcl-port/memoize.lisp")
  (:FILE
   "MCVS/F-54A44C0786853024F450D715BBB3997E.lisp"
-  "src/move.lisp")
+  "sbcl-port/move.lisp")
  (:FILE
   "MCVS/F-58D8930AD0215DAF4F30E752A5EF3EA1"
   "doc/Makefile")
  (:FILE
   "MCVS/F-5B815906BE2D64E9BC2E48B76242BFF2.lisp"
-  "src/sync.lisp")
+  "sbcl-port/sync.lisp")
  (:FILE
   "MCVS/F-5D53AE4674717BF80056E24988D89A49.lisp"
-  "src/unix-bindings/unix.lisp")
+  "sbcl-port/unix-bindings/unix.lisp")
  (:FILE
   "MCVS/F-64F03E4083CDA7BB01BEE06595ED006F.fig"
   "doc/beispiel1.fig")
  (:FILE
   "MCVS/F-6763C87866B0E9BE56C154839D6FAB55.lisp"
-  "src/purge.lisp")
+  "sbcl-port/purge.lisp")
  (:FILE
   "MCVS/F-6C2D433380C1B1B204522582A4F30484.lisp"
-  "src/slot-refs.lisp")
+  "sbcl-port/slot-refs.lisp")
  (:FILE
   "MCVS/F-6F5CF359180DF63FF524635A543C7BF5"
-  "src/gennf"
+  "sbcl-port/gennf"
   (:EXEC
    T))
  (:FILE
   "MCVS/F-74915F0862B511AC9C233FDCB87DBEF8.lisp"
-  "src/update.lisp")
+  "sbcl-port/update.lisp")
  (:FILE
   "MCVS/F-769D6330165D17D4921D9970720734B7.lisp"
   "prototype/configuration.lisp")
  (:FILE
   "MCVS/F-7849808E8711BA9FBEB0917F33B12A79.lisp"
-  "src/find-bind.lisp")
+  "sbcl-port/find-bind.lisp")
  (:FILE
   "MCVS/F-7FC7BAE8FEAFAA140D1560EE6A936C40.sh"
-  "src/unix-bindings/link.sh")
+  "sbcl-port/unix-bindings/link.sh")
  (:FILE
   "MCVS/F-83B842F2203F2AE6157E430B77F56938.lisp"
   "prototype/files.lisp")
@@ -139,34 +142,37 @@
   "prototype/sbcl.lisp")
  (:FILE
   "MCVS/F-8E73F07FB339A6981C69AF06C278B49A.lisp"
-  "src/rcs-utils.lisp")
+  "sbcl-port/rcs-utils.lisp")
+ (:FILE
+  "MCVS/F-90320572321DD63B77AD22566D3B4C2A.lisp"
+  "sbcl-port/meta-cvs-system.lisp")
  (:FILE
   "MCVS/F-972969458DDA322E03A1AAD19BF8ADC0.asd"
   "prototype/gennf.asd")
  (:FILE
   "MCVS/F-97770D7ED2DFF388BC60EAB380950A77.lisp"
-  "src/dirwalk.lisp")
+  "sbcl-port/dirwalk.lisp")
  (:FILE
   "MCVS/F-9FD71CEB3A8045B747F54A629ED92A8D.lisp"
-  "src/remove.lisp")
+  "sbcl-port/remove.lisp")
  (:FILE
   "MCVS/F-A30F4DBDE92A478CEB73EF64056E4340.lisp"
-  "src/restore.lisp")
+  "sbcl-port/restore.lisp")
  (:FILE
   "MCVS/F-A3262E4C63ABCB9396F1C019B9CAE540.lisp"
-  "src/cmucl-unix.lisp")
+  "sbcl-port/cmucl-unix.lisp")
  (:FILE
   "MCVS/F-A371BDB8A9CF854FE00C63C1264B1D99.lisp"
-  "src/mcvs-main.lisp")
+  "sbcl-port/mcvs-main.lisp")
  (:FILE
   "MCVS/F-A518EEFCABEE08D248A87C9289283D09"
   "LICENSE")
  (:FILE
   "MCVS/F-A580617EC4FE7BAAC13B25642EF48CAC.lisp"
-  "src/add.lisp")
+  "sbcl-port/add.lisp")
  (:FILE
   "MCVS/F-ABFCD555D3597D76F2AE7BB47DAD0C07"
-  "src/unix-bindings/Makefile")
+  "sbcl-port/unix-bindings/Makefile")
  (:FILE
   "MCVS/F-B457DDF336218AEBF4158383BC4BB553.html"
   "htdocs/index.html")
@@ -175,65 +181,65 @@
   "doc/scratchpad.tex")
  (:FILE
   "MCVS/F-C25BFAA9CFD16915F31BF90D03646B52.lisp"
-  "src/link.lisp")
+  "sbcl-port/link.lisp")
  (:FILE
   "MCVS/F-C534B6E74FE1BD1E409FAAFBB6DC110B.sh"
-  "src/install.sh"
+  "sbcl-port/install.sh"
   (:EXEC
    T))
  (:FILE
   "MCVS/F-CA4E16937768388DD32FAD6ADA8B6A2F.lisp"
-  "src/clisp-unix.lisp")
+  "sbcl-port/clisp-unix.lisp")
  (:FILE
   "MCVS/F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp"
   "prototype/directories.lisp")
  (:FILE
   "MCVS/F-D3884C19BD6F4028992C7EE4A564DCA3.lisp"
-  "src/restart.lisp")
+  "sbcl-port/restart.lisp")
  (:FILE
   "MCVS/F-D3DC1953503E35C4D11154495DE074FB.lisp"
-  "src/grab.lisp")
+  "sbcl-port/grab.lisp")
  (:FILE
   "MCVS/F-D636EE3C0CFBE5D4BF3AE6987E95B71A.fig"
   "doc/beispiel2.fig")
  (:FILE
   "MCVS/F-DBEF23F4E5EC75C4CF994FA5C7DE0326.lisp"
-  "src/sbcl-unix.lisp")
- (:FILE
-  "MCVS/F-DCFD91A2B9187774AFD3615DD030A174.lisp"
-  "src/gennf-commit.lisp")
+  "sbcl-port/sbcl-unix.lisp")
  (:FILE
   "MCVS/F-DDFDB88C633DE12D1C1F5B3C3312FC20.lisp"
-  "src/generic.lisp")
+  "sbcl-port/generic.lisp")
  (:FILE
   "MCVS/F-E3131BB19D8294EBDA5E9BFD1C50BB5D.lisp"
-  "src/filt.lisp")
+  "sbcl-port/filt.lisp")
  (:FILE
   "MCVS/F-E63AF5C74FCD768D115032F86E86B4E6.txt"
   "doc/proposal.txt")
  (:FILE
   "MCVS/F-E8B8309E1270A0D1EDB0FB64AB2298D2.lisp"
-  "src/mapping.lisp")
+  "sbcl-port/mapping.lisp")
  (:FILE
   "MCVS/F-E9DFED59ECE7621E4773E6B51E9D2881.lisp"
-  "src/posix.lisp")
+  "sbcl-port/posix.lisp")
  (:FILE
   "MCVS/F-EADDB60DB86A4481CF5D126F61D78F8E.lisp"
   "prototype/commit.lisp")
  (:FILE
   "MCVS/F-F0479D3BD4B6A3EB301F19E55A829B7E"
-  "src/unix-bindings-linking-set/clisp_mcvs"
+  "sbcl-port/unix-bindings-linking-set/clisp_mcvs"
   (:EXEC
    T))
  (:FILE
   "MCVS/F-F3CA06292A3D8237E960CB2844A8D5C0.lisp"
-  "src/branch.lisp")
+  "sbcl-port/branch.lisp")
  (:FILE
   "MCVS/F-FABFD2A24671001E7FA5E630FED91059.lisp"
-  "src/multi-hash.lisp")
+  "sbcl-port/multi-hash.lisp")
  (:FILE
   "MCVS/F-FC7FF8AB6284EA194323C1565C752386.lisp"
   "prototype/gennf.lisp")
  (:FILE
   "MCVS/F-FD67F73260C22A0EC7EF43A6F702E80F.lisp"
-  "src/seqfuncs.lisp"))
+  "sbcl-port/seqfuncs.lisp")
+ (:FILE
+  "MCVS/F-FE079EED6B0320DCF96CB71FE3B862D6.lisp"
+  "sbcl-port/packages.lisp"))
