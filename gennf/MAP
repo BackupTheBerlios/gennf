@@ -77,7 +77,7 @@
   "prototype/packages.lisp")
  (:FILE
   "MCVS/F-48D1C070D93800E7560AEE00EF78D0B2.lisp"
-  "prototype/miscallenous.lisp")
+  "prototype/miscellaneous.lisp")
  (:FILE
   "MCVS/F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp"
   "prototype/access.lisp")

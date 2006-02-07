@@ -1,8 +1,7 @@
-# Makefile fuer TeX-Dokument.
+# Makefile for gennf documentation.
 #
 
-NAME = scratchpad
-OUTPUT = $(NAME).pdf
+OUTPUT = scratchpad.pdf folien.pdf
 USER = $(shell if [ $(BERLIOS_USER) ]; then echo $(BERLIOS_USER)@; fi)
 SERVER = shell.berlios.de
 ROOT = /home/groups/gennf/htdocs
@@ -21,12 +20,12 @@ folien.pdf : folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
 	fig2dev -L pdftex -p dummy $< $*.pdf
 	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
 
-publish : $(NAME).pdf
-	scp $(NAME).pdf $(USER)$(SERVER):$(ROOT)
-	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 664 $(NAME).pdf"
+publish : scratchpad.pdf
+	scp scratchpad.pdf $(USER)$(SERVER):$(ROOT)
+	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 664 scratchpad.pdf"
 
 clean :
-	rm -f $(NAME).dvi $(NAME).aux $(NAME).log
+	rm -f *.aux *.log *.nav *.out *.bak *~ *.snm *.toc
 
 dist-clean : clean
-	rm -f $(NAME).ps $(NAME).pdf
+	rm -f *.pdf *.pdf_t
