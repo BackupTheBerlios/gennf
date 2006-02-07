@@ -16,7 +16,12 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.2 2006/01/24 13:10:15 florenz Exp $
+;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.3 2006/02/07 18:05:08 florenz Exp $
+
+;; All functions that call SBCL specific extensions (i. e. funtions
+;; of some sb-* package) go in here.
+;; To support other Common Lisp implementations a similair
+;; file has to be provided.
 
 (in-package :gennf)
 

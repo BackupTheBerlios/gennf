@@ -16,7 +16,10 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.1 2006/01/16 07:47:43 florenz Exp $
+;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.2 2006/02/07 18:05:08 florenz Exp $
+
+;; This file provides functions to manipulate meta files
+;; that contain sequences of alists.
 
 (in-package :gennf)
 

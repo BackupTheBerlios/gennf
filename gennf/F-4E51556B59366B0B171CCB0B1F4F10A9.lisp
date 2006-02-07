@@ -16,7 +16,11 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.19 2006/01/25 19:55:02 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.20 2006/02/07 18:05:08 florenz Exp $
+
+;; All functions that interact with CVS directly live in
+;; this file. These routines are only called from backend.lisp
+;; and from no where else.
 
 (in-package :gennf)
 

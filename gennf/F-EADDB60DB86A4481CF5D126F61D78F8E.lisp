@@ -16,7 +16,9 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-EADDB60DB86A4481CF5D126F61D78F8E.lisp,v 1.1 2006/01/16 07:47:42 florenz Exp $
+;; $Id: F-EADDB60DB86A4481CF5D126F61D78F8E.lisp,v 1.2 2006/02/07 18:05:08 florenz Exp $
+
+;; Manipulations of commits.
 
 (in-package :gennf)
 

@@ -16,7 +16,10 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.1 2006/01/16 07:47:42 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.2 2006/02/07 18:05:08 florenz Exp $
+
+;; This file contains routines to manipulate changes,
+;; change files, and sequences of changes.
 
 (in-package :gennf)
 

@@ -16,7 +16,9 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.8 2006/01/27 14:54:00 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.9 2006/02/07 18:05:08 florenz Exp $
+
+;; Main module. Basic operations of gennf are implemented in this file.
 
 (in-package :gennf)
 
@@ -31,6 +33,8 @@
 
 (defun create-empty-branch (module root
 			    &key (symbolic-name "") (description ""))
+  "Create a new branch. That is to create a branch directory
+with the next free number and an empty CHANGE file."
   (in-temporary-directory
     (create-meta-directory)
     (in-meta-directory
@@ -47,14 +51,15 @@
 			    :identifier identifier
 			    :symbolic-name symbolic-name
 			    :description description))
-		   (change-file
-		    (merge-pathnames branch-directory *change-file*)))
+		   (change-file (make-pathname)))
+	      (break)
 	      (setf branch-directory
 		    (make-pathname :directory
 				   (list :relative
 					 (format nil "~A" identifier))))
+	      (setf change-file
+		    (merge-pathnames branch-directory *change-file*))
 	      (add-branch branch *branch-file*)
-	      (format t "Created dir ~A" branch-directory)
 	      (create-directory branch-directory)
 	      (create-new-change-file change-file)
 	      (backend-commit module access
@@ -62,7 +67,9 @@
 	(remove-meta-directory)))))
 
 (defun create-empty-repository (module root)
-  ;; It should be checked if module already exists.
+  "Create a completely empty repository only containing an
+ACCESS and BRANCH file.
+FIXME: It should be checked if module already exists."
   (in-temporary-directory
    (create-meta-directory)
    (in-meta-directory

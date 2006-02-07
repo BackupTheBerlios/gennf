@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.1 2006/01/24 14:14:01 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.2 2006/02/07 18:05:08 florenz Exp $
 
 (defpackage :gennf-system
     (:use :cl :asdf))
@@ -39,22 +39,23 @@
    (:file "access"
 	  :depends-on ("packages" "configuration" "files"))
    (:file "backend"
-	  :depends-on ("packages" "backend-cvs" "miscallenous" "directories"))
+	  :depends-on ("packages" "backend-cvs" "miscellaneous" "directories"))
    (:file "backend-cvs"
-	  :depends-on ("packages" "miscallenous" "sbcl" "configuration"))
+	  :depends-on ("packages" "miscellaneous" "sbcl"
+				  "configuration" "directories"))
    (:file "branch"
-	  :depends-on ("packages" "miscallenous" "files" "configuration"))
+	  :depends-on ("packages" "miscellaneous" "files" "configuration"))
    (:file "change"
-	  :depends-on ("packages" "miscallenous" "files" "configuration"))
+	  :depends-on ("packages" "miscellaneous" "files" "configuration"))
    (:file "commit"
-	  :depends-on ("packages" "miscallenous" "files"))
+	  :depends-on ("packages" "miscellaneous" "files"))
    (:file "configuration"
 	  :depends-on ("packages"))
    (:file "directories"
 	  :depends-on ("packages" "configuration"))
    (:file "files"
 	  :depends-on ("packages"))
-   (:file "miscallenous"
+   (:file "miscellaneous"
 	  :depends-on ("packages"))
    (:file "sbcl"
 	  :depends-on ("packages"))))

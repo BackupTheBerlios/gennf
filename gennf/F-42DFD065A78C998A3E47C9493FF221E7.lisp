@@ -16,7 +16,12 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-42DFD065A78C998A3E47C9493FF221E7.lisp,v 1.1 2006/01/16 07:47:43 florenz Exp $
+;; $Id: F-42DFD065A78C998A3E47C9493FF221E7.lisp,v 1.2 2006/02/07 18:05:08 florenz Exp $
+
+;; Definition of gennf-package (this is ASDF-INSTALL style).
 
 (defpackage :gennf
-    (:use :cl))
+    (:use :cl)
+    (:documentation "All functions of gennf are in package gennf.
+At a later point, this package may well be splitted into
+several ones with distinct functionality."))

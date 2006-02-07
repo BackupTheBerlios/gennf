@@ -16,7 +16,13 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.2 2006/01/23 18:20:22 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.3 2006/02/07 18:05:08 florenz Exp $
+
+;; All directory related functions and macros live in this file.
+;; This includes changing working directory, moving and deletion
+;; of directory trees.
+;; Many of those functions should be generalized as much as possible
+;; and go in port-path someday.
 
 (in-package :gennf)
 
