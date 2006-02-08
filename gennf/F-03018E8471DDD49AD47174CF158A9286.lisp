@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.3 2006/02/08 19:59:49 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.4 2006/02/08 21:27:54 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -124,7 +124,8 @@ If file is not recorded update-file-map is identity."
 
 (defmethod exchange-file-map ((change change) file-map)
   "Replaces change's file-map by another one (destructive)."
-  (setf (file-map change) file-map))
+  (setf (file-map change) file-map)
+  change)
 
 (defun count-file-occurence (file sequence)
   "Counts, how often file is recorded in the

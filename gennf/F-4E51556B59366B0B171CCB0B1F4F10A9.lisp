@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.20 2006/02/07 18:05:08 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.21 2006/02/08 21:27:54 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -38,13 +38,6 @@
 			 :exit-code ,exit-code)
     ,@forms))
 
-;; (defmacro cvs-default-error-handling (&rest arguments)
-;;   (let ((exit-code (gensym "exit-code-")))
-;;     `(let ((,exit-code
-;; 	    (invoke-cvs ,@arguments)))
-;;       (cvs-default-error-handler ,exit-code))))
-
-  
 (defun cvs-default-error-handler (exit-code)
   (cond ((= exit-code 0) exit-code)
 	(t (error "cvs had exit code ~S." exit-code))))
@@ -54,7 +47,6 @@
 
 (defun cvs-default-error-handling (&rest args)
   (cvs-default-error-handler (apply #'invoke-cvs args)))
-
 
 (defun cvs-import (module access)
   (cvs-default-error-handling "-d" (extract :root access)
@@ -80,14 +72,11 @@ save routine."
 			      files))
 	   (argument-list (append (list "-d" (extract :root access) "co")
 				  file-list))
-	   ;;    (cvs-command (append (list 'cvs-default-error-handling
-	   ;; 				      "-d" (extract :root access)
-	   ;; 				      "co")
-	   ;; 				file-list))
 	   (module-path (make-pathname :directory
 				       (list :relative module))))
+      (format t "~S" argument-list)
+      (break)
       (apply #'cvs-default-error-handling argument-list)
-      ;;       (eval cvs-command)		
       (port-path:with-directory-form ((destination-directory
 				       destination))
 	(move-directory-tree module-path
