@@ -16,25 +16,38 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.2 2006/02/07 18:05:08 florenz Exp $
+;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.3 2006/02/08 19:59:49 florenz Exp $
 
 ;; This file provides functions to manipulate meta files
 ;; that contain sequences of alists.
 
 (in-package :gennf)
 
+(defgeneric convert-to-alist (object)
+  (:documentation "Generates an alist represenation of object.
+The reason, why this generic function is in this file is that
+all meta are lists of alists but converted to lists
+of objects of different classes internally.
+Thus, for each class' objects to be written to a meta
+file an appropriate method is to be provided."))
+
 (defun read-file (file)
+  "Return a Lisp representation of file's content."
   (with-open-file (stream file :direction :input)
     (read stream)))
 
 (defun prin1-file (file content)
+  "Print content readably to file. If file exists, it
+is overwritten, if not, it is created."
   (with-open-file (stream file
 			  :direction :output
 			  :if-exists :supersede
 			  :if-does-not-exist :create)
-    (let ((*print-readably* t)) (prin1 content stream))))
+    (prin1 content stream)))
 
 (defun prepend-to-list-file (file &optional element)
+  "Prepend element to the list in file. If file does not
+exist, it is created with element as its sole entry."
   (let (content)
     (if (port-path:path-exists-p file)
 	(progn

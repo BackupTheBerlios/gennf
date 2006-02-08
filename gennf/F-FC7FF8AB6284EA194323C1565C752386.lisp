@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.9 2006/02/07 18:05:08 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.10 2006/02/08 19:59:49 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -47,12 +47,11 @@ with the next free number and an empty CHANGE file."
 	    (backend-get module access
 			 (list *branch-file* *access-file*) *meta-directory*)
 	    (let* ((identifier (get-new-branch-identifier *branch-file*))
-		   (branch (create-new-branch
+		   (branch (make-instance 'branch
 			    :identifier identifier
 			    :symbolic-name symbolic-name
 			    :description description))
 		   (change-file (make-pathname)))
-	      (break)
 	      (setf branch-directory
 		    (make-pathname :directory
 				   (list :relative

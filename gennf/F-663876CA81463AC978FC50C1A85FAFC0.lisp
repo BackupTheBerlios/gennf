@@ -16,13 +16,16 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-EADDB60DB86A4481CF5D126F61D78F8E.lisp,v 1.3 2006/02/08 19:59:49 florenz Exp $
+;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.1 2006/02/08 19:59:49 florenz Exp $
 
-;; Manipulations of commits.
+;; Manipulations of merges.
 
 (in-package :gennf)
 
-(defclass commit (change)
-  ()
-  (:documentation "A commit is a change. This class'
-purpose is to distinguish between merges and commits."))
+(defclass merge (change)
+  ((origin :initarg :origin
+	   :accessor origin
+	   :documentation "The origin of a merge is a reference to
+another change."))
+  (:documentation "A merge is the result of creating a new change
+not with new code but with code from some other change."))

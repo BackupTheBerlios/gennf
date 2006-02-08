@@ -112,6 +112,9 @@
   "MCVS/F-64F03E4083CDA7BB01BEE06595ED006F.fig"
   "doc/beispiel1.fig")
  (:FILE
+  "MCVS/F-663876CA81463AC978FC50C1A85FAFC0.lisp"
+  "prototype/merge.lisp")
+ (:FILE
   "MCVS/F-6763C87866B0E9BE56C154839D6FAB55.lisp"
   "sbcl-port/purge.lisp")
  (:FILE

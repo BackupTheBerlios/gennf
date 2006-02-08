@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.9 2006/02/07 18:05:08 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.10 2006/02/08 19:59:49 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -26,11 +26,12 @@
 (in-package :gennf)
 
 (defmacro extract (symbol symbol-alist)
-  "Lookup a an entry in an alist."
+  "Lookup a an entry in a symbol alist (a symbol
+alist is an alist having symbols as keys)."
   `(cdr (assoc ,symbol ,symbol-alist)))
 
 (defun unassoc (symbol symbol-alist)
-  "Remove all entries having symbol from an alist."
+  "Remove all entries having symbol from a symbol alist."
   (remove-if (lambda (pair) (eql symbol (car pair))) symbol-alist))
 
 (defun reassoc (symbol data symbol-alist)
