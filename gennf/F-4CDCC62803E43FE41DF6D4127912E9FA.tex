@@ -1,4 +1,5 @@
-\documentclass[german]{beamer}
+% \documentclass[german, handout]{beamer}
+\documentclass[german, presentation]{beamer}
 
 \newcommand{\GPG}{\textsc{gpg}}
 \newcommand{\PGP}{\textsc{pgp}}
@@ -21,6 +22,8 @@
 \usepackage{babel}
 \usepackage{stmaryrd}
 \usepackage{pifont}
+
+
 
 \usetheme{Rochester}
 \usefonttheme{serif}
@@ -47,6 +50,8 @@
 Infrastrukturen zur Open Source Softwareentwicklung WS05/06 \\
 Bernd Mahr, Steffen Evers}
 \date{31.~Januar~2006}
+
+
 
 \begin{document}
 
@@ -284,18 +289,18 @@ Bernd Mahr, Steffen Evers}
   \begin{columns}
     \begin{column}{0.5\textwidth}
       \begin{flushleft}
-        \only<1>{\input{beispiel0.pdf_t}}
-        \only<2>{\input{beispiel1.pdf_t}}
+        \only<1| handout:1>{\input{beispiel0.pdf_t}}
+        \only<2| handout:2>{\input{beispiel1.pdf_t}}
       \end{flushleft}
     \end{column}
     \begin{column}{0.5\textwidth}
-      \begin{block}<1->{Stern-Topologie}
+      \begin{block}<1-| handout:1->{Stern-Topologie}
         \begin{itemize}
         \item Ein Haupt-Repository f\"ur "`gereiften"' Code
         \item Lokale Repositories bei jedem Entwickler/Team
         \end{itemize}
       \end{block}
-      \begin{block}<2>{Baum-Topologie}
+      \begin{block}<2| handout:2>{Baum-Topologie}
         \begin{itemize}
         \item Weitere Hierarchien f"ur Teilprojekte
         \item Code wandert nach oben
