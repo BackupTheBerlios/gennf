@@ -16,15 +16,27 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.2 2006/02/09 14:14:35 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.3 2006/02/09 15:06:56 sigsegv Exp $
 
-;; Description: Defines mapping data structure based on MCVS's mapping.
-;;              
+;; Description:  creates directory structure by using a map file.
+;;  The format and the idea is derived from MCVS 
+
+
+;; TODO: 
+;; - interface
+;;   - adding file
+;;   - removing file
+;;   - ... 
+;; - generating Universal ID
+;; - dublicate checking
+;; - structure generating
+;; - structure syncing
+;; 
+;; Done:
+;; - reading
+;; - writing
 
 (in-package :gennf)
-
-;; *map-file* from configuration.lisp is now used.
-;; (DEFPARAMETER *map-file* #p"/tmp/mapping.test" "Mapping file in *meta-dir*") 
 
 ;; MCVS uses defstruct!
 (defclass mapping ()
@@ -45,7 +57,8 @@
    (target
     :initform ""
     :initarg :target
-    :accessor target)
+    :accessor target
+    :documentation "symbolic link target")
    (executable 
     :initform nil
     :initarg :executable
@@ -54,12 +67,20 @@
    (raw-plist 
     :initform nil
     :initarg :raw-plist
-    :accessor raw-plist)))
+    :accessor raw-plist
+    :documentation "Userattributes in a plis")))
 
 ;; reads mcvs mapping-file 
 ;; returns map-list
 (defun read-map-file (&optional (file *map-file*))
   (convert-map-file-in (read-file file)))
+
+;; writes map-lists to file
+(defun write-map-file (map-list &optional (file *map-file*))
+  (let ((converted-map-list (convert-map-list-out map-list))
+	(*print-pretty* t)
+	(*print-right-margin* 1))
+    (prin1-file file converted-map-list)))
 
 ;; taken von mcvs:mapping.lisp
 (defun convert-map-file-in (raw-filemap)
@@ -94,6 +115,7 @@ representation---a list of mapping-entry structures."
 			       (first item))))))
     (mapcar #'map-fun raw-filemap)))
 
+;; sets exec attribut on entry if raw-plist has exec prop
 (defun mapping-entry-parse-plist (entry)
   (with-slots (executable raw-plist) entry
     (destructuring-bind (&key exec &allow-other-keys) 
@@ -101,12 +123,6 @@ representation---a list of mapping-entry structures."
       (setf executable exec)))
   (values))
 
-;; writes map-lists to file
-(defun write-map-file (map-list &optional (file *map-file*))
-  (let ((converted-map-list (convert-map-list-out map-list))
-	(*print-pretty* t)
-	(*print-right-margin* 1))
-    (prin1-file file converted-map-list)))
 
 ;; Taken from mcvs:mapping.lisp
 (defun convert-map-list-out (map-list) 
