@@ -16,14 +16,12 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.1 2006/02/09 13:23:25 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.2 2006/02/09 14:14:35 sigsegv Exp $
 
 ;; Description: Defines mapping data structure based on MCVS's mapping.
 ;;              
 
 (in-package :gennf)
-
-
 
 ;; *map-file* from configuration.lisp is now used.
 ;; (DEFPARAMETER *map-file* #p"/tmp/mapping.test" "Mapping file in *meta-dir*") 
@@ -79,9 +77,8 @@ representation---a list of mapping-entry structures."
 					  :id (second item)
 					  :path (third item)
 					  :raw-plist (fourth item))))
-		;; NOT YET SUPPORTED
-		;; 		   (when (fourth item)
-		;; 		     (mapping-entry-parse-plist entry))
+		(when (fourth item)
+		  (mapping-entry-parse-plist entry))
 		entry))
 	     ((:symlink)
 	      (when (not (third item))
@@ -96,6 +93,13 @@ representation---a list of mapping-entry structures."
 	     (otherwise (error "bad type keyword ~s in map." 
 			       (first item))))))
     (mapcar #'map-fun raw-filemap)))
+
+(defun mapping-entry-parse-plist (entry)
+  (with-slots (executable raw-plist) entry
+    (destructuring-bind (&key exec &allow-other-keys) 
+	raw-plist
+      (setf executable exec)))
+  (values))
 
 ;; writes map-lists to file
 (defun write-map-file (map-list &optional (file *map-file*))
@@ -112,9 +116,12 @@ representation---a list of mapping-entry structures."
 		 (setf (getf raw-plist :exec) t)
 		 (remf raw-plist :exec))
 	     (ccase kind
-	       (:file (list kind id path))
-	       (:symlink) (list kind id path target)))))
-    (mapcar #'map-fun map-list)))
+	       (:file (list kind id path
+			    (if raw-plist 
+				(list raw-plist))))
+	       (:symlink (list kind id path target
+				(if raw-plist (list raw-plist))))))))
+	 (mapcar #'map-fun map-list)))
 
 ;; prints object *only*  human readable to stream
 ;; This is not the output format of MCVS!
