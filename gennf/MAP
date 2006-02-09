@@ -141,6 +141,9 @@
   "MCVS/F-83B842F2203F2AE6157E430B77F56938.lisp"
   "prototype/files.lisp")
  (:FILE
+  "MCVS/F-881560526E7214793C24206DE07FE66D.lisp"
+  "prototype/mapping.lisp")
+ (:FILE
   "MCVS/F-88B873BF8C20BA949EB0547CD571F5B0.lisp"
   "prototype/sbcl.lisp")
  (:FILE

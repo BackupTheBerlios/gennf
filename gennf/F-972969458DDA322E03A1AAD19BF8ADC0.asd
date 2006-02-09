@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.2 2006/02/07 18:05:08 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.3 2006/02/09 13:23:25 sigsegv Exp $
 
 (defpackage :gennf-system
     (:use :cl :asdf))
@@ -58,4 +58,6 @@
    (:file "miscellaneous"
 	  :depends-on ("packages"))
    (:file "sbcl"
-	  :depends-on ("packages"))))
+	  :depends-on ("packages"))
+   (:file "mapping"
+	  :depends-on ("files"))))

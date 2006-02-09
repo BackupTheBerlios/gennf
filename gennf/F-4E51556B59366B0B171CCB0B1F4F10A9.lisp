@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.21 2006/02/08 21:27:54 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.22 2006/02/09 13:23:25 sigsegv Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -123,8 +123,8 @@ case no files are committed at all."
 (defun cvs-known-file-p (access file)
   (ensure-string-pathname file)
   (with-cvs-output ((list "-d" (extract :root access)
-			     "log" file)
-		       :exit-code exit-code)
+			  "log" file)
+		    :exit-code exit-code)
     (= exit-code 0)))
 
 (defun cvs-add (access files)

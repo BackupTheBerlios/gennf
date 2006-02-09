@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.3 2006/02/08 19:59:49 florenz Exp $
+;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.4 2006/02/09 13:23:25 sigsegv Exp $
 
 ;; This file provides functions to manipulate meta files
 ;; that contain sequences of alists.
@@ -43,7 +43,8 @@ is overwritten, if not, it is created."
 			  :direction :output
 			  :if-exists :supersede
 			  :if-does-not-exist :create)
-    (prin1 content stream)))
+    (prin1 content stream)
+    (terpri stream)))
 
 (defun prepend-to-list-file (file &optional element)
   "Prepend element to the list in file. If file does not
