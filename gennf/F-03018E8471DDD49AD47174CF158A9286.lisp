@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.4 2006/02/08 21:27:54 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.5 2006/02/11 21:20:16 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -175,7 +175,8 @@ sequence incremented by one."
 
 (defmethod get-change (identifier (sequence list))
   "Return the indicated change from sequence."
-  (nth identifier sequence))
+  ;; Sequences of changes are in reversed order.
+  (nth (- (length sequence) identifier) sequence))
 
 (defmethod get-change (identifier (file pathname))
   "Read file and then return the indicated change."
@@ -193,3 +194,31 @@ added change become shead of the change sequence."))
   "Write a new change file containing all changes of
 file plus a new one being head of the sequence."
   (prepend-to-list-file file change))
+
+(defgeneric extract-files-and-revisions (store &optional identifier)
+  (:documentation "For a given change identifier extract all files that are
+in the branch up to and including that change.
+The result is a list of dotted pairs (filename . revision),
+with revision being the latest possible one of, course.
+If no change is given, the latest one is assumed."))
+
+(defmethod extract-files-and-revisions ((sequence list) &optional identifier)
+  "Extract the required list from the given sequence of changes."
+  ;; Latest change is default.
+  (unless identifier
+    (setf identifier (length sequence)))
+  ;; Throw away changes that have higher identifiers than
+  ;; the requested one.
+  (setf sequence (nthcdr (- (length sequence) identifier) sequence))
+  ;; file-revisions will be the result.
+  (let ((file-revisions ()))
+    ;; The file-maps of all changes are united with precedence
+    ;; for newer entries.
+    (dolist (change sequence)
+      (setf file-revisions (alist-union (file-map change)
+					file-revisions :test #'string=)))
+    file-revisions))
+
+(defmethod extract-files-and-revisions ((file pathname) &optional change)
+  "Extract the required list from file."
+  (extract-files-and-revisions (read-change-file file) change))

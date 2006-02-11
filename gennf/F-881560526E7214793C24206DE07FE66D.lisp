@@ -16,10 +16,10 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.3 2006/02/09 15:06:56 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.4 2006/02/11 21:20:16 florenz Exp $
 
-;; Description:  creates directory structure by using a map file.
-;;  The format and the idea is derived from MCVS 
+;; Description: creates directory structure by using a map file.
+;; The format and the idea is derived from MCVS.
 
 
 ;; TODO: 
@@ -49,7 +49,7 @@
     :initform ""
     :initarg :id
     :accessor id
-    :documentation "F-File name")
+    :documentation "F-file name")
    (path
     :initform ""
     :initarg :path
@@ -58,7 +58,7 @@
     :initform ""
     :initarg :target
     :accessor target
-    :documentation "symbolic link target")
+    :documentation "Symbolic link target")
    (executable 
     :initform nil
     :initarg :executable
@@ -68,24 +68,23 @@
     :initform nil
     :initarg :raw-plist
     :accessor raw-plist
-    :documentation "Userattributes in a plis")))
+    :documentation "Userattributes in a plist")))
 
-;; reads mcvs mapping-file 
-;; returns map-list
 (defun read-map-file (&optional (file *map-file*))
+  "Reads mcvs mapping-file and returns map-list."
   (convert-map-file-in (read-file file)))
 
-;; writes map-lists to file
 (defun write-map-file (map-list &optional (file *map-file*))
+  "Writes map-lists to file."
   (let ((converted-map-list (convert-map-list-out map-list))
 	(*print-pretty* t)
 	(*print-right-margin* 1))
     (prin1-file file converted-map-list)))
 
-;; taken von mcvs:mapping.lisp
+;; Taken from mcvs:mapping.lisp
 (defun convert-map-file-in (raw-filemap)
-  "Converts a Gennf's filemap as read from a file into its internal
-representation---a list of mapping-entry structures."
+  "Converts a gennf filemap as read from a file into its internal
+representation -- a list of mapping-entry structures."
   (flet ((map-fun (item)
 	   (when (or (not (consp item))
 		     (not (and (keywordp (first item))
@@ -115,14 +114,13 @@ representation---a list of mapping-entry structures."
 			       (first item))))))
     (mapcar #'map-fun raw-filemap)))
 
-;; sets exec attribut on entry if raw-plist has exec prop
 (defun mapping-entry-parse-plist (entry)
+  "Sets exec attribut on entry if raw-plist has exec prop."
   (with-slots (executable raw-plist) entry
     (destructuring-bind (&key exec &allow-other-keys) 
 	raw-plist
       (setf executable exec)))
   (values))
-
 
 ;; Taken from mcvs:mapping.lisp
 (defun convert-map-list-out (map-list) 
@@ -139,18 +137,18 @@ representation---a list of mapping-entry structures."
 				(if raw-plist (list raw-plist))))))))
 	 (mapcar #'map-fun map-list)))
 
-;; prints object *only*  human readable to stream
+;; Prints object *only* human readable to stream
 ;; This is not the output format of MCVS!
 (defmethod print-object ((map mapping) stream)
   "Converting mapping into a human readable format.
-   This is not the format of mcvs." 
+This is not the format of mcvs." 
   (print-unreadable-object (map stream)
       (with-slots (kind id path executable raw-plist) map
         (format stream "(~%:KIND ~s~%:ID ~s~%:PATH ~s~%:EXEC ~s~%:RAW ~s)"
                 kind id path executable raw-plist))))
 
 ;; Creates new mappings but with sane defaults
-;; Not really usefull, but trains me..
+;; Not really useful, but trains me..
 ;; Whats the different between (make-instance )
 (defun make-new-mapping (&key (kind :file) (id "meine erste ID") (path nil path-set-p)
                          (executable nil) (raw-plist nil))

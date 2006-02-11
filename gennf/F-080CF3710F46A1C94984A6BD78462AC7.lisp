@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.3 2006/02/08 19:59:49 florenz Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.4 2006/02/11 21:20:16 florenz Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -109,3 +109,9 @@ from store."))
   "List position is branch identifier. Return the
 indicated item from sequence."
   (nth identifier sequence))
+
+(defun branch-identifier-to-directory (identifier)
+  "Returns the relative pathname object associated with
+the given identifier."
+  (make-pathname :directory (list :relative (format nil "~S" identifier
+))))

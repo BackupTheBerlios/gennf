@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.10 2006/02/08 19:59:49 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.11 2006/02/11 21:20:16 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -24,6 +24,11 @@
 ;; a sensible fashion.
 
 (in-package :gennf)
+
+
+;;
+;; Functions for alists.
+;;
 
 (defmacro extract (symbol symbol-alist)
   "Lookup a an entry in a symbol alist (a symbol
@@ -38,11 +43,32 @@ alist is an alist having symbols as keys)."
   "Exchange the value associated with symbol by data in an alist."
   (acons symbol data (unassoc symbol symbol-alist)))
 
+(defun alist-union (alist1 alist2 &key (test #'eql))
+  "Return the union of all pairs of alist1 and alist2.
+No key appears twice in the results. If both alists
+contain a certain key, the element of alist2 survives.
+If no test for equality is given it defaults to EQL (like ASSOC)."
+  (let ((union (copy-alist alist2)))
+    (dolist (pair alist1)
+      (unless (assoc (car pair) union :test test)
+	(setf union (acons (car pair) (cdr pair) union))))
+    union))
+
+
+;;
+;; Stuff concerning macros.
+;;
+
 (defmacro with-gensyms ((&rest names) &body forms)
   "Generate symbols for all names given to be used in
 a macro. Taken from Peter Seibel's book, chapter 8."
   `(let ,(loop for n in names collect `(,n (gensym)))
     ,@forms))
+
+
+;;
+;; Miscellaneous miscellaneous.
+;;
 
 (defmacro ensure-string-pathname (pathspec)
   "SETF pathspec to its namestring if it is
@@ -59,6 +85,11 @@ and return those that are found."
       (when (search item sequence)
 	(push item results)))
     results))
+
+
+;;
+;; Error handling.
+;;
 
 (defmacro retry-while-condition ((condition variable &rest cleanup-forms)
 				 &body body)

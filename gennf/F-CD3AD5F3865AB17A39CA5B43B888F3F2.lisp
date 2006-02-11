@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.3 2006/02/07 18:05:08 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.4 2006/02/11 21:20:16 florenz Exp $
 
 ;; All directory related functions and macros live in this file.
 ;; This includes changing working directory, moving and deletion
@@ -27,6 +27,9 @@
 (in-package :gennf)
 
 (defmacro in-meta-directory (&body forms)
+  "Evaluate forms with *meta-directory* being current
+directory and change back to previous working directory
+afterwards."
   (let ((current-directory (gensym "current-directory-")))
     `(let ((,current-directory (current-directory)))
       (change-to-meta-directory)
@@ -34,13 +37,23 @@
       (change-directory ,current-directory))))
 
 (defmacro in-temporary-directory (&body forms)
+  "Not yet implemented. The purpose of this macro is:
+Save creation of a temporary directory (e. g. under /tmp),
+evaluate forms with temporary directory as working directory,
+change back to old working directory and throw away
+the temporary directory-tree."
   `(progn
     ,@forms))
 
 (defun create-meta-directory ()
+  "Create *meta-directory* and signal a condition, if it
+is already there."
   (create-directory *meta-directory* :require-fresh-directory t))
 
 (defun change-directory (pathspec)
+  "Change current working directory. Keep the process'
+current working directory and *default-pathname-defaults*
+synchronized."
   (port-path:with-directory-form ((directory (merge-pathnames pathspec)))
     (if (port-path:path-exists-p directory)
 	(progn
@@ -49,15 +62,21 @@
 	(error "Directory ~S does not exist." directory))))
 
 (defun current-directory ()
+  "Return the current working directory."
   *default-pathname-defaults*)
 
 (defun change-directory-up ()
+  "Same as cd .. in Unix. If current directory is root
+root stays current directory."
   (change-directory (port-path:get-parent-directory (current-directory))))
 
 (defun change-to-meta-directory ()
+  "Make *meta-directory* current working directory."
   (change-directory *meta-directory*))
 
 (defun remove-meta-directory ()
+  "Delete *meta-directory* and all its subdirectories
+and files."
   (when (port-path:path-exists-p *meta-directory*)
     (change-to-meta-directory)
     (change-directory-up)

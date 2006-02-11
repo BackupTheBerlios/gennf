@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.11 2006/02/08 21:27:54 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.12 2006/02/11 21:20:16 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -61,7 +61,7 @@ with the next free number and an empty CHANGE file."
 	      (add-branch branch *branch-file*)
 	      (create-directory branch-directory)
 	      (create-new-change-file change-file)
-	      (backend-commit module access
+	      (backend-commit module "create-empty-branch" access
 			      (list change-file *branch-file*)))))
 	(remove-meta-directory)))))
 
@@ -79,52 +79,53 @@ FIXME: It should be checked if module already exists."
        (backend-import module access)))
    (remove-meta-directory)))
 
-(defun checkout-branch (module root identifier &optional change)
-  "Checkout a branch into a sandbox. If no change number is given,
+(defun checkout-change (module root branch &optional change)
+  "Checkout a change into a sandbox. If no change number is given,
 the latest change is checked out.
 The sandbox is called *meta-directory* and contains the branch and
 access file and the branch subdirectory with it's change file."
   (create-meta-directory)
   (in-meta-directory
     (let* ((access (create-new-access :root root))
-	   (branch-directory (make-pathname
-			      :directory (list :relative 
-					       (format nil "~S" identifier))))
+	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
       (backend-get module access
 		   (list *branch-file* *access-file* change-file)
 		   *meta-directory*)
-      (if change
-	  ()
-	  ()))))
-
+      ;; Extract the files with revisions to check out and
+      ;; exchange the filenames by "branch/filename".
+      (let ((files (mapcar #'(lambda (pair)
+			       (cons (merge-pathnames branch-directory
+						      (car pair))
+				     (cdr pair)))
+			   (extract-files-and-revisions change-file change))))
+	(backend-get module access files *meta-directory*)))))
+		     
 (defun commit (module root branch files)
   "Commit files to the checked out branch. An appropriate commit
 record is stored. All files must have been changed. If not
 they get recorded in the commit but are not assigned a new revision
-number which makes the mapping occurence<->revision-number illegal.
-This means, some other functions has to check, if all files will go
+number which makes the mapping occurence<-->revision-number illegal.
+This means, some other functions has to check if all files will go
 upstream."
   (in-meta-directory
     (let* ((access (create-new-access :root root))
-	   (branch-directory (make-pathname
-			      :directory (list :relative 
-					       (format nil "~S" branch))))
+	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
-;;      (retry ((backend-outdated-error
-	;;       :cleanup (delete-file *change-file*)))
-	(backend-get module access
-		     (list change-file) *meta-directory*)
-	(let* ((changes (read-change-file change-file))
-	       (identifier (get-new-change-identifier changes))
-	       (change (make-instance 'change
-				      :identifier identifier
-				      :file-map ())))
-	  (setf changes (add-change change changes))
-	  (format t "~S" changes)
-	  (dolist (file files)
-	    (setf changes (add-file-to-changes file changes)))
-	  (write-change-file changes change-file))
-	(backend-commit module access
-			(append (list change-file)
-				files)))))
+      (setf files (mapcar #'pathname files))
+      (backend-get module access
+		   (list change-file) *meta-directory*)
+      (let* ((changes (read-change-file change-file))
+	     (identifier (get-new-change-identifier changes))
+	     (change (make-instance 'change
+				    :identifier identifier
+				    :file-map (create-new-file-map))))
+	(setf changes (add-change change changes))
+	(dolist (file files)
+	  (setf changes (add-file-to-changes file changes)))
+	(write-change-file changes change-file))
+      (setf files (mapcar #'(lambda (file)
+			      (merge-pathnames branch-directory file)) files))
+      (backend-commit module "commit" access
+		      (append (list change-file)
+			      files)))))

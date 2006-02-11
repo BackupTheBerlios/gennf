@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.22 2006/02/09 13:23:25 sigsegv Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.23 2006/02/11 21:20:16 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -24,13 +24,20 @@
 
 (in-package :gennf)
 
-(defparameter *cvs-import-log-message* *backend-import-log-message*)
-(defparameter *cvs-import-vendor-tag* "gennf-created")
-(defparameter *cvs-import-release-tag* "fresh-repository")
-(defparameter *cvs-command-name* "cvs")
+(defparameter *cvs-import-log-message* *backend-import-log-message*
+  "The log message recorded when using cvs-import function.")
+(defparameter *cvs-import-vendor-tag* "gennf-created"
+  "The vendor tag passed to cvs when using cvs-import function.")
+(defparameter *cvs-import-release-tag* "fresh-repository"
+  "The release tag passed to cvs when using cvs-import function.")
+(defparameter *cvs-command-name* "cvs"
+  "The name of the cvs binary.")
 
 (defmacro with-cvs-output ((arguments &key exit-code
 				      output error) &body forms)
+  "Run cvs with given arguments an bind its output
+to stream variables output, error if provided and
+store the exit-code in exit-code if provided."
   `(with-program-output (*cvs-command-name*
 			 ,arguments
 			 :output ,output
@@ -39,16 +46,29 @@
     ,@forms))
 
 (defun cvs-default-error-handler (exit-code)
+  "Signals an errorif exit-code is not 0. The
+exit-code is mentioned in the error message."
   (cond ((= exit-code 0) exit-code)
 	(t (error "cvs had exit code ~S." exit-code))))
 
 (defun invoke-cvs (&rest arguments)
+  "Run cvs program with given arguments."
   (invoke-program *cvs-command-name* arguments))
 
 (defun cvs-default-error-handling (&rest args)
+  "Default error handling is to signal a condition if
+cvs exists with a non 0 exit code."
   (cvs-default-error-handler (apply #'invoke-cvs args)))
 
+(defun change-revision-to-cvs-revision (revision)
+  "Converts the revision number stored in a change,
+a natural number, into a CVS revision string:
+23 gets -r1.23"
+  (format nil "-r1.~S" revision))
+
 (defun cvs-import (module access)
+  "Interface to cvs import command, which is
+necessary to create a new repository."
   (cvs-default-error-handling "-d" (extract :root access)
 			      "import"
 			      "-m" *cvs-import-log-message*
@@ -57,26 +77,42 @@
 			      *cvs-import-release-tag*))
 
 (defun cvs-get (module access files destination)
-  "For some reason  co -d . ist not possible with cvs using
+  "For some reason co -d . ist not possible with cvs using
 ssh as transport layer. That means that all files
-are checked out into gennf-tmp/module/. The whole content of
-gennf-tmp/module is moved to destination,
+are checked out into <tmp>/module/. The whole content of
+<tmp>/module is moved to destination,
 especially including the cvs meta directory, because
 cvs-commit would not work otherwise.
-temporary-directory should be generated using some
-save routine."
+Each element of files may be an atom or a dotted pair
+as described for function backend-get."
+  (unless files (return-from cvs-get))
   (in-temporary-directory
-    (let* ((file-list (mapcar #'(lambda (file)
-				  (format nil "~A/~A" module
-					  (namestring file)))
-			      files))
-	   (argument-list (append (list "-d" (extract :root access) "co")
-				  file-list))
+    (let* ((default-argument-list (list "-d" (extract :root access) "co"))
 	   (module-path (make-pathname :directory
 				       (list :relative module))))
-      (format t "~S" argument-list)
-      (break)
-      (apply #'cvs-default-error-handling argument-list)
+      ;; Fetch all files.
+      (dolist (file files)
+	(let ((argument-list default-argument-list))
+	  (if (consp file)
+	      ;; file is a dotted pair (filename . revision).
+	      (let ((filename (car file))
+		    (revision (cdr file)))
+		(setf filename (format nil "~A/~A" module
+				       (namestring filename)))
+		(setf revision (change-revision-to-cvs-revision revision))
+		(setf argument-list (append default-argument-list
+					    (list revision filename))))
+	      ;; file is an atom.
+	      (progn
+		(setf file (format nil "~A/~A" module
+				   (namestring file)))
+		(setf argument-list (append default-argument-list
+					    (list file)))))
+	  ;; Call cvs correct argument list for desired
+	  ;; revision of file.
+	  (apply #'cvs-default-error-handling argument-list)))
+      ;; Move checked out files to destination
+      ;; and delete temporary subdirectory module-path.
       (port-path:with-directory-form ((destination-directory
 				       destination))
 	(move-directory-tree module-path
@@ -89,28 +125,36 @@ The current working directory has to be a result of a cvs-get.
 If some files are outdated a condition backend-outdated-error
 is signalled, containing a list of outdated files. In this
 case no files are committed at all."
-  (let (file-list argument-list)
+  (let (argument-list)
     (dolist (file files)
       (unless (cvs-known-file-p access file)
-	(cvs-add access (list file)))
-      (push file file-list))
-    ;(ensure-string-pathname message-file)
+	(cvs-add access (list file))))
     (setf argument-list (append (list "-d" (extract :root access)
 				      "ci" "-m" message)
-				(mapcar #'namestring file-list)))
+				(mapcar #'namestring files)))
+    (break)
     (with-cvs-output (argument-list :error error :exit-code exit-code)
       (unless (= exit-code 0)
+	(break)
+	;; Check if files were outdated and signal appropriately.
 	(let ((outdated-files
 	       (loop for line = (read-line error nil)
 		     while line
 		     when (search "Up-to-date check failed" line)
-		     append (search-multiple file-list line))))
-	  (setf outdated-files (mapcar #'pathname outdated-files))
-	  (error 'backend-outdated-error :code exit-code
-		 :description "Some files are outdated."
-		 :files outdated-files))))))
+		     append (search-multiple files line))))
+	  (if outdated-files
+	      (progn
+		(setf outdated-files (mapcar #'pathname outdated-files))
+		(error 'backend-outdated-error :code exit-code
+		       :description "Some files are outdated."
+		       :files outdated-files))
+	      (error  'backend-error :code exit-code
+		      :description "Something went wrong with cvs ci.")))))))
 
 (defun cvs-up-to-date-p (access file)
+  "Return if the checked out copy of file is
+an up to date copy (or a modification of an up
+to ate copy(."
   (ensure-string-pathname file)
   (with-cvs-output ((list "-d" (extract :root access)
 			  "-n" "up" file)
@@ -121,6 +165,7 @@ case no files are committed at all."
 		(char/= (aref output 0) #\?))))))
 	  
 (defun cvs-known-file-p (access file)
+  "Returns if file is known by cvs (if it is already added)."
   (ensure-string-pathname file)
   (with-cvs-output ((list "-d" (extract :root access)
 			  "log" file)
