@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.4 2006/02/09 13:23:25 sigsegv Exp $
+;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.5 2006/02/12 19:55:08 florenz Exp $
 
 ;; This file provides functions to manipulate meta files
 ;; that contain sequences of alists.
@@ -24,6 +24,7 @@
 (in-package :gennf)
 
 (defgeneric convert-to-alist (object)
+  (:method-combination append :most-specific-last)
   (:documentation "Generates an alist represenation of object.
 The reason, why this generic function is in this file is that
 all meta are lists of alists but converted to lists

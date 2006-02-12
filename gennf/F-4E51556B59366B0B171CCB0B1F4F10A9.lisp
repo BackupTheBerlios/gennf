@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.25 2006/02/12 18:30:30 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.26 2006/02/12 19:55:08 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -97,6 +97,7 @@ are incorporated in the checked out copy."
 a natural number, into a CVS revision string:
 23 gets -j1.23."
   (format nil "-j1.~S" revision))
+
 (defun cvs-output-file (file-request &optional prefix)
   "Extracts a filename from file-request, which may be
 a dotted pair (filename . revision) or an atom filename,
@@ -228,7 +229,6 @@ that is only consistent for the last chunk that was checked out."
 	(move-directory-tree module-path
 			     destination-directory)
 	(delete-directory-tree module-path)))))
-
   
 (defun cvs-commit (message access files)
   "If files are not known to cvs they are added.

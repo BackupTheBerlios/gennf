@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.4 2006/02/11 21:20:16 florenz Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.5 2006/02/12 19:55:08 florenz Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -45,7 +45,7 @@ NIL (see change.lisp for an explaination of this beheviour)."
       (call-next-method)
       (prin1 (convert-to-alist branch) stream)))
 
-(defmethod convert-to-alist ((branch branch))
+(defmethod convert-to-alist append ((branch branch))
   "Convert a branch object to its alist representation."
   (acons :identifier (identifier branch)
 	 (acons :symbolic-name (symbolic-name branch)

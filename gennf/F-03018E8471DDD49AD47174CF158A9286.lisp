@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.5 2006/02/11 21:20:16 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.6 2006/02/12 19:55:07 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -41,7 +41,7 @@ implemented as an alist."))
        (eql (car (first alist)) :identifier)
        (eql (car (second alist)) :file-map)))
 
-(defmethod convert-to-alist ((change change))
+(defmethod convert-to-alist append ((change change))
   "Converts a change to an alist. First entry is identifier,
 second is the file-map."
   (acons :identifier (identifier change)
