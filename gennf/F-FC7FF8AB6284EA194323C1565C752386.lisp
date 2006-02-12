@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.13 2006/02/12 14:26:16 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.14 2006/02/12 18:30:30 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -89,8 +89,10 @@ access file and the branch subdirectory with it's change file."
     (let* ((access (create-new-access :root root))
 	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
-      ;; Get change file.
-      (backend-get module access (list change-file) *meta-directory*)
+      ;; Get change, branch and access file.
+      (backend-get module access
+		   (list *access-file* *branch-file* change-file)
+		   *meta-directory*)
       ;; Extract the files with revisions to check out and
       ;; exchange the filenames by "branch/filename".
       (let ((files (mapcar #'(lambda (pair)
@@ -98,26 +100,22 @@ access file and the branch subdirectory with it's change file."
 						      (car pair))
 				     (cdr pair)))
 			   (extract-files-and-revisions change-file change))))
-	;; All files for one sandbox have to be checked out at once.
-	;; This especially means that change-file is checked out again.
-	;; See cvs-get for an explaination.
-	(push change-file files)
-	(push *access-file* files)
-	(push *branch-file* files)
+	;; Retrieve the files into *meta-directory*.
 	(backend-get module access files *meta-directory*)))))
 		     
 (defun commit (module root branch files)
-  "Commit files to the checked out branch. An appropriate commit
+  "Commit files to the checked out branch. An appropriate change
 record is stored. All files must have been changed. If not
 they get recorded in the commit but are not assigned a new revision
 number which makes the mapping occurence<-->revision-number illegal.
-This means, some other functions has to check if all files will go
-upstream."
+This means, some other functions has to check which files go upstream
+before calling this routine."
   (in-meta-directory
     (let* ((access (create-new-access :root root))
 	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
       (setf files (mapcar #'pathname files))
+      ;; Get latest change file.
       (backend-get module access
 		   (list change-file) *meta-directory*)
       (let* ((changes (read-change-file change-file))
@@ -126,8 +124,10 @@ upstream."
 				    :identifier identifier
 				    :file-map (create-new-file-map))))
 	(setf changes (add-change change changes))
+	;; Add files to new change.
 	(dolist (file files)
 	  (setf changes (add-file-to-changes file changes)))
+	;; Write new change file.
 	(write-change-file changes change-file))
       (setf files (mapcar #'(lambda (file)
 			      (merge-pathnames branch-directory file)) files))
