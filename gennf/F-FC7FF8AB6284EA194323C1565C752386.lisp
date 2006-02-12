@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.14 2006/02/12 18:30:30 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.15 2006/02/12 20:19:51 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -134,3 +134,12 @@ before calling this routine."
       (backend-commit module "commit" access
 		      (append (list change-file)
 			      files)))))
+
+(defun merge (module root branch origin)
+  "Merge is a repository only operation.
+origin indicates the change to merge in. That means, that a
+record in the access file for the origin's site has to exist.
+The merge is applied to module and branch on root.
+The origin's module has to have the same name. The branch
+has to exist."
+  ())

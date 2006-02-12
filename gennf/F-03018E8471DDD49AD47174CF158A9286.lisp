@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.6 2006/02/12 19:55:07 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.7 2006/02/12 20:19:51 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -67,7 +67,13 @@ as a list, this method passes if *print-radably* is T."
       (prin1 (convert-to-alist change) stream)))
 
 (defun read-change-file (&optional (file *change-file*))
-  (mapcar #'(lambda (alist) (alist-to-change alist)) (read-file file)))
+  "Reads file as a change file. Each entry is checked if
+it is a merge or a change and appropriate objects are created."
+  (flet ((create-object (alist)
+	   (cond ((is-change-p alist) (alist-to-change alist))
+		 ((is-merge-p alist) (alist-to-merge alist))
+		 (t (error "Garbage in the change file.")))))
+    (mapcar #'create-object (read-file file))))
 
 (defun write-change-file (changes &optional (file *change-file*))
   "Writes a list of changes into a change file, which is

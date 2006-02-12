@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.2 2006/02/12 19:55:08 florenz Exp $
+;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.3 2006/02/12 20:19:51 florenz Exp $
 
 ;; Manipulations of merges.
 
@@ -41,6 +41,20 @@ not with new code but with code from some other change."))
   "Converts a merge to its alist representation."
   (acons :origin (convert-to-alist (origin merge)) ()))
 
+(defun alist-to-merge (alist)
+  "Makes a merge object from its alist representation."
+  (when (is-merge-p alist)
+    (make-instance 'merge
+		   :identifier (extract :identifier alist)
+		   :file-map (extract :file-map alist)
+		   :origin (alist-to-origin (extract :origin alist)))))
+
+(defmethod print-object ((merge merge) stream)
+  "Prints a merge as an alist, only if *print-readably* is NIL."
+  (if *print-readably*
+      (call-next-method)
+      (prin1 (convert-to-alist merge) stream)))
+
 (defclass origin ()
   ((identifier :initarg :identifier
 	       :accessor identifier
@@ -51,7 +65,7 @@ not with new code but with code from some other change."))
    (access :initarg :access
 	   :accessor access
 	   :documentation "Access to get hold of change referring to."))
-  (:documentation "An origin established a link between changes."))
+  (:documentation "An origin establishes a link between changes."))
 
 (defun is-origin-p (alist)
   "Test if given alist is an origin represenation."
@@ -65,3 +79,17 @@ not with new code but with code from some other change."))
   (acons :identifier (identifier origin)
 	 (acons :branch (branch origin)
 		(acons :access (access origin) ()))))
+
+(defun alist-to-origin (alist)
+  "Converts a proper alist to an origin object."
+  (when (is-origin-p alist)
+    (make-instance 'origin
+		   :identifier (extract :identifier alist)
+		   :branch (extract :branch alist)
+		   :access (extract :access alist))))
+
+(defmethod print-object ((origin origin) stream)
+  "Prints a merge as an alist, only if *print-readably* is NIL."
+  (if *print-readably*
+      (call-next-method)
+      (prin1 (convert-to-alist origin) stream)))
