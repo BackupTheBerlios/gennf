@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.12 2006/02/11 21:20:16 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.13 2006/02/12 14:26:16 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -89,9 +89,8 @@ access file and the branch subdirectory with it's change file."
     (let* ((access (create-new-access :root root))
 	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
-      (backend-get module access
-		   (list *branch-file* *access-file* change-file)
-		   *meta-directory*)
+      ;; Get change file.
+      (backend-get module access (list change-file) *meta-directory*)
       ;; Extract the files with revisions to check out and
       ;; exchange the filenames by "branch/filename".
       (let ((files (mapcar #'(lambda (pair)
@@ -99,6 +98,12 @@ access file and the branch subdirectory with it's change file."
 						      (car pair))
 				     (cdr pair)))
 			   (extract-files-and-revisions change-file change))))
+	;; All files for one sandbox have to be checked out at once.
+	;; This especially means that change-file is checked out again.
+	;; See cvs-get for an explaination.
+	(push change-file files)
+	(push *access-file* files)
+	(push *branch-file* files)
 	(backend-get module access files *meta-directory*)))))
 		     
 (defun commit (module root branch files)

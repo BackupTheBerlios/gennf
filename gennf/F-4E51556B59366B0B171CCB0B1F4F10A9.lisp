@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.23 2006/02/11 21:20:16 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.24 2006/02/12 14:26:16 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -24,6 +24,9 @@
 
 (in-package :gennf)
 
+(defparameter *cvs-meta-directory*
+  (make-pathname :directory (list :relative "CVS"))
+  "Relative path of cvs meta directory.")
 (defparameter *cvs-import-log-message* *backend-import-log-message*
   "The log message recorded when using cvs-import function.")
 (defparameter *cvs-import-vendor-tag* "gennf-created"
@@ -45,6 +48,24 @@ store the exit-code in exit-code if provided."
 			 :exit-code ,exit-code)
     ,@forms))
 
+(defun cvs-output-to-file (arguments file)
+  "Run cvs command with given arguments. All output to
+standard output is written to file. Error handling is like
+cvs-default-error-handling."
+  (with-cvs-output (arguments :exit-code exit-code :output output)
+    (ensure-directories-exist file)
+    (with-open-file (destination file
+				 :direction :output
+				 :if-exists :supersede
+				 :if-does-not-exist :create)
+      (if (= exit-code 0)
+	  (loop for line = (read-line output nil)
+		while line
+		do (write-line line destination))
+	  (error 'backend-error :code exit-code
+		 :description
+		 "Something went wrong with cvs-output-to-file.")))))
+
 (defun cvs-default-error-handler (exit-code)
   "Signals an errorif exit-code is not 0. The
 exit-code is mentioned in the error message."
@@ -59,6 +80,13 @@ exit-code is mentioned in the error message."
   "Default error handling is to signal a condition if
 cvs exists with a non 0 exit code."
   (cvs-default-error-handler (apply #'invoke-cvs args)))
+
+(defun cvs-remove-sticky-tag (access file)
+  "Remove the sticky tag from file that results from
+cvs up or cvs co with -r option."
+  (apply #'cvs-default-error-handling
+	 (list "-d" (extract :root access)
+	       "up" "-A" (namestring file))))
 
 (defun change-revision-to-cvs-revision (revision)
   "Converts the revision number stored in a change,
@@ -77,40 +105,58 @@ necessary to create a new repository."
 			      *cvs-import-release-tag*))
 
 (defun cvs-get (module access files destination)
+  "Each element of files may be an atom or a dotted pair
+as described for function backend-get.
+cvs-get either calls cvs-get-checkout or cvs-get-update,
+depending on the existance of *cvs-meta-directory*
+in destination."
+  (if (port-path:path-exists-p (merge-pathnames *cvs-meta-directory*
+						destination))
+      (cvs-get-update access files destination)
+      (cvs-get-checkout module access files destination)))
+
+(defun cvs-get-update  (access files destination)
+  "Checks out all given files to destination. destination
+has to be a cvs sandbox, i. e. it contains *cvs-meta-directory*"
+  (unless files (return-from cvs-get-update)) ; No files, do nothing.
+  (in-directory destination
+    (let ((default-argument-list (list "-d" (extract :root access) "up")))
+      (dolist (file files)
+	(let ((argument-list
+	       (append default-argument-list
+		       (cvs-file-revision-argument file)))
+	      (output-file (cvs-output-file file)))
+	  (apply #'cvs-default-error-handling argument-list)
+	  (cvs-remove-sticky-tag access output-file))))))
+
+(defun cvs-get-checkout (module access files destination)
   "For some reason co -d . ist not possible with cvs using
 ssh as transport layer. That means that all files
 are checked out into <tmp>/module/. The whole content of
 <tmp>/module is moved to destination,
 especially including the cvs meta directory, because
 cvs-commit would not work otherwise.
-Each element of files may be an atom or a dotted pair
-as described for function backend-get."
-  (unless files (return-from cvs-get))
+Caution: it is not possible to get a proper sandbox
+by repeatedly calling cvs-get-checkout. This is due to the circumstance
+that files are checked out to a temporary storage and moved
+to the destination. This includes cvs meta data. Subsequently
+calling cvs-get-checkout for the same destination results in meta data
+that is only consistent for the last chunk that was checked out."
+  (unless files (return-from cvs-get-checkout)) ; No files, do nothing.
   (in-temporary-directory
-    (let* ((default-argument-list (list "-d" (extract :root access) "co"))
-	   (module-path (make-pathname :directory
-				       (list :relative module))))
+    (let ((default-argument-list (list "-d" (extract :root access) "co"))
+	  (module-path (make-pathname :directory
+				      (list :relative module))))
       ;; Fetch all files.
       (dolist (file files)
-	(let ((argument-list default-argument-list))
-	  (if (consp file)
-	      ;; file is a dotted pair (filename . revision).
-	      (let ((filename (car file))
-		    (revision (cdr file)))
-		(setf filename (format nil "~A/~A" module
-				       (namestring filename)))
-		(setf revision (change-revision-to-cvs-revision revision))
-		(setf argument-list (append default-argument-list
-					    (list revision filename))))
-	      ;; file is an atom.
-	      (progn
-		(setf file (format nil "~A/~A" module
-				   (namestring file)))
-		(setf argument-list (append default-argument-list
-					    (list file)))))
+	(let ((argument-list
+	       (append default-argument-list
+		       (cvs-file-revision-argument file module)))
+	      (output-file (cvs-output-file file module-path)))
 	  ;; Call cvs correct argument list for desired
 	  ;; revision of file.
-	  (apply #'cvs-default-error-handling argument-list)))
+	  (apply #'cvs-default-error-handling argument-list)
+	  (cvs-remove-sticky-tag access output-file)))
       ;; Move checked out files to destination
       ;; and delete temporary subdirectory module-path.
       (port-path:with-directory-form ((destination-directory
@@ -119,6 +165,45 @@ as described for function backend-get."
 			     destination-directory)
 	(delete-directory-tree module-path)))))
 
+(defun cvs-output-file (file-request &optional prefix)
+  "Extracts a filename from file-request, which may be
+a dotted pair (filename . revision) or an atom filename,
+to which cvs up or cvs co output is written."
+  (multiple-value-bind (file-revision output-file)
+      (cvs-file-revision-transform file-request prefix)
+    (declare (ignore file-revision))
+    output-file))
+
+(defun cvs-file-revision-argument (file-request &optional prefix)
+  "If file-request is a dotted pair (file . revision),
+proper cvs arguments like (-r1.2 filename) is returned.
+If pair is an atom, (filename) is returned.
+If a prefix is given, it is prepended to the file's filename."
+  (cvs-file-revision-transform file-request prefix))
+
+(defun cvs-file-revision-transform (file-request &optional prefix)
+  "Backend for cvs-output-file and cvs-file-revision-transform.
+The return value is a pair whose first element is an argument
+list for cvs an secon argument is a filename to store write
+checked out content to."
+  (flet ((prepend-prefix (filename prefix)
+	   (if prefix
+	       (format nil "~A/~A" prefix (namestring filename))
+	       (namestring filename)))
+	 (output-pathname (filename prefix)
+	   (if prefix
+	       (merge-pathnames (pathname filename) (pathname prefix))
+	       (pathname filename))))
+    (if (consp file-request)
+	;; file is a dotted pair (filename . revision).
+	(let ((filename (prepend-prefix (car file-request) prefix))
+	      (revision (change-revision-to-cvs-revision (cdr file-request)))
+	      (output-file (output-pathname (car file-request) prefix)))
+	  (values (list revision filename) output-file))
+      ;; file is an atom.
+      (values (list (prepend-prefix file-request prefix))
+	      (output-pathname file-request prefix)))))
+  
 (defun cvs-commit (message access files)
   "If files are not known to cvs they are added.
 The current working directory has to be a result of a cvs-get.
