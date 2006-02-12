@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.15 2006/02/12 20:19:51 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.16 2006/02/12 22:15:07 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -26,7 +26,7 @@
 (defparameter *devel-root*
   "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk")
 (defparameter *devel-access*
-  (create-new-access :identifier 0 :root *devel-root*))
+  (make-instance 'access :root *devel-root*))
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (proclaim '(optimize (debug 3))))
 ;; End of development only section.
@@ -43,7 +43,7 @@ with the next free number and an empty CHANGE file."
 		 :cleanup (progn (delete-file *branch-file*)
 				 (delete-directory-tree
 				  branch-directory))))
-	  (let ((access (create-new-access :root root)))
+	  (let ((access (make-instance 'access :root root)))
 	    (backend-get module access
 			 (list *branch-file* *access-file*) *meta-directory*)
 	    (let* ((identifier (get-new-branch-identifier *branch-file*))
@@ -73,8 +73,8 @@ FIXME: It should be checked if module already exists."
    (create-meta-directory)
    (in-meta-directory
      (create-new-branch-file)
-     (let ((access (create-new-access
-		    :identifier 1 :root root)))
+     (let ((access (make-instance 'access
+				  :identifier 1 :root root)))
        (add-access access *access-file*)
        (backend-import module access)))
    (remove-meta-directory)))
@@ -86,10 +86,11 @@ The sandbox is called *meta-directory* and contains the branch and
 access file and the branch subdirectory with it's change file."
   (create-meta-directory)
   (in-meta-directory
-    (let* ((access (create-new-access :root root))
+    (let* ((access (make-instance 'access :root root))
 	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
       ;; Get change, branch and access file.
+      (break)
       (backend-get module access
 		   (list *access-file* *branch-file* change-file)
 		   *meta-directory*)
@@ -109,9 +110,10 @@ record is stored. All files must have been changed. If not
 they get recorded in the commit but are not assigned a new revision
 number which makes the mapping occurence<-->revision-number illegal.
 This means, some other functions has to check which files go upstream
-before calling this routine."
+before calling this routine.
+FIXME: No conflict handling yet."
   (in-meta-directory
-    (let* ((access (create-new-access :root root))
+    (let* ((access (make-instance 'access :root root))
 	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
       (setf files (mapcar #'pathname files))
@@ -135,10 +137,10 @@ before calling this routine."
 		      (append (list change-file)
 			      files)))))
 
-(defun merge (module root branch origin)
+(defun merge (module root branch origin-root origin-branch origin-change)
   "Merge is a repository only operation.
-origin indicates the change to merge in. That means, that a
-record in the access file for the origin's site has to exist.
+origin-* indicate the change to merge in. A record the access file
+is made if necessary.
 The merge is applied to module and branch on root.
 The origin's module has to have the same name. The branch
 has to exist."

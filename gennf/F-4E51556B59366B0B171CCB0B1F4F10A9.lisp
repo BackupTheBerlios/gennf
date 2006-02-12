@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.26 2006/02/12 19:55:08 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.27 2006/02/12 22:15:07 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -89,7 +89,7 @@ cvs up or cvs co with -r option.
 Note: changes stored for this file in the repository
 are incorporated in the checked out copy."
   (apply #'cvs-default-error-handling
-	 (list "-d" (extract :root access)
+	 (list "-d" (root access)
 	       "up" "-A" (namestring file))))
 
 (defun change-revision-to-cvs-revision (revision)
@@ -142,7 +142,7 @@ checked out content to."
 an up to date copy (or a modification of an up
 to ate copy(."
   (ensure-string-pathname file)
-  (with-cvs-output ((list "-d" (extract :root access)
+  (with-cvs-output ((list "-d" (root access)
 			  "-n" "up" file)
 		    :output stream)
     (let ((output (read-line stream nil)))
@@ -153,7 +153,7 @@ to ate copy(."
 (defun cvs-known-file-p (access file)
   "Returns if file is known by cvs (if it is already added)."
   (ensure-string-pathname file)
-  (with-cvs-output ((list "-d" (extract :root access)
+  (with-cvs-output ((list "-d" (root access)
 			  "log" file)
 		    :exit-code exit-code)
     (= exit-code 0)))
@@ -161,7 +161,7 @@ to ate copy(."
 (defun cvs-import (module access)
   "Interface to cvs import command, which is
 necessary to create a new repository."
-  (cvs-default-error-handling "-d" (extract :root access)
+  (cvs-default-error-handling "-d" (root access)
 			      "import"
 			      "-m" *cvs-import-log-message*
 			      module
@@ -182,12 +182,12 @@ routine for some arbitrary cvs sandbox.)"
       (cvs-get-update access files destination)
       (cvs-get-checkout module access files destination)))
 
-(defun cvs-get-update  (access files destination)
+(defun cvs-get-update (access files destination)
   "Checks out all given files to destination. destination
 has to be a cvs sandbox, i. e. it contains *cvs-meta-directory*"
   (unless files (return-from cvs-get-update)) ; No files, do nothing.
   (in-directory destination
-    (let ((default-argument-list (list "-d" (extract :root access)
+    (let ((default-argument-list (list "-d" (root access)
 				       "up" "-jHEAD")))
       (dolist (file files)
 	(let ((argument-list
@@ -210,7 +210,7 @@ calling cvs-get-checkout for the same destination results in meta data
 that is only consistent for the last chunk that was checked out."
   (unless files (return-from cvs-get-checkout)) ; No files, do nothing.
   (in-temporary-directory
-    (let ((default-argument-list (list "-d" (extract :root access)
+    (let ((default-argument-list (list "-d" (root access)
 				       "co" "-jHEAD"))
 	  (module-path (make-pathname :directory
 				      (list :relative module))))
@@ -240,13 +240,11 @@ case no files are committed at all."
     (dolist (file files)
       (unless (cvs-known-file-p access file)
 	(cvs-add access (list file))))
-    (setf argument-list (append (list "-d" (extract :root access)
+    (setf argument-list (append (list "-d" (root access)
 				      "ci" "-m" message)
 				(mapcar #'namestring files)))
-    (break)
     (with-cvs-output (argument-list :error error :exit-code exit-code)
       (unless (= exit-code 0)
-	(break)
 	;; Check if files were outdated and signal appropriately.
 	(let ((outdated-files
 	       (loop for line = (read-line error nil)
@@ -272,6 +270,6 @@ to the repository."
 	   (paths (append directory-prefixes (list file))))
       (dolist (path paths)
 	(ensure-string-pathname path)
-	(invoke-cvs "-d" (extract :root access)
+	(invoke-cvs "-d" (root access)
 		    "add"
 		    path)))))

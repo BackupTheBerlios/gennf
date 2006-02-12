@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.22 2006/02/11 21:20:16 florenz Exp $
+;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.23 2006/02/12 22:15:07 florenz Exp $
 
 ;; This file is gennf's backend abstraction layer.
 ;; All interaction with a backend will be by routines of this file.
@@ -45,12 +45,12 @@ files is a list, each element may either be a filename
 or a dotted pair (filename . revision). Revision is the
 number stored in a change. If an element is only a
 filename, the latest revision will be fetched."
-  (let ((backend (extract :backend access)))
+  (let ((backend (backend access)))
     (cond ((eql backend :cvs) (cvs-get module access files destination))
 	  (t (error "Backend ~S not implemented." backend)))))
 
 (defun backend-import (module access)
-  (let ((backend (extract :backend access)))
+  (let ((backend (backend access)))
     (cond ((eql backend :cvs) (cvs-import module access))
 	  (t (error "Backend ~S not implemented." backend)))))
 
@@ -65,7 +65,7 @@ If it is not possible to commit a file because
 it is outdated a backend-outdated-error is signalled.
 No file will be committed in this case."
   (declare (ignore module))
-  (let ((backend (extract :backend access)))
+  (let ((backend (backend access)))
     (cond ((eql backend :cvs)
 	   (cvs-commit message access files))
 	  (t (error "Backend ~S not implemented." backend)))))
