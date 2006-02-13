@@ -2,6 +2,9 @@
   "MCVS/F-1231D4BAEA3A8B48DC3D68CF2C53A2D2.asd"
   "port-path.asd")
  (:FILE
+  "MCVS/F-227078CBBBB1203509886A2603541423.c"
+  "port-path-posix.c")
+ (:FILE
   "MCVS/F-7A7785FBE6038B4802ADCD8577015F59.lisp"
   "port-path.lisp")
  (:FILE
