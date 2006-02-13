@@ -16,16 +16,18 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.3 2006/02/09 13:23:25 sigsegv Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.4 2006/02/13 18:11:14 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
 
 (in-package :gennf)
 
-(defparameter *meta-directory* (merge-pathnames
-				(make-pathname
-				 :directory '(:relative "META"))))
+(defparameter *meta-directory-name* (make-pathname :directory
+						  '(:relative "META"))
+  "Name of the meta directory.")
+(defparameter *meta-directory* (merge-pathnames *meta-directory-name*)
+  "Absolute path of the meta directory.")				
 (defparameter *branch-file* (make-pathname :name "BRANCH"))
 (defparameter *access-file* (make-pathname :name "ACCESS"))
 (defparameter *change-file* (make-pathname :name "CHANGE"))

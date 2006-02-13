@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.27 2006/02/12 22:15:07 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.28 2006/02/13 18:11:13 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -186,7 +186,7 @@ routine for some arbitrary cvs sandbox.)"
   "Checks out all given files to destination. destination
 has to be a cvs sandbox, i. e. it contains *cvs-meta-directory*"
   (unless files (return-from cvs-get-update)) ; No files, do nothing.
-  (in-directory destination
+  (in-directory (destination)
     (let ((default-argument-list (list "-d" (root access)
 				       "up" "-jHEAD")))
       (dolist (file files)
@@ -209,7 +209,7 @@ to the destination. This includes cvs meta data. Subsequently
 calling cvs-get-checkout for the same destination results in meta data
 that is only consistent for the last chunk that was checked out."
   (unless files (return-from cvs-get-checkout)) ; No files, do nothing.
-  (in-temporary-directory
+  (in-temporary-directory ()
     (let ((default-argument-list (list "-d" (root access)
 				       "co" "-jHEAD"))
 	  (module-path (make-pathname :directory

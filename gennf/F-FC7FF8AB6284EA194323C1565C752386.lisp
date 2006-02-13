@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.16 2006/02/12 22:15:07 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.17 2006/02/13 18:11:14 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -35,7 +35,7 @@
 			    &key (symbolic-name "") (description ""))
   "Create a new branch. That is to create a branch directory
 with the next free number and an empty CHANGE file."
-  (in-temporary-directory
+  (in-temporary-directory ()
     (create-meta-directory)
     (in-meta-directory
       (let ((branch-directory (make-pathname)))
@@ -69,15 +69,14 @@ with the next free number and an empty CHANGE file."
   "Create a completely empty repository only containing an
 ACCESS and BRANCH file.
 FIXME: It should be checked if module already exists."
-  (in-temporary-directory
-   (create-meta-directory)
-   (in-meta-directory
-     (create-new-branch-file)
-     (let ((access (make-instance 'access
-				  :identifier 1 :root root)))
-       (add-access access *access-file*)
-       (backend-import module access)))
-   (remove-meta-directory)))
+  (in-temporary-directory ()
+    (create-meta-directory)
+    (in-meta-directory
+      (create-new-branch-file)
+      (let ((access (make-instance 'access
+				   :identifier 1 :root root)))
+	(add-access access *access-file*)
+	(backend-import module access)))))
 
 (defun checkout-change (module root branch &optional change)
   "Checkout a change into a sandbox. If no change number is given,

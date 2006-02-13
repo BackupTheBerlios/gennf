@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.5 2006/02/12 14:26:16 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.6 2006/02/13 18:11:14 florenz Exp $
 
 ;; All directory related functions and macros live in this file.
 ;; This includes changing working directory, moving and deletion
@@ -36,16 +36,22 @@ afterwards."
       ,@forms
       (change-directory ,current-directory))))
 
-(defmacro in-temporary-directory (&body forms)
-  "Not yet implemented. The purpose of this macro is:
-Save creation of a temporary directory (e. g. under /tmp),
+(defmacro in-temporary-directory ((&optional temporary-pathname) &body forms)
+  "Save creation of a temporary directory (e. g. under /tmp),
 evaluate forms with temporary directory as working directory,
 change back to old working directory and throw away
 the temporary directory-tree."
-  `(progn
-    ,@forms))
+  (with-gensyms (temporary-directory)
+    `(let ((,temporary-directory (port-path:create-temporary-directory)))
+      (in-directory (,temporary-directory)
+       ,(if temporary-pathname
+	    `(let ((,temporary-pathname ,temporary-directory))
+	      ,@forms)
+	    `(progn
+	      ,@forms)))
+      (delete-directory-tree ,temporary-directory))))
 
-(defmacro in-directory (directory &body forms)
+(defmacro in-directory ((directory) &body forms)
   "Evaluate forms in directory and change back
 to old working directory afterwards."
   (let ((current-directory (gensym "current-directory-")))
@@ -56,8 +62,10 @@ to old working directory afterwards."
 
 (defun create-meta-directory ()
   "Create *meta-directory* and signal a condition, if it
-is already there."
-  (create-directory *meta-directory* :require-fresh-directory t))
+is already there. Set *meta-directory* to path
+of the created directory."
+  (create-directory *meta-directory-name* :require-fresh-directory t)
+  (setf *meta-directory* (merge-pathnames *meta-directory-name*)))
 
 (defun change-directory (pathspec)
   "Change current working directory. Keep the process'
