@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.4 2006/02/11 21:20:16 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.5 2006/02/14 12:33:58 florenz Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -173,3 +173,22 @@ This is not the format of mcvs."
 		     :path #p"/an/absolute/path/w/d/n/e/"
 		     :executable 'nil)
       *test-data*)
+
+;; der Name passt mir noch nicht
+(defun parent-dirs (&optional (path *default-pathname-defaults*))
+  "creates a list of all parent dirs from given dir. Default is 
+*default-pathname-defaults*"
+  (loop
+     for x = path then (port-path:get-parent-directory x)
+     collect x
+     until (port-path:root-p x)))
+
+;; vileicht ersetzen durch find-directory-siblings
+;; die ein filter auf einer liste von Verzeichnissen ist.
+(defun find-upper-directory (&optional (name "META") (path *default-pathname-defaults*))
+"Searchs in all directories above path for a named directory;
+ returns the list of found pathnames"
+  (let ((search-dir (make-pathname :directory `(:relative ,name))))
+	(remove-if-not #'(lambda (p) (port-path:path-exists-p p))
+	  (mapcar #'(lambda (p) (merge-pathnames search-dir p))
+		  (list-parent-dirs path)))))
