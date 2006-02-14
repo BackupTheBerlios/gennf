@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.7 2006/02/14 17:32:55 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.8 2006/02/14 18:15:03 sigsegv Exp $
 
 ;; All directory related functions and macros live in this file.
 ;; This includes changing working directory, moving and deletion
@@ -117,6 +117,12 @@ and files."
 	    (error "Could not create fresh directory ~S, already existent."
 		   absolute-directory)
 	    path)))))
+
+(defun find-meta-directory ()
+"finds from current directory ongoing the higher \"META\" direcory"
+  (first
+   (port-path:search-directory-in-directories "META"
+					      (port-path:parent-dirs *default-pathname-defaults*))))
 
 (defun find-all-files (pathspec)
   "pathspec is interpreted as a directory and a list
