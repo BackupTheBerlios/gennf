@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.5 2006/02/13 17:21:07 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.6 2006/02/14 17:31:01 sigsegv Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -213,3 +213,20 @@ all directory-prefixes is generated:
 			     :name nil :type nil
 			     :defaults pathname) pathname-prefixes))
       pathname-prefixes)))
+
+
+(defun parent-dirs (&optional (path *default-pathname-defaults*))
+  "creates a list of all parent dirs from given dir. Default is 
+*default-pathname-defaults*"
+  (loop
+     for x = path then (port-path:get-parent-directory x)
+     collect x
+     until (port-path:root-p x)))
+
+
+(defun search-directory-in-directories (name path-list)
+  "searches for directory name in path-list.
+returns a list of found directories. "
+  (let ((search-dir (make-pathname :directory `(:relative ,name))))
+    (remove-if-not #'(lambda (p) (port-path:path-exists-p p))
+		   (mapcar #'(lambda (p) (merge-pathnames search-dir p)) path-list))))
