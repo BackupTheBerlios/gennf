@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.17 2006/02/13 18:11:14 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.18 2006/02/14 17:32:55 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -89,7 +89,6 @@ access file and the branch subdirectory with it's change file."
 	   (branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
       ;; Get change, branch and access file.
-      (break)
       (backend-get module access
 		   (list *access-file* *branch-file* change-file)
 		   *meta-directory*)

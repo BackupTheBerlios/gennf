@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.6 2006/02/13 18:11:14 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.7 2006/02/14 17:32:55 florenz Exp $
 
 ;; All directory related functions and macros live in this file.
 ;; This includes changing working directory, moving and deletion
@@ -149,7 +149,61 @@ last directory of source-pathspec still exists afterwards."
 		    all-sources-relative)))
       (mapcar #'(lambda (source-file destination-file)
 		  (ensure-directories-exist destination-file)
-		  (rename-file source-file destination-file))
+		  (move-file source-file destination-file))
 	      all-sources all-destinations)
       (mapcar #'delete-directory-tree
 	      (port-path:directory-listing source)))))
+
+(defun copy-stream (in out &optional (buffer-size 8192))
+  "Copies all data from in to until in is empty.
+Streams' elements must be compatible types."
+  (unless (subtypep (stream-element-type in) (stream-element-type out))
+    (error "Incompatible types of streams' elements."))
+  (loop with buffer = (make-array buffer-size
+				  :element-type (stream-element-type in))
+	for length = (read-sequence buffer in)
+	until (= length 0)
+	do (write-sequence buffer out :end length)))
+
+(defun copy-file (source destination &key overwrite)
+  "Copies a file from source to destination. Overwrites
+a possibly existing file if overwrite is T.
+T is returned if file was cpoied, NIL otherwise.
+source is interpreted as a pathspec in file-form, destination may
+be in file- or directory-form. If it is in directory-form
+the filename from source is taken.
+All directories in destination have to exist."
+  (when (port-path:wild-pathname-p source)
+    (error "Cannot copy a wild pathname."))
+  (when (port-path:wild-pathname-p destination)
+    (error "Cannot copy to a wil location."))
+  (let* ((from (port-path:pathname-to-file-form source))
+	 (to (if (port-path:directory-pathname-p destination)
+		 (merge-pathnames
+		  (make-pathname
+		   :name (pathname-name from)
+		   :type (pathname-type from))
+		  destination)
+		 destination)))
+    (with-open-file (in from
+			:direction :input
+			:if-does-not-exist :error
+			:element-type '(unsigned-byte 8))
+      (with-open-file (out to
+			   :direction :output
+			   :if-does-not-exist :create
+			   :if-exists (when overwrite :supersede)
+			   :element-type '(unsigned-byte 8))
+	(when out
+	  (copy-stream in out))))))
+
+(defun move-file (source destination &key overwrite)
+  "Moves a file from source to destination. If
+overwrite is T and destination exists it is overwritten.
+move-file returns T if file was actually moved, NIL
+otherwise.
+Rules from copy-file for source and destination apply.
+This move works also for cross file-system moves on
+Unix. SBCL's RENAME-FILE e. g. fails in such cases."
+  (when (copy-file source destination :overwrite overwrite)
+    (delete-file source)))
