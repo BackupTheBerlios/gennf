@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-42DFD065A78C998A3E47C9493FF221E7.lisp,v 1.3 2006/02/12 19:55:08 florenz Exp $
+;; $Id: F-42DFD065A78C998A3E47C9493FF221E7.lisp,v 1.4 2006/02/14 10:12:45 florenz Exp $
 
 ;; Definition of gennf-package (this is ASDF-INSTALL style).
 
@@ -26,3 +26,11 @@
     (:documentation "All functions of gennf are in package gennf.
 At a later point, this package may well be splitted into
 several ones with distinct functionality."))
+
+(defun generate-documentation (&optional (directory "doc"))
+  "Produces gennf html documentation using cldoc and stores
+it in directory."
+  (require 'cldoc)
+  (cldoc:extract-documentation 'cldoc:html
+			       directory
+			       (asdf:find-system :gennf)))
