@@ -16,13 +16,14 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.6 2006/02/14 17:31:01 sigsegv Exp $
+;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.7 2006/02/14 17:50:23 florenz Exp $
 
 ;; Defines the exported function of port-path.
 
 (defpackage :port-path
   (:use :cl)
-  (:export
+  (:exporte
+   :wild-pathname-p
    :create-temporary-directory
    :pathname-to-directory-form
    :pathname-to-file-form
