@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.5 2006/02/12 19:55:08 florenz Exp $
+;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.6 2006/02/15 16:00:20 florenz Exp $
 
 ;; This file provides functions to manipulate meta files
 ;; that contain sequences of alists.
@@ -57,3 +57,13 @@ exist, it is created with element as its sole entry."
 	  (when element (push element content)))
 	(setf content (if element (list element) ())))
     (prin1-file file content)))
+
+(defun file-to-list (file)
+  "Reads a (text) file and returns it as a list. Each line
+of the file is an elements of the list (as a string)."
+  (with-open-file (in file
+		      :direction :input
+		      :if-does-not-exist :error)
+    (loop for line = (read-line in nil)
+	  while line
+	  collect line)))

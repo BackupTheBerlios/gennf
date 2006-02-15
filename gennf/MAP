@@ -135,6 +135,9 @@
   "MCVS/F-7849808E8711BA9FBEB0917F33B12A79.lisp"
   "sbcl-port/find-bind.lisp")
  (:FILE
+  "MCVS/F-7B909B20AA69D6DA88736B778CC44579.lisp"
+  "prototype/merging.lisp")
+ (:FILE
   "MCVS/F-7FC7BAE8FEAFAA140D1560EE6A936C40.sh"
   "sbcl-port/unix-bindings/link.sh")
  (:FILE

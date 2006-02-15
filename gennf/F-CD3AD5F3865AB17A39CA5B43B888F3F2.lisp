@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.8 2006/02/14 18:15:03 sigsegv Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.9 2006/02/15 16:00:20 florenz Exp $
 
 ;; All directory related functions and macros live in this file.
 ;; This includes changing working directory, moving and deletion
@@ -40,7 +40,9 @@ afterwards."
   "Save creation of a temporary directory (e. g. under /tmp),
 evaluate forms with temporary directory as working directory,
 change back to old working directory and throw away
-the temporary directory-tree."
+the temporary directory-tree.
+If provided, temporary-pathname is bound to the pathname of the
+temporary directory."
   (with-gensyms (temporary-directory)
     `(let ((,temporary-directory (port-path:create-temporary-directory)))
       (in-directory (,temporary-directory)
@@ -100,6 +102,8 @@ and files."
     (delete-directory-tree *meta-directory*)))
 
 (defun delete-directory-tree (pathspec)
+  "pathspec is interpreted as directory-form
+and deleted -- along with all files and subdirectories."
   (port-path:with-directory-form ((directory pathspec))
     (let ((listing (port-path:directory-listing directory)))
       (dolist (entry listing)
@@ -109,6 +113,9 @@ and files."
 	(osicat:delete-directory directory))))
 
 (defun create-directory (pathspec &key (require-fresh-directory nil))
+  "pathspec is interpreted as a pathname in directory-form. Then all
+directories in this path are created. If require-fresh-directory is T
+an error is signalled if pathspec already existed."
   (port-path:with-directory-form ((directory pathspec))
     (let ((absolute-directory (merge-pathnames directory)))
       (multiple-value-bind (path created)
@@ -169,7 +176,8 @@ Streams' elements must be compatible types."
 				  :element-type (stream-element-type in))
 	for length = (read-sequence buffer in)
 	until (= length 0)
-	do (write-sequence buffer out :end length)))
+	do (write-sequence buffer out :end length)
+	finally (return t)))
 
 (defun copy-file (source destination &key overwrite)
   "Copies a file from source to destination. Overwrites
@@ -188,7 +196,7 @@ All directories in destination have to exist."
 		 (merge-pathnames
 		  (make-pathname
 		   :name (pathname-name from)
-		   :type (pathname-type from))
+	   :type (pathname-type from))
 		  destination)
 		 destination)))
     (with-open-file (in from

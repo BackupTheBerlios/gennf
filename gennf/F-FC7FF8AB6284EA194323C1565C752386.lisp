@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.18 2006/02/14 17:32:55 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.19 2006/02/15 16:00:20 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -100,7 +100,7 @@ access file and the branch subdirectory with it's change file."
 				     (cdr pair)))
 			   (extract-files-and-revisions change-file change))))
 	;; Retrieve the files into *meta-directory*.
-	(backend-get module access files *meta-directory*)))))
+	(backend-get module access files *meta-directory*))))))
 		     
 (defun commit (module root branch files)
   "Commit files to the checked out branch. An appropriate change
@@ -118,6 +118,7 @@ FIXME: No conflict handling yet."
       ;; Get latest change file.
       (backend-get module access
 		   (list change-file) *meta-directory*)
+      (break)
       (let* ((changes (read-change-file change-file))
 	     (identifier (get-new-change-identifier changes))
 	     (change (make-instance 'change
@@ -129,17 +130,39 @@ FIXME: No conflict handling yet."
 	  (setf changes (add-file-to-changes file changes)))
 	;; Write new change file.
 	(write-change-file changes change-file))
+        (break)
       (setf files (mapcar #'(lambda (file)
 			      (merge-pathnames branch-directory file)) files))
       (backend-commit module "commit" access
 		      (append (list change-file)
 			      files)))))
 
-(defun merge (module root branch origin-root origin-branch origin-change)
-  "Merge is a repository only operation.
-origin-* indicate the change to merge in. A record the access file
-is made if necessary.
-The merge is applied to module and branch on root.
-The origin's module has to have the same name. The branch
-has to exist."
-  ())
+;; (defun merge (module root branch
+;; 	      origin-root origin-branch &optional origin-change)
+;;   "Merge is a repository only operation.
+;; origin-* indicate the change to merge in. A record the access file
+;; is made if necessary.
+;; The merge is applied to module and branch on root.
+;; The origin's module has to have the same name. The branch
+;; has to exist."
+;;   (in-temporary-directory
+;;     (let* ((access (make-instance 'access :root root))
+;; 	   (origin-access (make-instance 'access :root origin-root))
+;; 	   (destination-directory (merge-pathnames
+;; 				   (make-pathname :directory
+;; 						  (list "destination"))))
+;; 	   (origin-directory (merge-pathnames
+;; 			      (make-pathname :directory
+;; 					     (list "origin"))))
+;; 	   (destination-branch (merge-pathnames
+;; 				(make-pathname :directory
+;; 					       (format nil "~S" branch))))
+;; 	   (origin-branch (merge-pathnames
+;; 			   (make-pathname :directory
+;; 					  (format nil "~S" origin-branch)))))
+;;       (create-directory destination-directory :require-fresh-directory t)
+;;       (create-directory origin-directory :require-fresh-directory t)
+;;       (in-directory (destination-directory)
+;; 	(checkout-change module root branch))
+;;       (in-directory (origin-directory)
+;; 	(checkout-change module origin-root origin-branch origin-change))

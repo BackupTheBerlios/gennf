@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.28 2006/02/13 18:11:13 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.29 2006/02/15 16:00:20 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -193,6 +193,7 @@ has to be a cvs sandbox, i. e. it contains *cvs-meta-directory*"
 	(let ((argument-list
 	       (append default-argument-list
 		       (cvs-file-revision-argument file))))
+	  (prin1 argument-list) (terpri)
 	  (apply #'cvs-default-error-handling argument-list))))))
 
 (defun cvs-get-checkout (module access files destination)
@@ -243,14 +244,18 @@ case no files are committed at all."
     (setf argument-list (append (list "-d" (root access)
 				      "ci" "-m" message)
 				(mapcar #'namestring files)))
+    (prin1 argument-list)
+    (break)
     (with-cvs-output (argument-list :error error :exit-code exit-code)
       (unless (= exit-code 0)
 	;; Check if files were outdated and signal appropriately.
 	(let ((outdated-files
-	       (loop for line = (read-line error nil)
+	       (loop with filenames = (mapcar #'namestring files)
+		     for line = (read-line error nil)
+		     do (format t "~S" line)
 		     while line
 		     when (search "Up-to-date check failed" line)
-		     append (search-multiple files line))))
+		     append (search-multiple filenamesline))))
 	  (if outdated-files
 	      (progn
 		(setf outdated-files (mapcar #'pathname outdated-files))

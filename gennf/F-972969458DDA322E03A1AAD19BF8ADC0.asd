@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.5 2006/02/14 16:54:52 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.6 2006/02/15 16:00:20 florenz Exp $
 
 (defpackage :gennf-system
     (:use :cl :asdf))
@@ -30,7 +30,7 @@
   :maintainer "Florian Lorenzen <florenz@berlios.de>"
   :licence "GPL"
   :description "Prototype implementaion of distributed version management."
-  :depends-on (:osicat :port-path :cldoc)
+  :depends-on (:osicat :port-path :cldoc :cl-difflib)
   :components
   ((:file "packages")
    (:file "gennf"
