@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.1 2006/02/15 16:00:20 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.2 2006/02/16 10:43:13 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -34,7 +34,7 @@ method dependent."))
 (defmethod differences ((list1 list) (list2 list)
                         &key (equality #'equal))
   "Computes differences between list1 and list2. If provided
-equality is used to test element equlity."
+equality is used to test element equality."
   (let* ((matcher (make-instance 'difflib:sequence-matcher
                                  :a list2
                                  :b list1
@@ -44,16 +44,16 @@ equality is used to test element equlity."
 (defmethod differences ((file1 pathname) (file2 pathname)
                         &key (equality #'equal))
   "Computes differences between file1 and file2."
-  (differences (file-to-list file2) (file-to-list file1)
+  (differences (file-to-list file1) (file-to-list file2)
                :equality equality))
 
 (defun conflictp (differences)
   "Returns wheather the differences indicate any
 conflicts."
-  (= 0 (count-if #'(lambda (element)
-                     (or (eql (difflib:opcode-tag element) :replace)
-                         (eql (difflib:opcode-tag element) :delete)))
-                 differences)))
+  (/= 0 (count-if #'(lambda (element)
+		      (or (eql (difflib:opcode-tag element) :replace)
+			  (eql (difflib:opcode-tag element) :delete)))
+		  differences)))
 
 (defgeneric two-way-merge (sequence1 sequence2
                                      &key equality conflicting
@@ -151,3 +151,4 @@ replace-markup-functions."
 				    (difflib:opcode-i1 difference)
 				    (difflib:opcode-i2 difference))))))))
     merge))
+

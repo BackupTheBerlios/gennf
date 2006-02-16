@@ -1,0 +1,11 @@
+TODO
+====
+
+* Log messages are not considered.
+* in-temporary-directory must ensure that directory is removed
+  if non-local exit occurs.
+  Similair holds for in-directory: the old working directory has
+  to be restored as current working directory in case of non-local
+  exit.
+* For the merging: An equality predicate which disregards differences
+  in whitespace might be helpful.
