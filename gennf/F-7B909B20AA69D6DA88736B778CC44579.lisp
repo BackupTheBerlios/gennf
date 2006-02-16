@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.3 2006/02/16 13:37:18 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.4 2006/02/16 14:33:35 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -187,6 +187,11 @@ ranges from each difference."
 	  collect difference
 	  until (> (funcall get-start difference) end)))
 
+(defun no-difference-p (differences)
+  "Scans a list of differences an returns if
+they are all equalities, i. e. no differences."
+  (every #'(lambda (difference)
+	     (eql (difflib:opcode-tag difference) :equal)) differences))
 
 (defgeneric three-way-merge (ancestor sequence1 sequence2
 				      &key delete-markup-function
@@ -200,22 +205,35 @@ This is done by computing the difference between sequence1 and
 ancestor and sequence2 and ancestor.
 Differences between sequence1 and ancestor are merged into
 sequence2 only if sequence2 and ancestor do not differ for this
-range."))
+range. Otherwise porper markup is inserted.
+The function returns the result of the merge as first value
+and as second value a boolean indicating conflicts."))
 
-(defmethod three-way-merge ((ancestor list) (sequence1 list) (sequence2 list)
+(defmethod three-way-merge ((ancestor list) (list1 list) (list2 list)
 			    &key delete-markup-function
 			    replace-markup-function
 			    insert-markup-function
-			    equality)
+			    (equality #'equal))
   "Three-way-merge for lists."
-  (let ((differences1 (differences sequence1 ancestor
+  (let ((differences1 (differences list1 ancestor
 				   :equality equality))
-	(differences2 (differences sequence2 ancestor
+	(differences2 (differences list2 ancestor
 				   :equality equality))
-	(merge ()))
+	(merge list2)
+	(conflict nil))
     (dolist (difference differences1)
-      (case (difflib:opcode-tag difference)
-	(:delete ())
-	(:replace ())
-	(:insert ())
-	(:equal ())))))
+      (let ((this-differences
+	     (which-differences differences2 
+				(difflib:opcode-i1 difference)
+				(difflib:opcode-i2 difference))))
+	(if (no-difference-p this-differences)
+	    (setf merge
+		  (apply-opcode difference list1 merge))
+	    (progn
+	      (setf conflict t)
+	      (case (difflib:opcode-tag difference)
+		(:delete ())
+		(:replace ())
+		(:insert ())
+		(:equal ()))))))
+    (values merge conflict)))
