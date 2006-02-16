@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.6 2006/02/14 18:15:03 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.7 2006/02/16 19:43:53 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -27,7 +27,6 @@
 ;;   - adding file
 ;;   - removing file
 ;;   - ... 
-;; - generating Universal ID
 ;; - dublicate checking
 ;; - structure generating
 ;; - structure syncing
@@ -35,7 +34,8 @@
 ;; Done:
 ;; - reading
 ;; - writing
-
+;; - generating Universal ID
+;;
 
 (in-package :gennf)
 
@@ -138,29 +138,89 @@ representation -- a list of mapping-entry structures."
 				(if raw-plist (list raw-plist))))))))
 	 (mapcar #'map-fun map-list)))
 
-;; Prints object *only* human readable to stream
-;; This is not the output format of MCVS!
-(defmethod print-object ((map mapping) stream)
-  "Converting mapping into a human readable format.
-This is not the format of mcvs." 
-  (print-unreadable-object (map stream)
-      (with-slots (kind id path executable raw-plist) map
-        (format stream "(~%:KIND ~s~%:ID ~s~%:PATH ~s~%:EXEC ~s~%:RAW ~s)"
-                kind id path executable raw-plist))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;; Predicates
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
-;; Creates new mappings but with sane defaults
-;; Not really useful, but trains me..
-;; Whats the different between (make-instance )
-(defun make-new-mapping (&key (kind :file) (id "meine erste ID") (path nil path-set-p)
-                         (executable nil) (raw-plist nil))
-  (when (not path-set-p)
-    (error "Path has to be specifyed."))
-  (make-instance 'mapping
-                 :kind kind :id id
-                 :path path :executable executable
-                 :raw-plist raw-plist))
+(defgeneric equal-mapping (left right)
+  (:documentation "Compares two mapping concernig equality"))
 
 
+(defmethod equal-mapping ((left mapping) (right mapping)) 
+  ;; taken from mcvs.
+  "Compares on following attributes
+\(kind id path target\)
+path have to bee in the same form (directory) "
+  (and (eq (kind left) (kind right))
+       (string= (id left) (id right))
+       (equal (path left) (path right))
+       (equal (target left) (target right))))
+
+(defun equal-filemaps (left right)
+  ;; taken from mcvs
+"Compares two filemapes on equality."
+  (let ((same t))
+    (mapc #'(lambda (le re)
+	      (setf same (and same (equal-mapping-entries le re))))
+	    left right)
+    same))
+
+(defun mapping-extract-kind (filemap kind)
+  ;; taken from mcvs
+ "extracts all kinds of mapping-list"
+  (remove-if-not #'(lambda (entry-kind) 
+		     (eq entry-kind kind))
+		 filemap
+		 :key #'kind))
+
+(declaim (inline mapping-extract-paths))
+(defun mapping-extract-paths (filemap)
+  ;; taken from mcvs
+  (mapcar #'path filemap))
+
+(defun mapping-lookup (filemap path)
+  ;; taken from mcvs
+  (find path filemap :test #'equal :key #'path))
+
+(defun mapping-prefix-lookup (filemap prefix)
+  ;; taken from mcvs
+  (if (path-equal *this-dir* prefix)
+    (first filemap)
+    (find prefix filemap :test #'equal :key #'path)))
+
+(defun mapping-prefix-matches (filemap path)
+  ;; taken from mcvs
+  (if (equal *this-dir* path)
+    filemap
+    (remove-if-not #'(lambda (entry) 
+		       (path-prefix-equal path (mapping-entry-path entry))) 
+		   filemap)))
+
+(defun mapping-same-id-p (entry-one entry-two)
+  ;; taken from mcvs
+  (string= (mapping-entry-id entry-one) (mapping-entry-id entry-two)))
+
+(defun mapping-same-path-p (entry-one entry-two)
+  ;; taken from mcvs
+  (path-equal (mapping-entry-path entry-one) (mapping-entry-path entry-two)))
+
+;; Taken from MCVS 1.1.0
+(defvar *have-dev-random* t)
+(defvar *mcvs-random-state*)
+
+(defun guid-gen ()
+  (cond
+    (*have-dev-random*
+       (or (ignore-errors 
+	     (with-open-file (f "/dev/urandom" 
+				:direction :input 
+				:element-type '(unsigned-byte 128))
+	       (read-byte f)))
+	   (progn
+	     (setf *have-dev-random* nil)
+	     (setf *mcvs-random-state* (make-random-state t))
+	     (guid-gen))))
+    (t (random #.(expt 2 128) *mcvs-random-state*))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Example data 
@@ -177,6 +237,16 @@ This is not the format of mcvs."
 		     :executable 'nil)
       *test-data*)
 
+
+;; Prints object *only* human readable to stream
+;; This is not the output format of MCVS!
+(defmethod print-object ((map mapping) stream)
+  "Converting mapping into a human readable format.
+This is not the format of mcvs." 
+  (print-unreadable-object (map stream)
+      (with-slots (kind id path executable raw-plist) map
+        (format stream "(~%:KIND ~s~%:ID ~s~%:PATH ~s~%:EXEC ~s~%:RAW ~s)"
+                kind id path executable raw-plist))))
 
 
 
