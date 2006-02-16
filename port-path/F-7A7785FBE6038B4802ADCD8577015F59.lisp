@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.6 2006/02/14 17:31:01 sigsegv Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.7 2006/02/16 19:41:35 sigsegv Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -213,6 +213,46 @@ all directory-prefixes is generated:
 			     :name nil :type nil
 			     :defaults pathname) pathname-prefixes))
       pathname-prefixes)))
+
+
+(defun pathname-prefix-p (prefix pathname)
+  (let ((pathname-list (pathname-to-list pathname))
+	(prefix-list (pathname-to-list prefix)))
+    (list-prefix-p prefix-list pathname-list)))
+  
+
+(defun pathname-to-list (pathname)
+  (remove nil
+	  (append (list (pathname-host pathname)
+			(pathname-device pathname))
+		  (pathname-directory pathname)
+		  (list (pathname-name pathname)
+			(pathname-type pathname)))))
+    
+(defun list-prefix-p (prefix list &key (test-function #'equal))
+  (cond
+    ((null prefix)
+     t)
+    ((> (length prefix) (length list))
+     nil)
+    ((funcall test-function (first prefix) (first list))
+     (list-prefix-p (rest prefix) (rest list)
+		    :test-function test-function))
+    (t nil)))
+
+;; Taken from Peter Seibel Book.
+(defun walk-directory (dirname fn &key dirs (test (constantly t)))
+  (labels ((walk (name)
+	     (cond 
+	       ((directory-pathname-p name)
+		(when (and dirs (funcall test name))
+		  (funcall fn name))
+		(dolist (x (directory-listing name))
+		  (walk x)))
+	       ((funcall test name) 
+		(funcall fn name)))))
+    (walk (pathname-to-directory-form dirname))))
+		
 
 
 (defun parent-dirs (&optional (path *default-pathname-defaults*))

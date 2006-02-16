@@ -16,27 +16,28 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.8 2006/02/14 17:53:07 florenz Exp $
+;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.9 2006/02/16 19:41:35 sigsegv Exp $
 
 ;; Defines the exported function of port-path.
 
 (defpackage :port-path
   (:use :cl)
   (:export
-   :wild-pathname-p
    :create-temporary-directory
+   :directory-listing
+   :directory-pathname-p
+   :get-parent-directory
+   :parent-dirs
+   :path-exists-p
+   :pathname-prefix-p
+   :pathname-prefixes
    :pathname-to-directory-form
    :pathname-to-file-form
-   :directory-pathname-p
-   :with-pathname
-   :with-directory-form
    :root-p
-   :path-exists-p
-   :get-parent-directory
-   :directory-listing
-   :pathname-prefixes
-   :parent-dirs
-   :search-directory-in-directories)
+   :search-directory-in-directories
+   :wild-pathname-p
+   :with-directory-form
+   :with-pathname)
   (:documentation "A library providing operations related
 with pathnames. Many ideas are taken from Peter Seibel's
 pathname library."))
