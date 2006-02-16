@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.12 2006/02/12 22:17:03 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.13 2006/02/16 13:37:17 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -25,6 +25,28 @@
 
 (in-package :gennf)
 
+;;
+;; Functions for lists.
+;;
+
+(defun delete-sublist (list start end)
+  "Returns list without end-start elements from start onwards."
+  (append (subseq list 0 start)
+	  (subseq list end)))
+
+(defun replace-sublist (list sublist index)
+  "Replace list's sublist starting at index with sublist."
+  (append (subseq list 0 index)
+	  sublist
+	  (when (> (length list)
+		   (+ index (length sublist)))
+	    (subseq list (+ index (length sublist))))))
+
+(defun insert-list (list sublist index)
+  "Insert sublist in list at index."
+  (append (subseq list 0 index)
+	  sublist
+	  (subseq list index)))
 
 ;;
 ;; Functions for alists.

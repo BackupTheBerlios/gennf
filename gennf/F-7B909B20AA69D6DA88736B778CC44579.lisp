@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.2 2006/02/16 10:43:13 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.3 2006/02/16 13:37:18 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -92,32 +92,32 @@ sequence and the second value indicates if conflicts arose."))
 		 :delete-markup-function delete-markup-function
 		 :replace-markup-function replace-markup-function))
 
+(defun default-delete-markup (deletion)
+  "Standard marker function for delete conflicts."
+  (append
+   '("<<< The part below is missing in list1 <<<")
+   deletion
+   '(">>> The part above is missing in list1 >>>")))
+
+(defun default-replace-markup (chunk-of-list1 chunk-of-list2)
+  "Standard marker function for replace conflicts."
+  (append
+   '("<<< The part below is from list1 <<<")
+   chunk-of-list1
+   '(">>> The part above is from list1 >>>")
+   '("<<< The part below is from list2 >>>")
+   chunk-of-list2
+   '(">>> The part above is from list2 >>>")))
+
 (defun perform-two-way-merge (differences list1 list2
-			      &key delete-markup-function
-			      replace-markup-function)
+			      &key (delete-markup-function
+				    #'default-delete-markup)
+			      (replace-markup-function
+			       #'default-replace-markup))
   "Computes a merge of list1 into list2 using differences.
 Conflict markers are produced by delete-markup-function and
 replace-markup-functions."
-  (let ((delete-markup
-	 (if delete-markup-function
-	     delete-markup-function
-	     (lambda (deletion)
-	       (append
-		'("<<< The part below is missing in list1 <<<")
-		deletion
-		'(">>> The part above is missing in list1 >>>")))))
-	(replace-markup
-	 (if replace-markup-function
-	     replace-markup-function
-	     (lambda (chunk-of-list1 chunk-of-list2)
-	       (append
-		'("<<< The part below is from list1 <<<")
-		chunk-of-list1
-		'(">>> The part above is from list1 >>>")
-		'("<<< The part below is from list2 >>>")
-		chunk-of-list2
-		'(">>> The part above is from list2 >>>")))))
-	(merge ()))
+  (let ((merge ()))
     (dolist (difference differences)
       (cond ((eql (difflib:opcode-tag difference) :equal)
 	     (setf merge
@@ -135,7 +135,7 @@ replace-markup-functions."
 	     (setf merge
 		   (append merge
 			   (funcall
-			    delete-markup
+			    delete-markup-function
 			    (subseq list2
 				    (difflib:opcode-i1 difference)
 				    (difflib:opcode-i2 difference))))))
@@ -143,7 +143,7 @@ replace-markup-functions."
 	     (setf merge
 		   (append merge
 			   (funcall
-			    replace-markup
+			    replace-markup-function
 			    (subseq list1
 				    (difflib:opcode-j1 difference)
 				    (difflib:opcode-j2 difference))
@@ -152,3 +152,70 @@ replace-markup-functions."
 				    (difflib:opcode-i2 difference))))))))
     merge))
 
+(defun apply-opcode (opcode list1 list2)
+  "Apply opcode to list2 and return the result.
+opcode is an elements of a differences list."
+  (case (difflib:opcode-tag opcode)
+    (:delete (delete-sublist list2
+			     (difflib:opcode-i1 opcode)
+			     (difflib:opcode-i2 opcode)))
+    (:replace (replace-sublist list2
+			       (subseq list1
+				       (difflib:opcode-j1 opcode)
+				       (difflib:opcode-j2 opcode))
+			       (difflib:opcode-i1 opcode)))
+    (:insert (insert-list list2
+			  (subseq list1
+				  (difflib:opcode-j1 opcode)
+				  (difflib:opcode-j2 opcode))
+			  (difflib:opcode-i1 opcode)))
+    (:equal list2)))
+
+(defun which-differences (differences start end
+			  &key (get-start #'difflib:opcode-i1)
+			  (get-end #'difflib:opcode-i2))
+  "Returns all differences that are about range
+start to end. get-start and get-end are used to extract
+ranges from each difference."
+    (loop for difference in differences
+	  when (or (and (<= (funcall get-start difference) start)
+			(< start (funcall get-end difference)))
+		   (and (> (funcall get-start difference) start)
+			(< (funcall get-end difference) end))
+		   (and (< (funcall get-start difference) end)
+			(<= end (funcall get-end difference))))
+	  collect difference
+	  until (> (funcall get-start difference) end)))
+
+
+(defgeneric three-way-merge (ancestor sequence1 sequence2
+				      &key delete-markup-function
+				      replace-markup-function
+				      insert-markup-function
+				      equality)
+  (:documentation "Perform a three-way-merge.
+sequence1 and sequence2 are two independent modifikations of ancestor.
+The modifications done in sequence1 are to be merged into sequence2.
+This is done by computing the difference between sequence1 and
+ancestor and sequence2 and ancestor.
+Differences between sequence1 and ancestor are merged into
+sequence2 only if sequence2 and ancestor do not differ for this
+range."))
+
+(defmethod three-way-merge ((ancestor list) (sequence1 list) (sequence2 list)
+			    &key delete-markup-function
+			    replace-markup-function
+			    insert-markup-function
+			    equality)
+  "Three-way-merge for lists."
+  (let ((differences1 (differences sequence1 ancestor
+				   :equality equality))
+	(differences2 (differences sequence2 ancestor
+				   :equality equality))
+	(merge ()))
+    (dolist (difference differences1)
+      (case (difflib:opcode-tag difference)
+	(:delete ())
+	(:replace ())
+	(:insert ())
+	(:equal ())))))
