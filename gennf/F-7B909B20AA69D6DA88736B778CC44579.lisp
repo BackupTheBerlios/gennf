@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.4 2006/02/16 14:33:35 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.5 2006/02/16 17:32:36 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -193,10 +193,24 @@ they are all equalities, i. e. no differences."
   (every #'(lambda (difference)
 	     (eql (difflib:opcode-tag difference) :equal)) differences))
 
+(defun all-chunks (list differences
+		   &key (get-start #'difflib:opcode-i1)
+		   (get-end #'difflib:opcode-i2))
+  "Return all chunks of list that can be extracted from
+differences by using get-start and get-end as index-extracting
+functions."
+  (let ((chunks ()))
+    (dolist (difference differences)
+      (setf chunks
+	    (append chunks
+		    (subseq list
+			    (funcall get-start difference)
+			    (funcall get-end difference)))))
+    chunks))
+			    
 (defgeneric three-way-merge (ancestor sequence1 sequence2
 				      &key delete-markup-function
 				      replace-markup-function
-				      insert-markup-function
 				      equality)
   (:documentation "Perform a three-way-merge.
 sequence1 and sequence2 are two independent modifikations of ancestor.
@@ -210,16 +224,17 @@ The function returns the result of the merge as first value
 and as second value a boolean indicating conflicts."))
 
 (defmethod three-way-merge ((ancestor list) (list1 list) (list2 list)
-			    &key delete-markup-function
-			    replace-markup-function
-			    insert-markup-function
+			    &key (delete-markup-function
+				  #'default-delete-markup)
+			    (replace-markup-function
+			     #'default-replace-markup)
 			    (equality #'equal))
   "Three-way-merge for lists."
   (let ((differences1 (differences list1 ancestor
 				   :equality equality))
 	(differences2 (differences list2 ancestor
 				   :equality equality))
-	(merge list2)
+	(merge (copy-list list2))
 	(conflict nil))
     (dolist (difference differences1)
       (let ((this-differences
@@ -231,9 +246,44 @@ and as second value a boolean indicating conflicts."))
 		  (apply-opcode difference list1 merge))
 	    (progn
 	      (setf conflict t)
-	      (case (difflib:opcode-tag difference)
-		(:delete ())
-		(:replace ())
-		(:insert ())
-		(:equal ()))))))
+	      (let ((chunks (all-chunks list2 this-differences)))
+		(setf merge (delete-sublist
+			     merge
+			     (difflib:opcode-i1 difference)
+			     (difflib:opcode-i2 difference)))
+		(case (difflib:opcode-tag difference)
+		  (:delete (setf merge
+				 (insert-list
+				  merge
+				  (funcall delete-markup-function
+					   chunks)
+				  (difflib:opcode-j1 difference))))
+		  (:replace (setf merge
+				  (insert-list
+				   merge
+				   (funcall replace-markup-function
+					    (subseq list1
+						    (difflib:opcode-j1
+						     difference)
+						    (difflib:opcode-j2
+						     difference))
+					    chunks)
+				   (difflib:opcode-j1 difference))))
+		  (otherwise ())))))))
     (values merge conflict)))
+
+(defmethod three-way-merge ((ancestor pathname)
+			    (file1 pathname)
+			    (file2 pathname)
+			    &key (delete-markup-function
+				  #'default-delete-markup)
+			    (replace-markup-function
+			     #'default-replace-markup)
+			    (equality #'equal))
+  "Three-way-merge for files. Returns the merge as list."
+  (three-way-merge (file-to-list ancestor)
+		   (file-to-list file1)
+		   (file-to-list file2)
+		   :delete-markup-function delete-markup-function
+		   :replace-markup-function replace-markup-function
+		   :equality equality))
