@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.6 2006/02/15 16:00:20 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.7 2006/02/16 14:35:53 florenz Exp $
 
 (defpackage :gennf-system
     (:use :cl :asdf))
@@ -45,6 +45,8 @@
 				  "configuration" "directories"))
    (:file "merge"
 	  :depends-on ("packages" "files" "change"))
+   (:file "merging"
+	  :depends-on ("packages" "miscellaneous" "files"))
    (:file "branch"
 	  :depends-on ("packages" "miscellaneous" "files" "configuration"))
    (:file "change"
