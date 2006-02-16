@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.5 2006/02/16 17:32:36 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.6 2006/02/16 18:34:11 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -24,6 +24,30 @@
 ;; of a change sequence.
 
 (in-package :gennf)
+
+(defgeneric not-same-p (sequence1 sequence2 &key equality)
+  (:documentation "Returns a list of differences 
+ sequuence1 and sequence2
+differ. If sequence1 and sequence2 are the same, NIL is returned.
+Rationale: This function can be used just for checking
+if two sequences differ but if they do, there is no need
+to compute the differences again."))
+
+(defmethod not-same-p ((list1 list) (list2 list)
+		       &key (equality #'equal))
+  "Test if list1 and list2 differ."
+  (let ((differences (differences list1 list2 :equality equality)))
+    (if (and (= (length differences) 1)
+	     (eql (difflib:opcode-tag (first differences)) :equal))
+	nil
+	differences)))
+
+(defmethod not-same-p ((file1 pathname) (file2 pathname)
+		       &key (equality #'equal))
+  "Test if file1 and file2 differ."
+  (not-same-p (file-to-list file1)
+	      (file-to-list file2)
+	      :equality equality))
 
 (defgeneric differences (sequence1 sequence2 &key equality)
   (:documentation "Computes differences between sequence1 and
@@ -119,37 +143,38 @@ Conflict markers are produced by delete-markup-function and
 replace-markup-functions."
   (let ((merge ()))
     (dolist (difference differences)
-      (cond ((eql (difflib:opcode-tag difference) :equal)
-	     (setf merge
-		   (append merge
-			   (subseq list1
-				   (difflib:opcode-j1 difference)
-				   (difflib:opcode-j2 difference)))))
-	    ((eql (difflib:opcode-tag difference) :insert)
-	     (setf merge
-		   (append merge
-			   (subseq list1
-				   (difflib:opcode-j1 difference)
-				   (difflib:opcode-j2 difference)))))
-	    ((eql (difflib:opcode-tag difference) :delete)
-	     (setf merge
-		   (append merge
-			   (funcall
-			    delete-markup-function
-			    (subseq list2
-				    (difflib:opcode-i1 difference)
-				    (difflib:opcode-i2 difference))))))
-	    ((eql (difflib:opcode-tag difference) :replace)
-	     (setf merge
-		   (append merge
-			   (funcall
-			    replace-markup-function
-			    (subseq list1
-				    (difflib:opcode-j1 difference)
-				    (difflib:opcode-j2 difference))
-			    (subseq list2
-				    (difflib:opcode-i1 difference)
-				    (difflib:opcode-i2 difference))))))))
+      (ecase (difflib:opcode-tag difference)
+	(:equal
+	 (setf merge
+	       (append merge
+		       (subseq list1
+			       (difflib:opcode-j1 difference)
+			       (difflib:opcode-j2 difference)))))
+	(:insert
+	 (setf merge
+	       (append merge
+		       (subseq list1
+			       (difflib:opcode-j1 difference)
+			       (difflib:opcode-j2 difference)))))
+	(:delete
+	 (setf merge
+	       (append merge
+		       (funcall
+			delete-markup-function
+			(subseq list2
+				(difflib:opcode-i1 difference)
+				(difflib:opcode-i2 difference))))))
+	(:replace
+	 (setf merge
+	       (append merge
+		       (funcall
+			replace-markup-function
+			(subseq list1
+				(difflib:opcode-j1 difference)
+				(difflib:opcode-j2 difference))
+			(subseq list2
+				(difflib:opcode-i1 difference)
+				(difflib:opcode-i2 difference))))))))
     merge))
 
 (defun apply-opcode (opcode list1 list2)
