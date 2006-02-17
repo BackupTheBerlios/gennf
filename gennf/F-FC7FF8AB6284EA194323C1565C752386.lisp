@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.20 2006/02/17 15:07:40 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.21 2006/02/17 22:38:59 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -28,7 +28,7 @@
 (defparameter *devel-access*
   (make-instance 'access :root *devel-root*))
 (eval-when (:execute :compile-toplevel :load-toplevel)
-  (proclaim '(optimize (debug 3))))
+  (proclaim '(optimize (cl:debug 2))))
 ;; End of development only section.
 
 (defun create-empty-branch (module access
@@ -88,23 +88,126 @@ access file and the branch subdirectory with it's change file."
       (backend-get module access
 		   (list *access-file* *branch-file* change-file)
 		   *meta-directory*)
+      ;; If no change is given, take latest.
+      (unless change
+	(setf change (length (read-change-file change-file))))
       ;; Extract the files with revisions to check out and
       ;; exchange the filenames by "branch/filename".
-      (let ((files (mapcar #'(lambda (pair)
-			       (cons (merge-pathnames branch-directory
-						      (car pair))
-				     (cdr pair)))
-			   (extract-files-and-revisions change-file change))))
+      (let ((files (branch-prefix-file-list
+		    (extract-files-and-revisions change-file
+						 :identifier change)
+		    branch-directory)))
 	;; Retrieve the files into *meta-directory*.
-	(backend-get module access files *meta-directory*)))))
+	(backend-get module access files *meta-directory*)
+	;; Write sandbox-file.
+	(write-sandbox-file
+	 (make-instance 'sandbox
+			:branch branch
+			:change change
+			:access (identifier access)))))))
 
-(defun update-change (module root branch)
-  "Update a previously checked out change. A sandbox has to exist
-and *meta-directory* has to be set properly."
+(defun branch-prefix-file-list (file-list branch)
+  "Put the branch prefix in front of the files in list.
+Each element of list can either be a dotted pair with a filename as
+its first argument and a revision as its second argument
+or a plain filename."
+  (mapcar #'(lambda (file)
+	      (if (consp file)
+		  (cons (merge-pathnames (car file) branch)
+			(cdr file))
+		  (merge-pathnames file branch)))
+	  file-list))
+
+(defun update (module access branch files &optional change)
+  "Update files of a previously checked out change. A sandbox has to exist
+and *meta-directory* has to be set properly.
+Optionally a change can be passed. If so, files are updated to the
+state they had in this change."
+  (declare (optimize (cl:debug 3)))
   (in-meta-directory
-    (let* ((access (make-instance 'access :root root))
-	   
-    ))))
+    (let* ((branch-directory (branch-identifier-to-directory branch))
+	   (change-file (merge-pathnames branch-directory *change-file*))
+	   (change-file-to-get change-file)
+	   (old-changes (read-change-file change-file))
+	   (sandbox (read-sandbox-file))
+	   (old-change-identifier (change sandbox)))
+      (setf files (mapcar #'pathname files))
+      ;; Set change-file to a filename-revision pair if the
+      ;; optional change argument was passed.
+      (when change
+	(when (< change old-change-identifier)
+	  (error "Can not update to a state in the past."))
+	(setf change-file-to-get (cons change-file change)))
+      ;; Get changes done in the meantime.
+      (backend-get module access
+		   (list change-file-to-get) *meta-directory*)
+      (let* ((changes (read-change-file change-file))
+	     ;; Get the list of modified files with their
+	     ;; revisions and check, if any of them is to be updated
+	     ;; and prefix them with the branch-prefix.
+	     (modified-files (get-modified-files old-changes changes))
+	     (files-to-update (intersection modified-files
+					    files :test #'equal))
+	     (files-to-update-and-revisions
+	      (extract-files-and-revisions changes :files files-to-update))
+	     (files-to-update-branch-prefixed
+	      (branch-prefix-file-list files-to-update-and-revisions
+				       branch-directory))
+	     ;; Get the common predecessors of the files which
+	     ;; are to be updated to perform a three-way-merge.
+	     (ancestor-files-and-revisions
+	      (extract-files-and-revisions old-changes
+					   :identifier old-change-identifier
+					   :files files-to-update))
+	     (ancestor-files-and-revisions-branch-prefixed
+	      (branch-prefix-file-list ancestor-files-and-revisions
+				       branch-directory)))
+	;; If no particular change is requiredit can be set
+	;; from the freshly read changes file.
+	(unless change
+	  (setf change (length changes)))
+	(debug
+	  (debug-format "Update following files: ~S"
+			files-to-update-branch-prefixed))
+	;; Checkout the new revisions of the files to
+	;; a temporary directory.
+	(in-temporary-directory (temporary-directory)
+	  ;; Create one directory for the new revisions of files
+	  ;; and one for the ancestor revisions. The latter are
+	  ;; necessary because they might be changed in the sandbox.
+	  (let ((new-directory
+		 (merge-pathnames (make-pathname
+				   :directory (list :relative "new"))
+				  temporary-directory))
+		(ancestor-directory
+		 (merge-pathnames (make-pathname
+				   :directory (list :relative "ancestor"))
+				  temporary-directory)))
+	    (create-directory new-directory)
+	    (create-directory ancestor-directory)
+	    ;; Get the new and ancestor files.
+	    (backend-get module access
+			 files-to-update-branch-prefixed
+			 new-directory)
+	    (backend-get module access
+			 ancestor-files-and-revisions-branch-prefixed
+			 ancestor-directory)
+	    ;; Merge the changes into the sandbox.
+	    (dolist (file files-to-update-branch-prefixed)
+	      (let ((ancestor-file (merge-pathnames (car file)
+						    ancestor-directory))
+		    (new-file (merge-pathnames (car file)
+					       new-directory))
+		    (old-file (merge-pathnames (car file)
+					       *meta-directory*)))
+		(multiple-value-bind (merged-file conflict)
+		    (three-way-merge ancestor-file new-file old-file)
+		  (when conflict
+		    (format t "Conflicts updating file ~S." (car file)))
+		  (list-to-file merged-file old-file))))))
+	;; Write up to date sandbox file.
+	(setf (change sandbox) change)
+	(write-sandbox-file sandbox)))))
 		     
 (defun commit (module access branch files)
   "Commit files to the checked out branch. An appropriate change

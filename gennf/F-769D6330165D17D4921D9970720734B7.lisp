@@ -16,13 +16,18 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.5 2006/02/17 15:07:40 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.6 2006/02/17 22:38:59 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
 
 (in-package :gennf)
 
+;; Debugging.
+(defparameter *debug-mode* t
+  "Switches on debug mode.")
+
+;; Directories.
 (defparameter *meta-directory-name* (make-pathname :directory
 						  '(:relative "META"))
   "Name of the meta directory.")

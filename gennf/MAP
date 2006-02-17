@@ -144,6 +144,9 @@
   "MCVS/F-7FC7BAE8FEAFAA140D1560EE6A936C40.sh"
   "sbcl-port/unix-bindings/link.sh")
  (:FILE
+  "MCVS/F-82ED3D193589C12259001984C9E7F8C9.lisp"
+  "prototype/debug.lisp")
+ (:FILE
   "MCVS/F-83B842F2203F2AE6157E430B77F56938.lisp"
   "prototype/files.lisp")
  (:FILE
