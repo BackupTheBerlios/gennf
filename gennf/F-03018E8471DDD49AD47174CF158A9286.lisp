@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.7 2006/02/12 20:19:51 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.8 2006/02/17 15:07:40 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -142,6 +142,16 @@ file-maps of all changes in sequence."
 	(incf occurences)))
     occurences))
 
+(defgeneric all-changed-files (change)
+  (:documentation "Returns all files that were
+changes, without a their revision number, as a list of
+files."))
+
+(defmethod all-changed-files ((change change))
+  "All files recorded in change's filemap"
+  (let ((file-map (file-map change)))
+    (loop for file-revision in file-map collect (car file-revision))))
+    
 (defgeneric add-file-to-changes (file store)
   (:documentation "Add a mapping for file in the latest change of the sequence,
 i. e. to the head of the sequence. If file was already added to the head
@@ -163,6 +173,27 @@ to the latest change."
   "Writes a new change-file with file recorded in the
 latest change."
   (write-change-file (add-file-to-changes file (read-file change-file))))
+
+(defgeneric get-modified-files (older-changes newer-changes)
+  (:documentation "Return a list of files, which
+have been modified from latest change of older-changes to latest
+change of newer-changes.
+older-changes has to be a tail of newer-changes, i. e. in fact
+an older version of newer-changes."))
+
+(defmethod get-modified-files ((older-changes list) (newer-changes list))
+  "Extract modified files from lists."
+  (let ((new-changes (butlast newer-changes (length older-changes)))
+	(files ()))
+    (dolist (change new-changes)
+      (setf files (union files (all-changed-files change) :test #'equal)))
+    (mapcar #'pathname files)))
+
+(defmethod get-modified-files ((older-changes pathname)
+			       (newer-changes pathname))
+  "Extract modified files from change files."
+  (get-modified-files (read-change-file older-changes)
+		      (read-change-file newer-changes)))
 
 (defgeneric get-new-change-identifier (store)
   (:documentation "Gets a new change identifier (a new number)."))

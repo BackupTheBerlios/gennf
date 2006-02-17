@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.4 2006/02/13 18:11:14 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.5 2006/02/17 15:07:40 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -28,9 +28,14 @@
   "Name of the meta directory.")
 (defparameter *meta-directory* (merge-pathnames *meta-directory-name*)
   "Absolute path of the meta directory.")				
-(defparameter *branch-file* (make-pathname :name "BRANCH"))
-(defparameter *access-file* (make-pathname :name "ACCESS"))
-(defparameter *change-file* (make-pathname :name "CHANGE"))
+(defparameter *branch-file* (make-pathname :name "BRANCH")
+  "Name of file which lists branches.")
+(defparameter *access-file* (make-pathname :name "ACCESS")
+  "Name of file which lists accesses.")
+(defparameter *change-file* (make-pathname :name "CHANGE")
+  "Name of file containing the change sequence.")
+(defparameter *sandbox-file* (make-pathname :name "SANDBOX")
+  "The sandbox file indicates the checked out branch, change and root.")
 (defparameter *backend-import-log-message*
   "Creation of a fresh gennf repository.")
 (defparameter *map-file* (make-pathname :name "MAP"))

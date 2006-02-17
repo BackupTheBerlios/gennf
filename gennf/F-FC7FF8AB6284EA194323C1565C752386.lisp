@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.19 2006/02/15 16:00:20 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.20 2006/02/17 15:07:40 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -31,7 +31,7 @@
   (proclaim '(optimize (debug 3))))
 ;; End of development only section.
 
-(defun create-empty-branch (module root
+(defun create-empty-branch (module access
 			    &key (symbolic-name "") (description ""))
   "Create a new branch. That is to create a branch directory
 with the next free number and an empty CHANGE file."
@@ -43,7 +43,6 @@ with the next free number and an empty CHANGE file."
 		 :cleanup (progn (delete-file *branch-file*)
 				 (delete-directory-tree
 				  branch-directory))))
-	  (let ((access (make-instance 'access :root root)))
 	    (backend-get module access
 			 (list *branch-file* *access-file*) *meta-directory*)
 	    (let* ((identifier (get-new-branch-identifier *branch-file*))
@@ -63,9 +62,9 @@ with the next free number and an empty CHANGE file."
 	      (create-new-change-file change-file)
 	      (backend-commit module "create-empty-branch" access
 			      (list change-file *branch-file*)))))
-	(remove-meta-directory)))))
+	(remove-meta-directory))))
 
-(defun create-empty-repository (module root)
+(defun create-empty-repository (module access)
   "Create a completely empty repository only containing an
 ACCESS and BRANCH file.
 FIXME: It should be checked if module already exists."
@@ -73,20 +72,17 @@ FIXME: It should be checked if module already exists."
     (create-meta-directory)
     (in-meta-directory
       (create-new-branch-file)
-      (let ((access (make-instance 'access
-				   :identifier 1 :root root)))
-	(add-access access *access-file*)
-	(backend-import module access)))))
+      (add-access access *access-file*)
+      (backend-import module access))))
 
-(defun checkout-change (module root branch &optional change)
+(defun checkout-change (module access branch &optional change)
   "Checkout a change into a sandbox. If no change number is given,
 the latest change is checked out.
 The sandbox is called *meta-directory* and contains the branch and
 access file and the branch subdirectory with it's change file."
   (create-meta-directory)
   (in-meta-directory
-    (let* ((access (make-instance 'access :root root))
-	   (branch-directory (branch-identifier-to-directory branch))
+    (let* ((branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*)))
       ;; Get change, branch and access file.
       (backend-get module access
@@ -100,9 +96,17 @@ access file and the branch subdirectory with it's change file."
 				     (cdr pair)))
 			   (extract-files-and-revisions change-file change))))
 	;; Retrieve the files into *meta-directory*.
-	(backend-get module access files *meta-directory*))))))
+	(backend-get module access files *meta-directory*)))))
+
+(defun update-change (module root branch)
+  "Update a previously checked out change. A sandbox has to exist
+and *meta-directory* has to be set properly."
+  (in-meta-directory
+    (let* ((access (make-instance 'access :root root))
+	   
+    ))))
 		     
-(defun commit (module root branch files)
+(defun commit (module access branch files)
   "Commit files to the checked out branch. An appropriate change
 record is stored. All files must have been changed. If not
 they get recorded in the commit but are not assigned a new revision
@@ -111,31 +115,38 @@ This means, some other functions has to check which files go upstream
 before calling this routine.
 FIXME: No conflict handling yet."
   (in-meta-directory
-    (let* ((access (make-instance 'access :root root))
-	   (branch-directory (branch-identifier-to-directory branch))
-	   (change-file (merge-pathnames branch-directory *change-file*)))
+    (let* ((branch-directory (branch-identifier-to-directory branch))
+	   (change-file (merge-pathnames branch-directory *change-file*))
+	   (old-changes (read-change-file change-file)))
       (setf files (mapcar #'pathname files))
       ;; Get latest change file.
       (backend-get module access
 		   (list change-file) *meta-directory*)
-      (break)
       (let* ((changes (read-change-file change-file))
 	     (identifier (get-new-change-identifier changes))
 	     (change (make-instance 'change
 				    :identifier identifier
-				    :file-map (create-new-file-map))))
-	(setf changes (add-change change changes))
-	;; Add files to new change.
-	(dolist (file files)
-	  (setf changes (add-file-to-changes file changes)))
-	;; Write new change file.
-	(write-change-file changes change-file))
-        (break)
-      (setf files (mapcar #'(lambda (file)
-			      (merge-pathnames branch-directory file)) files))
-      (backend-commit module "commit" access
-		      (append (list change-file)
-			      files)))))
+				    :file-map (create-new-file-map)))
+	     (modified-files (get-modified-files old-changes changes))
+	     (conflicting-files (intersection files modified-files
+					      :test #'equal)))
+	(if conflicting-files
+	    ;; Conflict handling.
+	    ()
+	    ;; No conflicts.
+	    (progn
+	      (setf changes (add-change change changes))
+	      ;; Add files to new change.
+	      (dolist (file files)
+		(setf changes (add-file-to-changes file changes)))
+	      ;; Write new change file.
+	      (write-change-file changes change-file)
+	      (setf files (mapcar #'(lambda (file)
+				      (merge-pathnames
+				       branch-directory file)) files))
+	      (backend-commit module "commit" access
+			      (append (list change-file)
+				      files))))))))
 
 ;; (defun merge (module root branch
 ;; 	      origin-root origin-branch &optional origin-change)

@@ -9,3 +9,4 @@ TODO
   exit.
 * For the merging: An equality predicate which disregards differences
   in whitespace might be helpful.
+* commit handles no conflicts.

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.3 2006/02/12 22:15:07 florenz Exp $
+;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.4 2006/02/17 15:07:40 florenz Exp $
 
 ;; This file contains routines to manipulate access entries.
 
@@ -37,11 +37,12 @@
   (:documentation "An access describes how to reach
 a certain repository."))
 
-(defun is-access-p (access)
-  (and (= (length access) 3)
-       (assoc :identifier access)
-       (assoc :backend access)
-       (assoc :root access)))
+(defun is-access-p (alist)
+  "Returns if alist is an alist representation of an access."
+  (and (= (length alist) 3)
+       (assoc :identifier alist)
+       (assoc :backend alist)
+       (assoc :root alist)))
 
 (defmethod convert-to-alist append ((access access))
   "Convert an access object to an alist."
