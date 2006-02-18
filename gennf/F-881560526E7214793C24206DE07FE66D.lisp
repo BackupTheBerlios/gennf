@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.7 2006/02/16 19:43:53 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.8 2006/02/18 10:45:02 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -71,6 +71,12 @@
     :accessor raw-plist
     :documentation "Userattributes in a plist")))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Reading and Writing
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+
 (defun read-map-file (&optional (file *map-file*))
   "Reads mcvs mapping-file and returns map-list."
   (convert-map-file-in (read-file file)))
@@ -82,8 +88,9 @@
 	(*print-right-margin* 1))
     (prin1-file file converted-map-list)))
 
-;; Taken from mcvs:mapping.lisp
+
 (defun convert-map-file-in (raw-filemap)
+;; Taken from mcvs:mapping.lisp
   "Converts a gennf filemap as read from a file into its internal
 representation -- a list of mapping-entry structures."
   (flet ((map-fun (item)
@@ -116,6 +123,7 @@ representation -- a list of mapping-entry structures."
     (mapcar #'map-fun raw-filemap)))
 
 (defun mapping-entry-parse-plist (entry)
+;; Taken from mcvs:mapping.lisp
   "Sets exec attribut on entry if raw-plist has exec prop."
   (with-slots (executable raw-plist) entry
     (destructuring-bind (&key exec &allow-other-keys) 
@@ -123,8 +131,9 @@ representation -- a list of mapping-entry structures."
       (setf executable exec)))
   (values))
 
-;; Taken from mcvs:mapping.lisp
+
 (defun convert-map-list-out (map-list) 
+;; Taken from mcvs:mapping.lisp
   (flet ((map-fun (map) 
 	   (with-slots (kind id path target executable raw-plist) map
 	     (if executable
@@ -138,6 +147,7 @@ representation -- a list of mapping-entry structures."
 				(if raw-plist (list raw-plist))))))))
 	 (mapcar #'map-fun map-list)))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ;; Predicates
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
@@ -190,19 +200,59 @@ path have to bee in the same form (directory) "
 
 (defun mapping-prefix-matches (filemap path)
   ;; taken from mcvs
-  (if (equal *this-dir* path)
+  ;; (if (equal *this-dir* path)		
+  (if (equal #p"." path)
     filemap
     (remove-if-not #'(lambda (entry) 
-		       (path-prefix-equal path (mapping-entry-path entry))) 
+		       (port-path:pathname-prefix-p path (path entry))) 
 		   filemap)))
 
 (defun mapping-same-id-p (entry-one entry-two)
   ;; taken from mcvs
-  (string= (mapping-entry-id entry-one) (mapping-entry-id entry-two)))
+  (string= (id entry-one) (id entry-two)))
 
 (defun mapping-same-path-p (entry-one entry-two)
   ;; taken from mcvs
-  (path-equal (mapping-entry-path entry-one) (mapping-entry-path entry-two)))
+  (equal (path entry-one) (path entry-two)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;; Check
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+;; FIXME: Wird noch nicht vom jetztigen code benutzt.
+(defun mapping-dupe-check (filemap)
+;; Taken from mcvs:mapping.lisp
+"Signals an error condition if the filemap contains duplicate paths or
+duplicate objects. Otherwise returns the filemap, sorted by path."
+  (let ((dupes)
+	(id-hash (make-hash-table :test #'equal))
+	(path-hash (make-hash-table :test #'equal)))
+    (dolist (entry filemap)
+      (if (gethash (id entry) id-hash)
+	(push entry dupes)
+	(setf (gethash (id entry) id-hash) entry))
+      (if (gethash (path entry) path-hash)
+	(push entry dupes)
+	(setf (gethash (path entry) path-hash) entry)))
+    (when dupes
+      (dolist (dupe dupes)
+	;; 	(chatter-terse "duplicate ~a -> ~a~%" 
+	;; 		       (id dupe) (path dupe)))
+	;; FIXME: Use more abstraction for format
+	;; so that a common debug exists.
+	(format t "duplicate ~a -> ~a~%" 
+		       (id dupe) (path dupe)))
+
+      (error "duplicates in map: correct and run mcvs update.")))
+  filemap)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Gerating ID
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Taken from MCVS 1.1.0
 (defvar *have-dev-random* t)
@@ -221,10 +271,11 @@ path have to bee in the same form (directory) "
 	     (setf *mcvs-random-state* (make-random-state t))
 	     (guid-gen))))
     (t (random #.(expt 2 128) *mcvs-random-state*))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Debuggin and Examples
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Example data 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defparameter *test-data* nil)
 
 (push (make-instance 'mapping
