@@ -1,4 +1,4 @@
-\documentclass[fleqn, 10pt, a4paper]{article}
+\documentclass[fleqn, 10pt, a4paper]{report}
 \usepackage{amssymb}
 \setlength{\parindent}{0pt}
 
@@ -71,26 +71,30 @@ Development is currently done by
 
 \section{The goal}
 
-We want to implement a better version management system based on
-existing software. \emph{Better} in a sense that it supports
-code signing and distributed repositories.
 
-Code signing means, that each chunk of code checked into the repository
-has to be signed by the programmer using some public/private key scheme
-to enable other developers or users to verify the origin of the code (as
-long as keys are trustworthy).
 
-Distributed means that the repository is not stored on a single server
-but that commits can be done on several servers and the results be
-merged. The advantages are a better failure behaviour and the
-possibility to structure the repositories according to some external
-requirements, e.~g. responsibilities for or maintenance of certain code
-sections by certain parties.
 
-\subsection{Plans we abandoned}
+\chapter{The project's course}
 
-Initially, we also thought about improving the code merging capabilities
-which are geavily relied on in distributed environments. The idea was to
+\section{The planning}
+
+\subsection{In search of a project}
+
+In the time from mid of October to begin of November we were looking
+for this term's project. At end of October it was clear that at least
+Hannes Mehnert and Florian Lorenzen would risk a try in the area of
+version management software. Fabian Otto definitely joined in during the
+first days of November.
+
+During the first half of November lots of issues concerning
+already existent software and the project's goals were discussed.
+
+Among them were a few we abandoned:
+
+\subsubsection{Plans we abandoned}
+
+We thought about improving the code merging capabilities
+which are heavily relied on in version control software. The idea was to
 do a merge not of streams of characters (the source code) but of
 abstract syntax trees of the programming language used. This seemd very
 promising because fewer conflicts should arise. We abandoned this plan
@@ -129,12 +133,52 @@ for several reasons:
   semester.
 \end{itemize}
 
+As we found out later in February 2006, exactly this approach
+was taken by Hayase et. al. \cite{HMI05}.
 
-\section{The project's course}
+\subsubsection{Plans, which shouldn't stay on paper}
 
-We discussed improving the handling of repositories in \textsc{darcs} or
-adding distributed repositories to \textsc{metacvs}. Code Signing is not
-available in any of them (at least not in our sense).
+We more or less settled on two other aspects which seemed
+improvable to us:
+
+\begin{itemize}
+\item Code signing
+\item Ditributed repositories
+\end{itemize}
+
+Code signing means, that each chunk of code checked into the repository
+has to be signed by the programmer using some public/private key scheme
+to enable other developers or users to verify the origin of the code (as
+long as keys are trustworthy).
+
+Distributed means that the repository is not stored on a single server
+but that commits can be done on several servers and the results be
+merged. The advantages are a better failure behaviour and the
+possibility to structure the repositories according to some external
+requirements, e.~g. responsibilities for or maintenance of certain code
+sections by certain parties.
+
+It was fairly clear right from the beginning that we could not
+and want not write a version management system from scratch but
+to improcve an existing system. The two systems in question
+were \textsc{darcs} and \textsc{metacvs}.
+
+\textsc{darcs} is already a distributed system -- but it is 
+too distributed for our taste: every working copy is a repository.
+This should not be necessary and one option was to offer greater
+flexibility concering repositores and working copies in
+\textsc{darcs}.
+
+\textsc{metacvs} is a wrapper around \textsc{cvs} and requires only
+\textsc{cvs} onb the server side. It circumvents some quirks of
+\textsc{cvs}, especially the weak handling of directory structure of a
+project. Like \textsc{cvs} it is a central-server oriented system
+and consequently the option as to introduce distribution into this
+system.
+
+Concerning code signing neither of the two had support in our sense
+(\textsc{darcs} has some rudimentary support using digitally signed
+mails).
 
 We decided to build on \textsc{metacvs} because it is, in turn, based on
 \textsc{cvs} which we know quite well and because it is written in
@@ -143,8 +187,98 @@ Another reason is that \textsc{cvs} is widely available on services
 like SourceForge or BerliOS and thus existing infrastructure
 is available to the new system.
 
+We also had a look on a system called \textsc{dcvs}, distributed
+\textsc{cvs} but this was ruled out right from the start:
+it support several repositories but each repository is assigned a
+part of code which is the only one that can be modified. That was
+not so flexible as we would like it.
+
+\subsection{Infrastructure}
+
+Around the same time that we had stated the two overall goals of
+the project we applied for a project at BerliOS which was approved on
+November 7 with the following proposal:
+
+\begin{verbatim}
+As part of the course "Infrastructures for Open Source Software
+Development" [1] held by Steffen Evers at Berlin Technical University
+[2], we want to implement a distributed version management system with
+code signing support.
+
+Code signing intends to open the possibility that the origin of each
+chunk of code of a piece of software can be verified using
+public/private key signing. Without code signing users and other
+developers have to trust the integrity of the machine hosting the
+sources.
+
+Distributed version management means that there is no need for a central
+repository which avoids single points of failure and provides means to
+structure the repositories according to some external criteria like
+responsibilities or maintenanceships. We want to implement a system
+without the necessity that each site hosting a repository has to
+store all revisions of projects which can cause huge storage
+consumption.
+
+We want to implement the system as an extension of Meta-CVS [3], which
+is open source under the GPL license. The code signing will 
+heavily rely on GnuPG [4].
+Meta-CVS is written in CLISP [5], which is an open source implementation
+of Common Lisp [6]. To ease development, our code will be written in
+Common Lisp (using CLISP extension when necessary).
+
+The name of the project will be gennf.
+
+----------
+References:
+[1] http://flp.cs.tu-berlin.de/lehre/wise05-06/ossi.html
+[2] http://www.tu-berlin.de
+[3] http://users.footprints.net/~kaz/mcvs.html
+[4] http://www.gnupg.org/
+[5] http://clisp.cons.org/
+[6] http://www.cs.cmu.edu/Groups/AI/html/cltl/cltl2.html}
+\end{verbatim}
+
+We installed a \textsc{cvs} repository at
+\texttt{cvs.gennf.berlios.de:/cvsroot/gennf} which we used
+with \textsc{metacvs}. For this reason the \textsc{viewcvs}
+interface of BerliOS is not so usable, because it cannot resolve
+\textsc{metacvs}'s F-files.
+
+The first version of our web-page at \texttt{http://gennf.berlios.de}
+was online about a month later on December 12.
+
+To ease communication among the developers we installed an publicly
+open mailing list \texttt{gennf-devel@lists.berlios.de} on
+November~30. Some days later commit mails were enabled.
+The Perl script \texttt{log\_accum.pl} used
+originally stems from the FreeBSD project and found the
+way to us via the ZEDV group at Berlin's Free University's physics
+department and the \texttt{octopus} project. Until mid of January
+it had the same problem as \textsc{viewcvs}: it could not resolve
+\textsc{metacvs}'s F-file names, until a very basic \texttt{MAP}-file
+parser was included into the script.
+
+
+\subsection{Designing and planning the implementation}
+
+Until mid of november we had no schedule whatsoever.
+
+\subsection{Working on \textsc{metacvs}}
+
 We started investigating \textsc{metacvs} version 1.0.13 which was
 \emph{latest stable} in December 2005.
+
+The system is written in \textsc{clisp}, a particular
+\textsc{Common~Lisp} implementation. For the code signing part
+we wanted to rely on the \textsc{gpgme} library. For this reason
+including \textsc{c}-libraries was an important issue. At some point
+in the mid of December we decided to use \textsc{sbcl} as the
+\textsc{lisp} implementation of choice because it supports
+\textsc{uffi}, which is a cross-platform foreign function interface,
+and is less clumsy than \textsc{clisp} at some points.
+
+Of cou
+
 The system was ported to \textsc{sbcl} at the end of December 2005.
 After the specification for the distrubted repositories was finished,
 it turned out, that \textsc{metacvs} is to tightly written around
@@ -256,10 +390,12 @@ Day-to-day communication will be done using
   Apr. 1 to Apr. 6, 2006 & Finishing the project's report
   and preparing the presentation for final colloquium. \\
   \hline
-  Apr. 11, 2006, 14:00 & Final colloquium, 20 minutes talk.
+  Apr. 11, 2006, 14:00 & Final colloquium, 20 minutes talk. \\
   \hline
 \end{tabular}
 
+
+\chapter{Concepts and desgin}
 
 \section{Code Signing}
 
@@ -1311,6 +1447,12 @@ repositories.
 \end{itemize}
 
 \section{References}
+
+\begin{thebibliography}{Loe99}
+\bibitem{HMI05}[HMI05] Yasuhiro Hayase / Makoto Matsushita / Katsuro
+  Inoue; \emph{Revision control system using delta script of syntax
+    tree}; ACM Press 2005
+\end{thebibliography}
 
 \begin{itemize}
 \item \texttt{http://users.footprints.net/\textasciitilde{}kaz/mcvs.html} is the home of
