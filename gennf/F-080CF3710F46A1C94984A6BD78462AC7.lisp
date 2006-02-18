@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.6 2006/02/17 15:07:40 florenz Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.7 2006/02/18 16:18:42 florenz Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -116,8 +116,22 @@ indicated item from sequence."
 the given identifier."
   (make-pathname :directory (list :relative (format nil "~S" identifier))))
 
+(defun branch-prefix-file-list (file-list branch)
+  "Put the branch prefix in front of the files in list.
+Each element of list can either be a dotted pair with a filename as
+its first argument and a revision as its second argument
+or a plain filename."
+  (mapcar #'(lambda (file)
+	      (if (consp file)
+		  (cons (merge-pathnames (car file) branch)
+			(cdr file))
+		  (merge-pathnames file branch)))
+	  file-list))
+
 (defclass sandbox ()
-  ((branch :initarg :branch
+  ((module :initarg :module
+	   :accessor module)
+   (branch :initarg :branch
 	   :accessor branch)
    (access :initarg :access
 	   :accessor access)
@@ -128,24 +142,27 @@ on a checked out sandbox."))
 
 (defun is-sandbox-p (alist)
   "Returns if alist is the alist representation of a sandbox."
-  (and (= (length alist) 3)
-       (eql (car (first alist)) :branch)
-       (eql (car (second alist)) :access)
-       (eql (car (third alist)) :change)))
+  (and (= (length alist) 4)
+       (eql (car (first alist)) :module)
+       (eql (car (second alist)) :branch)
+       (eql (car (third alist)) :access)
+       (eql (car (fourth alist)) :change)))
 
 (defun alist-to-sandbox (alist)
   "Convert alist into a sandbox object."
   (when (is-sandbox-p alist)
     (make-instance 'sandbox
+		   :module (extract :module alist)
 		   :branch (extract :branch alist)
 		   :access (extract :access alist)
 		   :change (extract :change alist))))
 
 (defmethod convert-to-alist append ((sandbox sandbox))
   "Transform a sandbox into its alist representation."
-  (acons :branch (branch sandbox)
-	 (acons :access (access sandbox)
-		(acons :change (change sandbox) ()))))
+  (acons :module (module sandbox)
+	  (acons :branch (branch sandbox)
+		 (acons :access (access sandbox)
+			(acons :change (change sandbox) ())))))
 
 (defmethod print-object ((sandbox sandbox) stream)
   "Prints a sandbox as an alist."

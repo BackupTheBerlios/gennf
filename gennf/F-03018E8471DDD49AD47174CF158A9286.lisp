@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.9 2006/02/17 22:38:59 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.10 2006/02/18 16:18:42 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -148,11 +148,18 @@ changes, without a their revision number, as a list of
 files."))
 
 (defmethod all-changed-files ((change change))
-  "All files recorded in change's filemap"
+  "Return all files recorded in change's filemap"
   (let ((file-map (file-map change)))
     (loop for file-revision in file-map 
 	  collect (pathname (car file-revision)))))
-    
+
+(defmethod all-changed-files ((changes list))
+  "Return all files recorded in all changes in the list."
+  (let ((files ()))
+    (dolist (change changes)
+      (setf files (union files (all-changed-files change) :test #'equal)))
+    files))
+
 (defgeneric add-file-to-changes (file store)
   (:documentation "Add a mapping for file in the latest change of the sequence,
 i. e. to the head of the sequence. If file was already added to the head
@@ -273,3 +280,18 @@ appear in the result that are mentioned in this file list."))
   "Extract the required list from file."
   (extract-files-and-revisions (read-change-file file)
 			       :identifier identifier :files files))
+
+(defun retrieve-latest-changes (module access branch)
+  "Returns latest change sequence for the indicated module."
+  (let ((changes ())
+	(change-file
+	 (merge-pathnames *change-file*
+			  (branch-identifier-to-directory branch))))
+    (in-temporary-directory (temporary-directory)
+      (backend-get module access (list change-file) temporary-directory)
+      (setf changes (read-change-file change-file)))
+    changes))
+    
+
+					
+      

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.21 2006/02/17 22:38:59 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.22 2006/02/18 16:18:42 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -75,7 +75,7 @@ FIXME: It should be checked if module already exists."
       (add-access access *access-file*)
       (backend-import module access))))
 
-(defun checkout-change (module access branch &optional change)
+(defun checkout (module access branch &optional change)
   "Checkout a change into a sandbox. If no change number is given,
 the latest change is checked out.
 The sandbox is called *meta-directory* and contains the branch and
@@ -102,28 +102,18 @@ access file and the branch subdirectory with it's change file."
 	;; Write sandbox-file.
 	(write-sandbox-file
 	 (make-instance 'sandbox
+			:module module
 			:branch branch
 			:change change
 			:access (identifier access)))))))
-
-(defun branch-prefix-file-list (file-list branch)
-  "Put the branch prefix in front of the files in list.
-Each element of list can either be a dotted pair with a filename as
-its first argument and a revision as its second argument
-or a plain filename."
-  (mapcar #'(lambda (file)
-	      (if (consp file)
-		  (cons (merge-pathnames (car file) branch)
-			(cdr file))
-		  (merge-pathnames file branch)))
-	  file-list))
 
 (defun update (module access branch files &optional change)
   "Update files of a previously checked out change. A sandbox has to exist
 and *meta-directory* has to be set properly.
 Optionally a change can be passed. If so, files are updated to the
-state they had in this change."
-  (declare (optimize (cl:debug 3)))
+state they had in that change.
+As update has to get the list of files to update it is not out of
+the box able to retrieve intermittently added files."
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*))
@@ -162,7 +152,7 @@ state they had in this change."
 	     (ancestor-files-and-revisions-branch-prefixed
 	      (branch-prefix-file-list ancestor-files-and-revisions
 				       branch-directory)))
-	;; If no particular change is requiredit can be set
+	;; If no particular change is required it can be set
 	;; from the freshly read changes file.
 	(unless change
 	  (setf change (length changes)))
@@ -205,7 +195,7 @@ state they had in this change."
 		  (when conflict
 		    (format t "Conflicts updating file ~S." (car file)))
 		  (list-to-file merged-file old-file))))))
-	;; Write up to date sandbox file.
+	;; Write updated sandbox file.
 	(setf (change sandbox) change)
 	(write-sandbox-file sandbox)))))
 		     
@@ -215,41 +205,79 @@ record is stored. All files must have been changed. If not
 they get recorded in the commit but are not assigned a new revision
 number which makes the mapping occurence<-->revision-number illegal.
 This means, some other functions has to check which files go upstream
-before calling this routine.
-FIXME: No conflict handling yet."
+before calling this routine."
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file*))
-	   (old-changes (read-change-file change-file)))
+	   (old-changes (read-change-file change-file))
+	   (sandbox (read-sandbox-file)))
       (setf files (mapcar #'pathname files))
-      ;; Get latest change file.
-      (backend-get module access
-		   (list change-file) *meta-directory*)
-      (let* ((changes (read-change-file change-file))
+      (let* ((changes (retrieve-latest-changes module access branch))
 	     (identifier (get-new-change-identifier changes))
 	     (change (make-instance 'change
 				    :identifier identifier
 				    :file-map (create-new-file-map)))
 	     (modified-files (get-modified-files old-changes changes))
 	     (conflicting-files (intersection files modified-files
-					      :test #'equal)))
+					      :test #'equal))
+	     ;; If no files are added existing-files equals files.
+	     (existing-files (intersection files
+					   (all-changed-files changes)
+					   :test #'equal)))
 	(if conflicting-files
-	    ;; Conflict handling.
-	    ()
+	    ;; Signal an error, if files conflict.
+	    (error "The following files conflict: ~S" conflicting-files)
 	    ;; No conflicts.
-	    (progn
+	    (let ((branch-prefixed-existing-files (branch-prefix-file-list
+						   existing-files
+						   branch-directory))
+		  (branch-prefixed-files (branch-prefix-file-list
+					  files
+					  branch-directory)))
 	      (setf changes (add-change change changes))
 	      ;; Add files to new change.
 	      (dolist (file files)
 		(setf changes (add-file-to-changes file changes)))
 	      ;; Write new change file.
 	      (write-change-file changes change-file)
-	      (setf files (mapcar #'(lambda (file)
-				      (merge-pathnames
-				       branch-directory file)) files))
-	      (backend-commit module "commit" access
-			      (append (list change-file)
-				      files))))))))
+	      ;; Now, it gets a little bit awkward.
+	      ;; As updates are handled by gennf and not by cvs,
+	      ;; files in the sandbox may have outdated cvs revisions
+	      ;; though they are up to date (which is known from the
+	      ;; changes file).
+	      ;; To circumvent a cvs update on files in the sandbox,
+	      ;; which could causes undesired merges, all work is done
+	      ;; in a temporary directory.
+	      ;; The last version of all files to be checked in is
+	      ;; checked-out to this temporary-directory. Then the
+	      ;; files from the sandbox are written to those files
+	      ;; and the commit is performed.
+	      (in-temporary-directory (temporary-directory)
+		(debug
+		  (debug-format "Doing commit in directory: ~S"
+				temporary-directory)
+		  (break))
+		(backend-get module access
+			     (append (list change-file)
+				     branch-prefixed-existing-files)
+			     temporary-directory)
+		(copy-file (merge-pathnames change-file *meta-directory*)
+			   (merge-pathnames change-file temporary-directory)
+			   :overwrite t)
+		(dolist (file branch-prefixed-files)
+		  (copy-file (merge-pathnames file *meta-directory*)
+			     (merge-pathnames file temporary-directory)
+			     :overwrite t))
+		(debug
+		  (break))
+		(backend-commit module "commit" access
+				(append (list change-file)
+					branch-prefixed-files)))
+	      ;; Write new sandbox file.
+	      (debug
+		(debug-format "New change identifier is ~S." identifier))
+	      (setf (change sandbox) identifier)
+	      (write-sandbox-file sandbox)))))))
 
 ;; (defun merge (module root branch
 ;; 	      origin-root origin-branch &optional origin-change)
@@ -277,6 +305,6 @@ FIXME: No conflict handling yet."
 ;;       (create-directory destination-directory :require-fresh-directory t)
 ;;       (create-directory origin-directory :require-fresh-directory t)
 ;;       (in-directory (destination-directory)
-;; 	(checkout-change module root branch))
+;; 	(checkout module root branch))
 ;;       (in-directory (origin-directory)
-;; 	(checkout-change module origin-root origin-branch origin-change))
+;; 	(checkout module origin-root origin-branch origin-change))

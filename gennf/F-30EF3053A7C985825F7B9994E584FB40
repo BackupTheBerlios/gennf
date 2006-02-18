@@ -9,4 +9,10 @@ TODO
   exit.
 * For the merging: An equality predicate which disregards differences
   in whitespace might be helpful.
-* commit handles no conflicts.
+* commit should offer a restart to do an update if conflicts
+  occur. If the update is conflict-free, it should be offered the
+  possibility to proceed with the commit or the quit.
+  If the update has conflicts too, it should be quit.
+* The lock-problem (cf. e-mail from Florian) is not considere in
+  commit. It is assumed that the complete commit procedure
+  is not interrupted by some other commit.

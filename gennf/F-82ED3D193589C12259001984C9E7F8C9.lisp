@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-82ED3D193589C12259001984C9E7F8C9.lisp,v 1.1 2006/02/17 22:38:59 florenz Exp $
+;; $Id: F-82ED3D193589C12259001984C9E7F8C9.lisp,v 1.2 2006/02/18 16:18:42 florenz Exp $
 
 ;; Simple support for debugging code.
 
@@ -34,9 +34,10 @@
 with two lines indicating debug-output.
 Output only in debug mode."
   (when *debug-mode*
-    (format *debug-io* *debug-output-begin*)
+    (write-line *debug-output-begin* *debug-io*)
     (apply #'print arguments)
-    (format *debug-io* *debug-output-end*)))
+    (fresh-line *debug-io*)
+    (write-line *debug-output-end* *debug-io*)))
 
 (defun debug-format (&rest arguments)
   "Passes all arguments to format and encloses them
@@ -44,9 +45,10 @@ with two lines indicating debug-output. The stream argument
 to format is automatically inserted.
 Output only in debug mode."
   (when *debug-mode*
-    (format *debug-io* *debug-output-begin*)
+    (write-line *debug-output-begin* *debug-io*)
     (apply #'format (append (list *debug-io*) arguments))
-    (format *debug-io* *debug-output-end*)))
+    (fresh-line *debug-io*)
+    (write-line *debug-output-end* *debug-io*)))
        
 (defmacro debug (&body forms)
   "Executes forms only when in debug-mode. Debug mode is
