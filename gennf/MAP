@@ -129,6 +129,9 @@
   (:EXEC
    T))
  (:FILE
+  "MCVS/F-74178C2E50AE1257726E1B3D58FE1EEE.lisp"
+  "prototype/distribution.lisp")
+ (:FILE
   "MCVS/F-74915F0862B511AC9C233FDCB87DBEF8.lisp"
   "sbcl-port/update.lisp")
  (:FILE
