@@ -1,3 +1,26 @@
+% Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+%
+% This file is part of gennf.
+%
+% gennf is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% gennf is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with gennf; if not, write to the Free Software
+% Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+%
+% $Id: F-BB223D44B63BE9E1F84D89EE7FDDFB69.tex,v 1.25 2006/02/19 16:27:59 florenz Exp $
+
+% This is the project's report stateing on the course of
+% development as well as on design and technical issues.
+
 \documentclass[fleqn, 10pt, a4paper]{report}
 \usepackage{amssymb}
 \setlength{\parindent}{0pt}
@@ -12,10 +35,16 @@
   Programmierung \\
   Prof.~Dr.~Bernd~Mahr, Steffen~Evers
   \bigskip
+  \bigskip
 
   {\LARGE
-    \GENNF{} -- Distributed Version Management System with Code Signing \\
-    Project Report}
+    \GENNF{} -- Distributed Version Management System with Code
+    Signing}
+  \medskip
+
+  {\Large
+    -- Project Report --}
+  \bigskip
   \bigskip
 
   {\large
@@ -38,30 +67,43 @@
       \end{center}
     \end{minipage}
     \bigskip
+    \bigskip
 
-    \today }
+    \today}
 
 \end{center}
-\bigskip
 
 \tableofcontents
 
+\section*{Prologue}
+\addcontentsline{toc}{section}{Prologue}
 
-\section{Prologue}
+This document is the project report of \GENNF{}, a distributed
+version management system enhanced with code signing as
+part of the \emph{Infrastrukturen zur Open Source Software Entwicklung}
+course held by Steffen Evers at Berlin Technical University.
 
-This document is our project's scratchpad accompanying the development
-of a distributed version management system enhanced with code signing as
-part of the \emph{Infrastructures for Open Source Software Development}
-course held by Steffen Evers at the Berlin Technical University.
+The document started as a scratchpad we sketched our ideas and
+plans and is currently being transformed into an intermediate report
+and once will be the final report.
 
-Our hope is, that eventually the project's documentation will be
-distilled out of this text. Up to that point, it will be a bit messy,
-probably unstructured and a moving target of course.
+The documente is divided into two chapters:
+\begin{itemize}
+\item The first chapter describes the course of the project in
+chronologically order. Decisions and steps we undertook are
+explained as well as comments from a review perspective.
+\item The second chapter describes the desgin and concepts of
+\GENNF{} in a more technical fashion. Large parts of this
+section were written as a desgin document in an early period
+of the project, some parts were corrected and adjusted during
+development or thereafter. Thus, this chapter can be considered
+as a part of the project's outcome.
+\end{itemize}
 
+\section*{Developers}
+\addcontentsline{toc}{section}{Developers}
 
-\section{Developers}
-
-Development is currently done by
+\GENNF{} is being developed by
 \begin{itemize}
 \item Fabian Otto, \texttt{sigsegv@cs.tu-berlin.de}
 \item Hannes Mehnert, \texttt{mehnert@cs.tu-berlin.de}
@@ -69,14 +111,16 @@ Development is currently done by
 \end{itemize}
 
 
-\section{The goal}
+\chapter{The project's course \label{course}}
 
-
-
-
-\chapter{The project's course}
+This chapter describes in rough chronological order the
+different steps we undertook during the development of \GENNF{}.
 
 \section{The planning}
+
+The planning phase covers all the time prior to any coding. As
+we changed plans at several points there is some interleaving during
+the middle period of the project.
 
 \subsection{In search of a project}
 
@@ -158,6 +202,10 @@ possibility to structure the repositories according to some external
 requirements, e.~g. responsibilities for or maintenance of certain code
 sections by certain parties.
 
+The code signing part should be mainly worked on by Hannes Mehnert,
+whereas Florian Lorenzen felt more reponsible for the distributive
+part. Fabian Otto would participate in both parts of the project.
+
 It was fairly clear right from the beginning that we could not
 and want not write a version management system from scratch but
 to improcve an existing system. The two systems in question
@@ -188,10 +236,13 @@ like SourceForge or BerliOS and thus existing infrastructure
 is available to the new system.
 
 We also had a look on a system called \textsc{dcvs}, distributed
-\textsc{cvs} but this was ruled out right from the start:
-it support several repositories but each repository is assigned a
-part of code which is the only one that can be modified. That was
-not so flexible as we would like it.
+\textsc{cvs} but this was ruled out right from the start, beacuse
+its support several repositories is rather unflexible:
+each repository is assigned a
+part of code which is the only one that can be modified.
+That means the distribution must follow the responsibilities
+and/or maintenanceships of the projects which imposes to
+strong rules on the development process in our opinion.
 
 \subsection{Infrastructure}
 
@@ -258,128 +309,49 @@ it had the same problem as \textsc{viewcvs}: it could not resolve
 \textsc{metacvs}'s F-file names, until a very basic \texttt{MAP}-file
 parser was included into the script.
 
+The mailing list archives are found at
+\texttt{http://lists.berlios.de/pipermail/gennf-devel/} and as all
+commit mails were sent to and many discussions took place on the list
+it reads like a (not properly edited, though) logbook of the project.
 
 \subsection{Designing and planning the implementation}
 
-Until mid of november we had no schedule whatsoever.
+Until mid of november we had did not have a schedule or
+distinct milestones. The reason for this was twofold:
+Firstly, it took some time to get the goals of the project straight.
+Secondly, we had the problem that among the three developers was one
+(Florian Lorenzen) who had to do most of the work until the mid of
+February 2006 and two others (Hannes Mehnert and Fabian Otto, then)
+who would not start intensive work before that point of time.
+That constrained us to plan a handing over of the code at around
+the middle of February in a defined state.
 
-\subsection{Working on \textsc{metacvs}}
+Having this discussed it was made up the plan, that the basic
+operations for the handling of distributed repositories should
+be protypically implemented until then. The code signing, the code
+signing and the user-interface should be built on top of this
+the following one and a half months.
 
-We started investigating \textsc{metacvs} version 1.0.13 which was
-\emph{latest stable} in December 2005.
+A concept how the distribution shall take place had to be finished
+until end of the year 2005. This was done in several steps and
+finally completed on January 3, 2005.
 
-The system is written in \textsc{clisp}, a particular
-\textsc{Common~Lisp} implementation. For the code signing part
-we wanted to rely on the \textsc{gpgme} library. For this reason
-including \textsc{c}-libraries was an important issue. At some point
-in the mid of December we decided to use \textsc{sbcl} as the
-\textsc{lisp} implementation of choice because it supports
-\textsc{uffi}, which is a cross-platform foreign function interface,
-and is less clumsy than \textsc{clisp} at some points.
+A more in depth description of the requirements of the code signing
+was written mid of November.
 
-Of cou
-
-The system was ported to \textsc{sbcl} at the end of December 2005.
-After the specification for the distrubted repositories was finished,
-it turned out, that \textsc{metacvs} is to tightly written around
-\textsc{cvs} to easily incorporate the modifications required
-for the concept of changes.
-
-At begin of January it was decided to write a protype from scratch
-which is able to perform all operations necessary for
-distributed repositories -- but only for repositories without a
-directory structure. This layer will be build independently of the
-underlying mechanism of changes. At this point ideas and/or code
-from \textsc{metacvs} come in.
-
-The code signing part again will be independent of the directory
-structuring and the distributive part.
-
-The notion of changes and the accompanying operations though are
-comman base of both parts of the project.
-
-\subsection{\textsc{Common Lisp} implementation issues}
-
-\textsc{metacvs} is implemented in \textsc{clisp} which is now installed
-in \texttt{/home/pub/bin} in the IRB-network. \textsc{metacvs} is
-installed in the same location to get familiar with it and for testing
-purposes. \textsc{metacvs} requires \texttt{libsigsegv}, which is
-installed but I had to patch the \texttt{/home/pub/bin/mcvs}-script and
-the install-script to have a proper \texttt{LD\_LIBRARY\_PATH}. The
-patched sources (also for \textsc{clisp}) are in \texttt{/home/pub/src}.
-
-\textsc{slime} is installed in \texttt{/home/pub/share/emacs/slime} and
-can be used by putting
-\begin{verbatim}
-(add-to-list 'load-path "/home/pub/share/emacs/slime")
-(require 'slime)
-(slime-setup)
-(setq inferior-lisp-program "clisp")
-\end{verbatim}
-
-into \texttt{\textasciitilde/.emacs}.
-
-The trouble is that the originial \textsc{metacvs} build system
-creates a pre-image which contains \textsc{unix} bindings first to use
-this image to compile and image-dump \textsc{metacvs}.
-
-The script \texttt{create\_image} can be used to build this image
-and \texttt{unix-bindings-linking-set/clisp\_mcvs} is a shell script
-to invoke \textsc{clisp} with this image. Using \texttt{clisp\_mcvs}
-as \textsc{slime}'s \texttt{inferior-lisp-program} makes loading
-and exploration of the original code handy.
-
-We decided to use \textsc{sbcl} for our development because it's
-foreign function interface seems to be easier and is compatible with
-\textsc{uffi} which also support \textsc{allegro}, \textsc{lispworks},
-\textsc{openmcl} and others.
-
-The port to \textsc{sbcl} is nearly complete but not sufficiently
-tested yet. The original build system is replaced by \textsc{asdf}
-and the \textsc{unix} bindings are replaced by calls to a patched version of
-\textsc{osicat}, \textsc{port-path} (based on Peter Seibel's
-\textsc{pathname} library with some home grown extensions) and some
-\textsc{sbcl} specific extensions for interprocess communication.
-
-The \textsc{osicat} patch can be retrieved from \textsc{cvs}
-module \texttt{osicat-patch} and \textsc{port-path} from
-module \texttt{port-path}. Both systems come with \textsc{asdf}
-definitions and are made available to \textsc{sbcl} by symlinking
-the \texttt{.asd} file to \texttt{\textasciitilde{}/.sbcl/systems}.
-
-The \textsc{metacvs} port can be loaded with
-
-\begin{verbatim}
-(require :asdf)
-(asdf:operate 'asdf:load-op :gennf)
-\end{verbatim}
-
-A \texttt{Makefile} to build an image \texttt{gennf.run}
-is available and can be started with a shell script \texttt{gennf}
-which behaves like the \texttt{mcvs} binary.
-
-
-\subsection{Communication}
-
-Everyone participating in the project is free to mess up this file to
-record relevant thoughts, ideas, \ldots
-
-Day-to-day communication will be done using
-\texttt{gennf-devel@lists.berlios.de}.
-
-
-\subsection{Schedule \label{schedule}}
+Our schedule then looked like this:
+\bigskip
 
 \begin{tabular}{|p{.3\textwidth}|p{.6\textwidth}|}
   \hline
   \textmd{When} & \textmd{What} \\
   \hline\hline
-  Nov. 7 2005 &
-  Meeting at 12 o'clock in FR5017 to discuss design issues. \\
-  \hline
-  Nov. 4 to Nov. 15, 2005 &
+  Nov. 15, 2005 to Jan. 1, 2006 &
   Getting familiar with the code of \textsc{metacvs}
   and drafting a design for distributiveness and signing. \\
+  \hline
+  Dec. 15, 2005 to Jan. 1 2006 &
+  Porting \textsc{metacvs} to \textsc{sbcl} \\
   \hline
   Jan. 9 to Feb. 19, 2006 & Prototypic implementation of
   distributed repositories. \\
@@ -394,12 +366,130 @@ Day-to-day communication will be done using
   \hline
 \end{tabular}
 
+\subsection{Working on \textsc{metacvs}}
+
+As we decided to extend \textsc{metacvs} we started investigating
+the code of version 1.0.13 in December.
+
+The system is written in \textsc{clisp}, a particular
+\textsc{Common~Lisp} implementation. For the code signing part
+we wanted to rely on the \textsc{gpgme} library. For this reason
+including \textsc{c}-libraries was an important issue. At some point
+in the mid of December we decided to use \textsc{sbcl} as the
+\textsc{lisp} implementation of choice because it supports
+\textsc{uffi}, which is a cross-platform foreign function interface,
+and is less clumsy than \textsc{clisp} at some points.
+
+This implied porting \textsc{metacvs} to \textsc{sbcl}. After
+close looks on the implementation dependent parts of the code
+it was clear that most of them could be replaced by a portable
+library called \textsc{osicat}, which is a high level \textsc{posix}
+interface. Inclusion of this library would make the code cleaner
+and more portable. Furthermore, we decided that the current build
+system of \textsc{metacvs} is very clumsy and that it should be
+replaced by the widely used \textsc{asdf}-package to compile and
+load \textsc{Common~Lisp} software.
+
+The system was ported to \textsc{sbcl} at the end of December 2005.
+This turned out to be a waste of time some days later:
+
+After the specification for the distributed repositories was finished,
+it turned out, that \textsc{metacvs} is to tightly written around
+\textsc{cvs} to easily incorporate the modifications required
+for the concept of changes. For the distributed repositories and
+the its central concept of changes a clean backend abstraction,
+i.~e. a \textsc{cvs} abstraction, was required. The reason is that
+quite a different development model than \textsc{cvs}'s model
+should be realised. \textsc{metacvs} did not change the development
+model in any way but just improved \textsc{cvs} at some points.
+The result of this philosophy ws that basically a wrapper for
+each \textsc{cvs} operation was provided and that the executable
+was called when needed.
+
+Unfortunately, \textsc{metacvs} has no inner interface that we could
+build on to benefit from its improvements over \textsc{cvs} and
+at the same time abstracting from the sandbox centered development
+model. The only possibility would have been wrapping the program
+once again which would not be a very clean solution.
+
+So we sorted out the aspect of \textsc{metacvs} that were very good
+ideas, which are basically the indirection layer for directory
+structure, and decided to implement a protype from scratch
+incorporating these ideas (and code fragments from \textsc{metacvs}
+as far as possible). At this point it was clear that a patch for
+\textsc{metacvs} as project result was out of sight. It was
+furthermore obvious that all the porting was not necessary at all.
+
+From a review perspective it can be stated that the decision to take
+\textsc{scbl} as development platform was not a good decision. If
+we had sticked with \textsc{clisp} there would have been some quirks
+to ship around but it would have been clear that patching was not
+possible at least two weeks earlier. Unlucky enough those two weeks
+were the academic holidays -- and there would have been plenty of time
+to do useful codeing, instead of writing a superflouos port.
+
+At beginning of January 2006 the codeing of a prototype to implement
+the distribution model began.
+
+\section{Implementation}
+
+The implementation phase started at begin of January 2005.
+
+\subsection{The distribution prototype}
+
+The protoype for distribute repositories should provide
+all necessary basic operations as described in section \ref{distrib}
+but only for flat repositories, i.~e. without any directory
+structure. The idea behind this was that all structure would be set on
+top of this as it is done in \textsc{metacvs}.
+
+The first task for this part was to find a suitable backend
+abstraction. This turned out to be much more difficult than expected,
+again because \textsc{cvs} imposes very strict rules on how the
+development takes place. All those difficulties could somehow be
+circumvented but it only with heavy traffic between the repository and
+the client and massive use of temporary harddisk storage.
+
+It now became clear why there is, apart from \textsc{dcvs}, no other
+distributed version management system which builds on top of
+\textsc{cvs}: \textsc{cvs} is to powerful for just using it as a store
+and retrieve engine and network transport. Just using it for this
+purpose needs a lot of tricks. Despite this insight \textsc{cvs} was
+not replaced on the one hand side due to time constraints and on the
+other hand side because it is widely available and indeed handles the
+network for us.
+
+But a more satisfing solution would have been to take an
+transportation protocol like HTTP or FTP and some simpler software to
+store the revisions of files.
+
+Storeing revisions of files introduces the next problem we had because
+of our sticking to \textsc{cvs}. Our concept of distribution heavily
+relies on merging different revisions of files from different
+branches. It turned out that \textsc{cvs} mergeing capabilities could
+not be used for this because they only handle merges of files that
+live in the same repository. Consequently, this merging had to be done
+by ourselves. We use \textsc{cl-difflib} to compute differences
+between files and some self-written routines to use this information
+to merge two files. This is not a bad solution but it costed time to
+implement of course. It also introduces the necessity to do the
+merging ourselves even in situations in which we could have used
+\textsc{cvs} because it is very undesireable to have two different
+merging algorithms -- one we can control and one we cannot -- in one
+piece of software.
+
+Again, it would have been better to work without \textsc{cvs} and
+using simpler software to store the revisions of files like
+\textsc{Common~Lisp} versions of \texttt{diff} and \texttt{patch}.
+
+
 
 \chapter{Concepts and desgin}
 
 \section{Code Signing}
 
 \subsection{Motivation}
+
 Currently most version management systems don't use any digital signatures
 for code (apart from \textsc{tla}). Authentication is done by an own password
 server (\textsc{cvs}: pserver), via a ssh public key (\textsc{cvs},

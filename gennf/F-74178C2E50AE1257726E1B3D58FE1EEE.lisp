@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.1 2006/02/19 13:31:36 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.2 2006/02/19 16:27:59 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -58,8 +58,7 @@ It returns the identifier of the branch created."
 
 (defun create-empty-repository (module access)
   "Create a completely empty repository only containing an
-ACCESS and BRANCH file.
-FIXME: It should be checked if module already exists."
+access and branch file."
   (in-temporary-directory ()
     (create-meta-directory)
     (in-meta-directory
@@ -358,8 +357,6 @@ Origin files are in ~S."
       (create-directory destination-directory :require-fresh-directory t)
       (create-directory origin-directory :require-fresh-directory t)
       (format t "DESTINATION CHANGES ~S" destination-changes)
-      (debug
-	(break))
       ;; Only the common files have to be fetched from the destination
       ;; branch because only those have to be merged. The other
       ;; files can just be added.
@@ -371,17 +368,12 @@ Origin files are in ~S."
 		   destination-directory)
       (backend-get module origin-access origin-files-and-revisions-prefixed
 		   origin-directory)
-      (debug
-	(break))
       (let ((conflicts nil))
 	;; Copy uncommon files.
 	(dolist (file uncommon-files)
 	  (let ((complete-filename (merge-pathnames file
 						    origin-branch-absolute)))
 	    (copy-file complete-filename destination-branch-absolute)))
-	
-	(debug
-	  (break))
 	;; Merge common files.
 	(dolist (file common-files)
 	  (let ((origin-file (merge-pathnames file
@@ -395,8 +387,6 @@ Origin files are in ~S."
 		(setf conflicts t)
 		(format t "Conflict merging file ~S." file))
 	      (list-to-file merged-file destination-file))))
-	(debug
-	  (break))
 	;; Create merge entry.
 	(backend-get module access (list *access-file*)
 		     destination-directory)
@@ -430,8 +420,6 @@ Origin files are in ~S."
 	(write-change-file new-changes
 			   (merge-pathnames *change-file*
 					    destination-branch-absolute))
-	(debug
-	  (break))
 	;; Finish the operation.
 	(if conflicts
 	    ;; If there were conflicts during the merge (which will be

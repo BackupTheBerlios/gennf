@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.13 2006/02/16 13:37:17 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.14 2006/02/19 16:27:59 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -94,8 +94,7 @@ a macro. Taken from Peter Seibel's book, chapter 8."
 
 (defmacro ensure-string-pathname (pathspec)
   "SETF pathspec to its namestring if it is
-a pathname.
-FIXME: This should go into port-path."
+a pathname."
   `(when (typep ,pathspec 'pathname)
     (setf ,pathspec (namestring ,pathspec))))
 
@@ -178,10 +177,7 @@ to introduce the variable lexically:
 
 ;; (let ((some-variable some-initialization))
 ;;   (retry ((exception :cleanup (some-form-using-some-variable)))
-;;     (some-code-also-using-some-variable)))
-
-FIXME: * If one of the maximums is exceeded a condition should be thrown.
-       * This macro is not yet fully tested."
+;;     (some-code-also-using-some-variable)))"
   (with-gensyms (retry counters)
     (let ((conditions nil)
 	  (condition-variables nil)

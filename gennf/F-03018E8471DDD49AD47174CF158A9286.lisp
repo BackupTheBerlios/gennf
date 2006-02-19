@@ -16,12 +16,11 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.11 2006/02/19 11:37:25 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.12 2006/02/19 16:27:59 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
 ;; All the file-map handling is in this file too.
-;; FIXME: Perhaps, this should be moved to another file.
 
 (in-package :gennf)
 

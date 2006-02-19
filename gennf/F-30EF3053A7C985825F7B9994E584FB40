@@ -18,6 +18,15 @@ TODO
 * The lock-problem (cf. e-mail from Florian) is not considered in
   commit. It is assumed that the complete commit procedure
   is not interrupted by some other commit.
+  The retry macro is somehow for this purpose but it is not
+  consequently used yet.
+* The retry macro should signal a condition if the maximum
+  number of retries is exceeded.
 * When merging, proper mark up functions, which insert filenames
   and stuff, should be used.
 * The whole replication stuff is not respected in any way.
+* When creating a new repository module it is not checked if it
+  already exists.
+* Cleanup: Some functions/macros from miscellaneous.lisp
+  (ensure-string-pathname), directories.lisp and possibly files.lisp
+  should really go to port-path.

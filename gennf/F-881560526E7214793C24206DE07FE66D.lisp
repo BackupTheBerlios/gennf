@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.8 2006/02/18 10:45:02 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.9 2006/02/19 16:27:59 florenz Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -221,7 +221,7 @@ path have to bee in the same form (directory) "
 ;; Check
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
-;; FIXME: Wird noch nicht vom jetztigen code benutzt.
+;; FIXME: Not yet used in existing code.
 (defun mapping-dupe-check (filemap)
 ;; Taken from mcvs:mapping.lisp
 "Signals an error condition if the filemap contains duplicate paths or
