@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.2 2006/02/19 16:27:59 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.3 2006/02/19 18:54:56 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -28,21 +28,22 @@
   "Create a new branch. That is to create a branch directory
 with the next free number and an empty change file.
 It returns the identifier of the branch created."
-  (in-temporary-directory ()
-    (create-meta-directory)
-    (in-meta-directory
-      (let ((branch-directory (make-pathname)))
-	(retry ((backend-outdated-error
-		 :cleanup (progn (delete-file *branch-file*)
-				 (delete-directory-tree
-				  branch-directory))))
+  (let (identifier) ; This is just because it is to be returned.
+    (in-temporary-directory ()
+      (create-meta-directory)
+      (in-meta-directory
+	(let ((branch-directory (make-pathname)))
+	  (retry ((backend-outdated-error
+		   :cleanup (progn (delete-file *branch-file*)
+				   (delete-directory-tree
+				    branch-directory))))
 	    (backend-get module access
 			 (list *branch-file* *access-file*) *meta-directory*)
-	    (let* ((identifier (get-new-branch-identifier *branch-file*))
-		   (branch (make-instance 'branch
-			    :identifier identifier
-			    :symbolic-name symbolic-name
-			    :description description))
+	    (setf identifier (get-new-branch-identifier *branch-file*))
+	    (let* ((branch (make-instance 'branch
+					  :identifier identifier
+					  :symbolic-name symbolic-name
+					  :description description))
 		   (change-file (make-pathname)))
 	      (setf branch-directory
 		    (branch-identifier-to-directory identifier))
@@ -54,7 +55,7 @@ It returns the identifier of the branch created."
 	      (backend-commit module "create-empty-branch" access
 			      (list change-file *branch-file*)))))
 	(remove-meta-directory)))
-  identifier)
+    identifier))
 
 (defun create-empty-repository (module access)
   "Create a completely empty repository only containing an
@@ -246,8 +247,7 @@ before calling this routine."
 	      (in-temporary-directory (temporary-directory)
 		(debug
 		  (debug-format "Doing commit in directory: ~S"
-				temporary-directory)
-		  (break))
+				temporary-directory))
 		(backend-get module access
 			     (append (list change-file)
 				     branch-prefixed-existing-files)
@@ -259,8 +259,6 @@ before calling this routine."
 		  (copy-file (merge-pathnames file *meta-directory*)
 			     (merge-pathnames file temporary-directory)
 			     :overwrite t))
-		(debug
-		  (break))
 		(backend-commit module "commit" access
 				(append (list change-file)
 					branch-prefixed-files)))
@@ -269,6 +267,13 @@ before calling this routine."
 		(debug-format "New change identifier is ~S." identifier))
 	      (setf (change sandbox) identifier)
 	      (write-sandbox-file sandbox)))))))
+
+(defparameter *destination* (make-pathname :directory
+					   '(:relative "destination"))
+  "Where files are merged on a merge.")
+(defparameter *origin* (make-pathname :directory
+				      '(:relative "origin"))
+  "Where files to be merged in a temporally stored.")
 
 (defun merge (module access branch
 	      origin-access origin-branch &optional origin-change)
@@ -280,9 +285,10 @@ The origin's module has to have the same name. The branch
 has to exist.
 The merge is performed in a temporary directory. If conflicts
 occur when merging the files, the temporary directory is kept
-and the function returns its pathname. The conflicts then have to
+and the function returns its pathname as well as the files
+which were not commited as multiple valyes. The conflicts then have to
 be resolved by hand and merge-finish has to be called on this
-directory.
+directory and files.
 If no conflicts happen merge returns NIL and temporary data is
 deleted (no conflicts is the ususal case when using merge for
 branching."
@@ -291,19 +297,15 @@ branching."
     ;; destination and origin. The data to be merged in is
     ;; stored in origin and the latest change of the branch
     ;; which will receive the merge is stored in destination.
-    (let* ((destination-directory (merge-pathnames
-				   (make-pathname :directory
-						  '(:relative "destination"))
-				   temporary-directory))
+    (let* ((destination-directory (merge-pathnames *destination*
+						   temporary-directory))
 	   (destination-branch-directory (branch-identifier-to-directory
 					  branch))
 	   (destination-branch-absolute (merge-pathnames
 					 destination-branch-directory
 					 destination-directory))
-	   (origin-directory (merge-pathnames
-			      (make-pathname :directory
-					     '(:relative "origin"))
-			      temporary-directory))
+	   (origin-directory (merge-pathnames *origin*
+					      temporary-directory))
 	   (origin-branch-directory (branch-identifier-to-directory
 				     origin-branch))
 	   (origin-branch-absolute (merge-pathnames origin-branch-directory
@@ -431,7 +433,11 @@ Origin files are in ~S."
 	    (progn
 	      (delete-directory-tree origin-directory)
 	      (format t "There were conflicts which have to be resolved.")
-	      (return-from merge temporary-directory))
+	      (format t "The conflicting files are in ~S."
+		      (namestring destination-directory))
+	      (return-from merge
+		(values temporary-directory
+			(union common-files uncommon-files :test #'equal))))
 	    (let ((uncommon-files-prefixed (branch-prefix-file-list
 					    uncommon-files
 					    destination-branch-directory))
@@ -449,5 +455,18 @@ Origin files are in ~S."
   ;; (because in the case of conflicts the temporary pathname is returned).
   nil)
 
-(defun merge-finish ()
-  ())
+(defun merge-finish (module branch access directory files)
+  "Finishes a stuck merge. branch and access have to be the same
+as for merge and directory and files are merge's return values.
+The directory is deleted after"
+  (let ((destination-directory (merge-pathnames *destination* directory)))
+    (in-directory (destination-directory)
+      (let* ((branch-directory (branch-identifier-to-directory branch))
+	     ;; Include change file into list.
+	     (files-prefixed (branch-prefix-file-list
+			      (cons *change-file* files)
+			      branch-directory)))
+	;; Include access file into list.
+	(backend-commit module "merge-finish" access
+			(cons *access-file* files-prefixed)))))
+  (delete-directory-tree directory))
