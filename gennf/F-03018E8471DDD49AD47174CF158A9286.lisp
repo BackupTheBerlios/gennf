@@ -16,12 +16,12 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.10 2006/02/18 16:18:42 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.11 2006/02/19 11:37:25 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
 ;; All the file-map handling is in this file too.
-;; Perhaps, this should be moved to another file.
+;; FIXME: Perhaps, this should be moved to another file.
 
 (in-package :gennf)
 
@@ -142,19 +142,22 @@ file-maps of all changes in sequence."
 	(incf occurences)))
     occurences))
 
-(defgeneric all-changed-files (change)
+(defgeneric all-changed-files (change &optional identifier)
   (:documentation "Returns all files that were
 changes, without a their revision number, as a list of
 files."))
 
-(defmethod all-changed-files ((change change))
+(defmethod all-changed-files ((change change) &optional identifier)
   "Return all files recorded in change's filemap"
+  (declare (ignore identifier)) ; It is not needed but the generic has it.
   (let ((file-map (file-map change)))
     (loop for file-revision in file-map 
 	  collect (pathname (car file-revision)))))
 
-(defmethod all-changed-files ((changes list))
+(defmethod all-changed-files ((changes list) &optional identifier)
   "Return all files recorded in all changes in the list."
+  (when identifier
+    (setf changes (without-newer-changes identifier changes)))
   (let ((files ()))
     (dolist (change changes)
       (setf files (union files (all-changed-files change) :test #'equal)))
@@ -240,6 +243,18 @@ added change become shead of the change sequence."))
 file plus a new one being head of the sequence."
   (prepend-to-list-file file change))
 
+(defgeneric without-newer-changes (identifier changes)
+  (:documentation "Remove all changes newer than identifer and return
+the remaining sequence."))
+
+(defmethod without-newer-changes (identifier (sequence list))
+  "Read changes form sequence."
+  (nthcdr (- (length sequence) identifier) sequence))
+
+(defmethod without-newer-changes (identifier (file pathname))
+  "Read changes from file."
+  (without-newer-changes identifier (read-change-file file)))
+  
 (defgeneric extract-files-and-revisions (store &key identifier files)
   (:documentation "For a given change identifier extract all files that are
 in the branch up to and including that change.
@@ -256,7 +271,7 @@ appear in the result that are mentioned in this file list."))
     (setf identifier (length sequence)))
   ;; Throw away changes that have higher identifiers than
   ;; the requested one.
-  (setf sequence (nthcdr (- (length sequence) identifier) sequence))
+  (setf sequence (without-newer-changes identifier sequence))
   ;; file-revisions will be the result.
   (let ((file-revisions ()))
     ;; The file-maps of all changes are united with precedence
@@ -281,8 +296,14 @@ appear in the result that are mentioned in this file list."))
   (extract-files-and-revisions (read-change-file file)
 			       :identifier identifier :files files))
 
+(defun remove-revisions (alist)
+  "Removes the revisions from a file-revision list as produced
+by extract-files-and-revisions."
+  (mapcar #'(lambda (pair) (car pair)) alist))
+
 (defun retrieve-latest-changes (module access branch)
-  "Returns latest change sequence for the indicated module."
+  "Returns latest change sequence for the indicated module
+directly from the repository."
   (let ((changes ())
 	(change-file
 	 (merge-pathnames *change-file*
@@ -291,7 +312,4 @@ appear in the result that are mentioned in this file list."))
       (backend-get module access (list change-file) temporary-directory)
       (setf changes (read-change-file change-file)))
     changes))
-    
 
-					
-      

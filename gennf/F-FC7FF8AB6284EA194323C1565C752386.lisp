@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.22 2006/02/18 16:18:42 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.23 2006/02/19 11:37:28 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -279,32 +279,184 @@ before calling this routine."
 	      (setf (change sandbox) identifier)
 	      (write-sandbox-file sandbox)))))))
 
-;; (defun merge (module root branch
-;; 	      origin-root origin-branch &optional origin-change)
-;;   "Merge is a repository only operation.
-;; origin-* indicate the change to merge in. A record the access file
-;; is made if necessary.
-;; The merge is applied to module and branch on root.
-;; The origin's module has to have the same name. The branch
-;; has to exist."
-;;   (in-temporary-directory
-;;     (let* ((access (make-instance 'access :root root))
-;; 	   (origin-access (make-instance 'access :root origin-root))
-;; 	   (destination-directory (merge-pathnames
-;; 				   (make-pathname :directory
-;; 						  (list "destination"))))
-;; 	   (origin-directory (merge-pathnames
-;; 			      (make-pathname :directory
-;; 					     (list "origin"))))
-;; 	   (destination-branch (merge-pathnames
-;; 				(make-pathname :directory
-;; 					       (format nil "~S" branch))))
-;; 	   (origin-branch (merge-pathnames
-;; 			   (make-pathname :directory
-;; 					  (format nil "~S" origin-branch)))))
-;;       (create-directory destination-directory :require-fresh-directory t)
-;;       (create-directory origin-directory :require-fresh-directory t)
-;;       (in-directory (destination-directory)
-;; 	(checkout module root branch))
-;;       (in-directory (origin-directory)
-;; 	(checkout module origin-root origin-branch origin-change))
+(defun merge (module access branch
+	      origin-access origin-branch &optional origin-change)
+  "Merge is a repository only operation.
+origin-* indicate the change to merge in. A record to the access file
+is made if necessary.
+The merge is applied to module and branch on access.
+The origin's module has to have the same name. The branch
+has to exist.
+The merge is performed in a temporary directory. If conflicts
+occur when merging the files, the temporary directory is kept
+and the function returns its pathname. The conflicts then have to
+be resolved by hand and merge-finish has to be called on this
+directory.
+If no conflicts happen merge returns NIL and temporary data is
+deleted (no conflicts is the ususal case when using merge for
+branching."
+  (in-temporary-directory (temporary-directory)
+    ;; In temporary-directory two directories are created:
+    ;; destination and origin. The data to be merged in is
+    ;; stored in origin and the latest change of the branch
+    ;; which will receive the merge is stored in destination.
+    (let* ((destination-directory (merge-pathnames
+				   (make-pathname :directory
+						  '(:relative "destination"))
+				   temporary-directory))
+	   (destination-branch-directory (branch-identifier-to-directory
+					  branch))
+	   (destination-branch-absolute (merge-pathnames
+					 destination-branch-directory
+					 destination-directory))
+	   (origin-directory (merge-pathnames
+			      (make-pathname :directory
+					     '(:relative "origin"))
+			      temporary-directory))
+	   (origin-branch-directory (branch-identifier-to-directory
+				     origin-branch))
+	   (origin-branch-absolute (merge-pathnames origin-branch-directory
+						    origin-directory))
+	   (destination-changes (retrieve-latest-changes module
+							 access
+							 branch))
+	   (destination-files-and-revisions
+	    (extract-files-and-revisions destination-changes))
+	   (origin-changes (retrieve-latest-changes module
+						    origin-access
+						    origin-branch))
+	   (origin-files-and-revisions
+	    (extract-files-and-revisions origin-changes
+					 :identifier origin-change))
+	   (origin-files-and-revisions-prefixed
+	    (branch-prefix-file-list origin-files-and-revisions
+				     origin-branch-directory))
+	   (origin-files
+	    (remove-revisions origin-files-and-revisions))
+	   ;; This will be the final new change sequence
+	   (new-changes destination-changes)
+	   (destination-change-file (merge-pathnames
+				     destination-branch-directory
+				     *change-file*))
+	   ;; Common files have to be merged.
+	   (common-files-and-revisions
+	    (intersection origin-files-and-revisions
+			  destination-files-and-revisions
+			  :test #'equal
+			  :key #'car))
+	   (common-files-and-revisions-prefixed
+	    (branch-prefix-file-list common-files-and-revisions
+				     destination-branch-directory))
+	   (common-files
+	    (remove-revisions common-files-and-revisions))
+	   ;; Uncommon files are just added.
+	   (uncommon-files
+	    (set-difference origin-files common-files :test #'equal)))
+      (unless origin-change
+	(setf origin-change (length origin-changes)))
+      (debug
+	(debug-format "Destination files are in ~S.
+Origin files are in ~S."
+		      destination-directory origin-directory))
+      (create-directory destination-directory :require-fresh-directory t)
+      (create-directory origin-directory :require-fresh-directory t)
+      ;; Only the common files have to be fetched from the destination
+      ;; branch because only those have to be merged. The other
+      ;; files can just be added.
+      ;; The change file has to be fetched too because it will be
+      ;; fed up again.
+      (backend-get module access
+		   (cons destination-change-file
+			 common-files-and-revisions-prefixed)
+		   destination-directory)
+      (backend-get module origin-access origin-files-and-revisions-prefixed
+		   origin-directory)
+      (debug
+	(break))
+      (let ((conflicts nil))
+	;; Copy uncommon files.
+	(dolist (file uncommon-files)
+	  (let ((complete-filename (merge-pathnames file
+						    origin-branch-absolute)))
+	    (copy-file complete-filename destination-branch-absolute)))
+	
+	(debug
+	  (break))
+	;; Merge common files.
+	(dolist (file common-files)
+	  (let ((origin-file (merge-pathnames file
+					      origin-branch-absolute))
+		(destination-file (merge-pathnames
+				   file
+				   destination-branch-absolute)))
+	    (multiple-value-bind (merged-file conflict)
+		(two-way-merge origin-file destination-file :conflicting t)
+	      (when conflict
+		(setf conflicts t)
+		(format t "Conflict merging file ~S." file))
+	      (list-to-file merged-file destination-file))))
+	(debug
+	  (break))
+	;; Create merge entry.
+	(backend-get module access (list *access-file*)
+		     destination-directory)
+	(let ((access-file (merge-pathnames *access-file*
+					    destination-directory)))
+	  (multiple-value-bind (new-access accesses)
+	      (include-access (make-instance 'access
+					     :root (root origin-access))
+			      access-file)
+	    (let* ((origin (make-instance 'origin
+					  :identifier origin-change
+					  :access (identifier new-access)
+					  :branch origin-branch))
+		   (merge
+		    (make-instance 'merge
+				   :identifier (get-new-change-identifier
+						destination-changes)
+				   :file-map (create-new-file-map)
+				   :origin origin)))
+	      ;; Write out access file.
+	      (write-access-file accesses
+				 (merge-pathnames *access-file*
+						  destination-directory))
+	      ;; Add merge to new change-sequence
+	      (setf new-changes (add-change merge new-changes)))))
+	;; Add files to merge's file-map and write change sequence.
+	(dolist (file common-files)
+	  (setf new-changes (add-file-to-changes file new-changes)))
+	(dolist (file uncommon-files)
+	  (setf new-changes (add-file-to-changes file new-changes)))
+	(write-change-file new-changes
+			   (merge-pathnames *change-file*
+					    destination-branch-absolute))
+	(debug
+	  (break))
+	;; Finish the operation.
+	(if conflicts
+	    ;; If there were conflicts during the merge (which will be
+	    ;; the usual) the change sequence is saved and the
+	    ;; temporary-directory is kept and its name returned.
+	    ;; At this point it is important, that the
+	    ;; in-temporary-directory macro does not delete the
+	    ;; temporary-directory on the non-local exit.
+	    (progn
+	      (delete-directory-tree origin-directory)
+	      (format t "There were conflicts which have to be resolved.")
+	      (return-from merge temporary-directory))
+	    (let ((uncommon-files-prefixed (branch-prefix-file-list
+					    uncommon-files
+					    destination-branch-directory))
+		  (common-files-prefixed (branch-prefix-file-list
+					  common-files
+					  destination-branch-directory)))
+	      (in-directory (destination-directory)
+		(backend-commit module "merge"
+				access
+				(append uncommon-files-prefixed
+					common-files-prefixed
+					(list destination-change-file
+					      *access-file*)))))))))
+  ;; If the operation completes we return NIL for success
+  ;; (because in the case of conflicts the temporary pathname is returned).
+  nil)

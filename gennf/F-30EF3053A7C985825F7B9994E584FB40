@@ -3,7 +3,9 @@ TODO
 
 * Log messages are not considered.
 * in-temporary-directory must ensure that directory is removed
-  if non-local exit occurs.
+  if non-local exit occurs. This should be the default behaviour
+  but if must be possible to disable this, because sometimes
+  the temporary data is required afterwards.
   Similair holds for in-directory: the old working directory has
   to be restored as current working directory in case of non-local
   exit.
@@ -16,3 +18,5 @@ TODO
 * The lock-problem (cf. e-mail from Florian) is not considere in
   commit. It is assumed that the complete commit procedure
   is not interrupted by some other commit.
+* When merging, proper mark up functions, which insert filenames
+  and stuff, should be used.

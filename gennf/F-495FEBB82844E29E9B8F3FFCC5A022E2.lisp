@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.4 2006/02/17 15:07:40 florenz Exp $
+;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.5 2006/02/19 11:37:28 florenz Exp $
 
 ;; This file contains routines to manipulate access entries.
 
@@ -96,6 +96,33 @@ next free number."))
   "Return a new sequence of accesses with new one
 being head."
   (cons access sequence))
+
+(defgeneric include-access (access store)
+  (:documentation "Includes access in store
+if it is not already present
+and automatically assigns an identifier if necessary.
+The completely specified access object -- i. e. with
+an identifier filled in -- is returned as well as
+the new sequence as second value.
+If the access is already present that one is
+returned."))
+
+(defmethod include-access (access (sequence list))
+  "Include access into a list."
+  (let ((accesses (remove-if-not
+		   #'(lambda (element)
+		       (string= (root access) (root element)))
+		   sequence)))
+    (if accesses
+	(values (first accesses) sequence)
+	(progn
+	  (setf (identifier access) (get-new-access-identifier sequence))
+	  (values access (add-access access sequence))))))
+
+(defmethod include-access (access (file pathname))
+  "Include access into a access of file and return
+a sequence of accesses."
+  (include-access access (read-access-file file)))
 
 (defgeneric get-access (identifier store)
   (:documentation "Return the indicated access from store."))
