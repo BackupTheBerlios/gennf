@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.6 2006/02/16 18:34:11 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.7 2006/02/19 12:39:11 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -93,7 +93,10 @@ sequence and the second value indicates if conflicts arose."))
 
 (defmethod two-way-merge ((list1 list) (list2 list)
 			  &key (equality #'equal) conflicting
-			  delete-markup-function replace-markup-function)
+			  (delete-markup-function
+			   #'default-delete-markup)
+			  (replace-markup-function
+			   #'default-replace-markup))
   "Merges list1 into list2 and returns the result."
   (let* ((differences (differences list1 list2 :equality equality))
 	 (conflicts (conflictp differences)))
@@ -107,7 +110,10 @@ sequence and the second value indicates if conflicts arose."))
 
 (defmethod two-way-merge ((file1 pathname) (file2 pathname)
 			  &key (equality #'equal) conflicting
-			  delete-markup-function replace-markup-function)
+			  (delete-markup-function
+			   #'default-delete-markup)
+			  (replace-markup-function
+			   #'default-replace-markup))
   "Merges file1 into fil2 and returns the result as a list."
   (two-way-merge (file-to-list file1)
 		 (file-to-list file2)

@@ -15,8 +15,9 @@ TODO
   occur. If the update is conflict-free, it should be offered the
   possibility to proceed with the commit or the quit.
   If the update has conflicts too, it should be quit.
-* The lock-problem (cf. e-mail from Florian) is not considere in
+* The lock-problem (cf. e-mail from Florian) is not considered in
   commit. It is assumed that the complete commit procedure
   is not interrupted by some other commit.
 * When merging, proper mark up functions, which insert filenames
   and stuff, should be used.
+* The whole replication stuff is not respected in any way.

@@ -16,13 +16,17 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.23 2006/02/19 11:37:28 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.24 2006/02/19 12:39:11 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
 (in-package :gennf)
 
 ;; For development purposes only.
+(defparameter *devel-root2*
+  "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk2")
+(defparameter *devel-access2*
+  (make-instance 'access :root *devel-root2*))
 (defparameter *devel-root*
   "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk")
 (defparameter *devel-access*
@@ -339,9 +343,14 @@ branching."
 				     destination-branch-directory
 				     *change-file*))
 	   ;; Common files have to be merged.
+	   ;; Can it be relied on that the elements from
+	   ;; intersection's first argument go to the result?
+	   ;; If not, this has to be rewritten, because revision
+	   ;; numbers from destination habe to be in
+	   ;; common-files-and-revisions.
 	   (common-files-and-revisions
-	    (intersection origin-files-and-revisions
-			  destination-files-and-revisions
+	    (intersection destination-files-and-revisions
+			  origin-files-and-revisions
 			  :test #'equal
 			  :key #'car))
 	   (common-files-and-revisions-prefixed
@@ -360,6 +369,9 @@ Origin files are in ~S."
 		      destination-directory origin-directory))
       (create-directory destination-directory :require-fresh-directory t)
       (create-directory origin-directory :require-fresh-directory t)
+      (format t "DESTINATION CHANGES ~S" destination-changes)
+      (debug
+	(break))
       ;; Only the common files have to be fetched from the destination
       ;; branch because only those have to be merged. The other
       ;; files can just be added.
@@ -460,3 +472,6 @@ Origin files are in ~S."
   ;; If the operation completes we return NIL for success
   ;; (because in the case of conflicts the temporary pathname is returned).
   nil)
+
+(defun merge-finish ()
+  ())
