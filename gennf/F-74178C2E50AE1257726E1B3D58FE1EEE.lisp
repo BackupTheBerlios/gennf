@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.3 2006/02/19 18:54:56 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.4 2006/03/03 16:53:04 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -52,7 +52,7 @@ It returns the identifier of the branch created."
 	      (add-branch branch *branch-file*)
 	      (create-directory branch-directory)
 	      (create-new-change-file change-file)
-	      (backend-commit module "create-empty-branch" access
+	      (backend-commit module *log-empty-branch* access
 			      (list change-file *branch-file*)))))
 	(remove-meta-directory)))
     identifier))
@@ -191,7 +191,7 @@ the box able to retrieve intermittently added files."
 	(setf (change sandbox) change)
 	(write-sandbox-file sandbox)))))
 		     
-(defun commit (module access branch files)
+(defun commit (module message access branch files)
   "Commit files to the checked out branch. An appropriate change
 record is stored. All files must have been changed. If not
 they get recorded in the commit but are not assigned a new revision
@@ -259,7 +259,7 @@ before calling this routine."
 		  (copy-file (merge-pathnames file *meta-directory*)
 			     (merge-pathnames file temporary-directory)
 			     :overwrite t))
-		(backend-commit module "commit" access
+		(backend-commit module message access
 				(append (list change-file)
 					branch-prefixed-files)))
 	      ;; Write new sandbox file.
@@ -445,7 +445,9 @@ Origin files are in ~S."
 					  common-files
 					  destination-branch-directory)))
 	      (in-directory (destination-directory)
-		(backend-commit module "merge"
+		(backend-commit module
+				(log-message-merge origin-branch
+						   origin-access origin-change)
 				access
 				(append uncommon-files-prefixed
 					common-files-prefixed
@@ -454,6 +456,11 @@ Origin files are in ~S."
   ;; If the operation completes we return NIL for success
   ;; (because in the case of conflicts the temporary pathname is returned).
   nil)
+
+(defun log-message-merge (branch access change)
+  "Generate a log message for a merge."
+  (format nil "Merged in change ~S from branch ~S at ~S."
+	  change branch (log-message-format access)))
 
 (defun merge-finish (module branch access directory files)
   "Finishes a stuck merge. branch and access have to be the same

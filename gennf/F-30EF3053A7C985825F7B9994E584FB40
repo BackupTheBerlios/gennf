@@ -22,11 +22,17 @@ TODO
   consequently used yet.
 * The retry macro should signal a condition if the maximum
   number of retries is exceeded.
-* When merging, proper mark up functions, which insert filenames
+* When merging, proper mark up functions, which inserts filenames
   and stuff, should be used.
-* The whole replication stuff is not respected in any way.
 * When creating a new repository module it is not checked if it
   already exists.
 * Cleanup: Some functions/macros from miscellaneous.lisp
   (ensure-string-pathname), directories.lisp and possibly files.lisp
   should really go to port-path.
+* A function to get changed files is required to do proper updateing of
+  the sandbox (as update requires a list of files).
+
+ABANDONED
+=========
+
+* The whole replication is thrown away.

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.6 2006/02/17 22:38:59 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.7 2006/03/03 16:53:04 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -44,3 +44,7 @@
 (defparameter *backend-import-log-message*
   "Creation of a fresh gennf repository.")
 (defparameter *map-file* (make-pathname :name "MAP"))
+
+;; Log messages.
+(defparameter *log-empty-branch* "Creation of empty branch."
+  "Log message stored when an empty branch is created.")
