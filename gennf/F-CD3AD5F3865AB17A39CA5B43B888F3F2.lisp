@@ -16,13 +16,9 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.10 2006/03/05 18:48:15 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.11 2006/03/05 19:00:10 florenz Exp $
 
 ;; All directory related functions and macros live in this file.
-;; This includes changing working directory, moving and deletion
-;; of directory trees.
-;; Many of those functions should be generalized as much as possible
-;; and go in port-path someday.
 
 (in-package :gennf)
 
@@ -31,7 +27,7 @@
 directory and change back to previous working directory
 afterwards."
   (let ((current-directory (gensym "current-directory-")))
-    `(let ((,current-directory (current-directory)))
+    `(let ((,current-directory (port-path:current-directory)))
       (change-to-meta-directory)
       ,@forms
       (port-path:change-directory ,current-directory))))
@@ -56,7 +52,7 @@ and files."
     (port-path:delete-directory-tree *meta-directory*)))
 
 (defun find-meta-directory ()
-"finds from current directory ongoing the higher \"META\" direcory"
+"Finds from current directory ongoing the higher \"META\" directory."
   (first
-   (port-path:search-directory-in-directories "META"
-					      (port-path:parent-dirs *default-pathname-defaults*))))
+   (port-path:search-directory-in-directories
+    "META" (port-path:parent-dirs *default-pathname-defaults*))))
