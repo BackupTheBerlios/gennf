@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-82ED3D193589C12259001984C9E7F8C9.lisp,v 1.2 2006/02/18 16:18:42 florenz Exp $
+;; $Id: F-82ED3D193589C12259001984C9E7F8C9.lisp,v 1.3 2006/03/05 18:48:15 florenz Exp $
 
 ;; Simple support for debugging code.
 
@@ -55,5 +55,3 @@ Output only in debug mode."
 controlled by *debug-mode*, which is defined in configuration.lisp."
   `(when *debug-mode*
     (progn ,@forms)))
-     
-	  

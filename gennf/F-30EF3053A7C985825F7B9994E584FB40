@@ -28,9 +28,6 @@ TODO
   and stuff, should be used.
 * When creating a new repository module it is not checked if it
   already exists.
-* Cleanup: Some functions/macros from miscellaneous.lisp
-  (ensure-string-pathname), directories.lisp and possibly files.lisp
-  should really go to port-path.
 * A function to get changed files is required to do proper updateing of
   the sandbox (as update requires a list of files).
 

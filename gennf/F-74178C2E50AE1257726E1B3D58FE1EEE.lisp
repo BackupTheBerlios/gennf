@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.4 2006/03/03 16:53:04 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.5 2006/03/05 18:48:15 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -29,13 +29,13 @@
 with the next free number and an empty change file.
 It returns the identifier of the branch created."
   (let (identifier) ; This is just because it is to be returned.
-    (in-temporary-directory ()
+    (port-path:in-temporary-directory ()
       (create-meta-directory)
       (in-meta-directory
 	(let ((branch-directory (make-pathname)))
 	  (retry ((backend-outdated-error
 		   :cleanup (progn (delete-file *branch-file*)
-				   (delete-directory-tree
+				   (port-path:delete-directory-tree
 				    branch-directory))))
 	    (backend-get module access
 			 (list *branch-file* *access-file*) *meta-directory*)
@@ -50,7 +50,7 @@ It returns the identifier of the branch created."
 	      (setf change-file
 		    (merge-pathnames branch-directory *change-file*))
 	      (add-branch branch *branch-file*)
-	      (create-directory branch-directory)
+	      (port-path:create-directory branch-directory)
 	      (create-new-change-file change-file)
 	      (backend-commit module *log-empty-branch* access
 			      (list change-file *branch-file*)))))
@@ -60,7 +60,7 @@ It returns the identifier of the branch created."
 (defun create-empty-repository (module access)
   "Create a completely empty repository only containing an
 access and branch file."
-  (in-temporary-directory ()
+  (port-path:in-temporary-directory ()
     (create-meta-directory)
     (in-meta-directory
       (create-new-branch-file)
@@ -153,7 +153,7 @@ the box able to retrieve intermittently added files."
 			files-to-update-branch-prefixed))
 	;; Checkout the new revisions of the files to
 	;; a temporary directory.
-	(in-temporary-directory (temporary-directory)
+	(port-path:in-temporary-directory (temporary-directory)
 	  ;; Create one directory for the new revisions of files
 	  ;; and one for the ancestor revisions. The latter are
 	  ;; necessary because they might be changed in the sandbox.
@@ -165,8 +165,8 @@ the box able to retrieve intermittently added files."
 		 (merge-pathnames (make-pathname
 				   :directory (list :relative "ancestor"))
 				  temporary-directory)))
-	    (create-directory new-directory)
-	    (create-directory ancestor-directory)
+	    (port-path:create-directory new-directory)
+	    (port-path:create-directory ancestor-directory)
 	    ;; Get the new and ancestor files.
 	    (backend-get module access
 			 files-to-update-branch-prefixed
@@ -244,7 +244,7 @@ before calling this routine."
 	      ;; checked-out to this temporary-directory. Then the
 	      ;; files from the sandbox are written to those files
 	      ;; and the commit is performed.
-	      (in-temporary-directory (temporary-directory)
+	      (port-path:in-temporary-directory (temporary-directory)
 		(debug
 		  (debug-format "Doing commit in directory: ~S"
 				temporary-directory))
@@ -252,12 +252,15 @@ before calling this routine."
 			     (append (list change-file)
 				     branch-prefixed-existing-files)
 			     temporary-directory)
-		(copy-file (merge-pathnames change-file *meta-directory*)
-			   (merge-pathnames change-file temporary-directory)
+		(port-path:copy-file (merge-pathnames change-file
+						      *meta-directory*)
+				     (merge-pathnames change-file
+						      temporary-directory)
 			   :overwrite t)
 		(dolist (file branch-prefixed-files)
-		  (copy-file (merge-pathnames file *meta-directory*)
-			     (merge-pathnames file temporary-directory)
+		  (port-path:copy-file (merge-pathnames file *meta-directory*)
+				       (merge-pathnames file
+							temporary-directory)
 			     :overwrite t))
 		(backend-commit module message access
 				(append (list change-file)
@@ -292,7 +295,7 @@ directory and files.
 If no conflicts happen merge returns NIL and temporary data is
 deleted (no conflicts is the ususal case when using merge for
 branching."
-  (in-temporary-directory (temporary-directory)
+  (port-path:in-temporary-directory (temporary-directory)
     ;; In temporary-directory two directories are created:
     ;; destination and origin. The data to be merged in is
     ;; stored in origin and the latest change of the branch
@@ -356,8 +359,9 @@ branching."
 	(debug-format "Destination files are in ~S.
 Origin files are in ~S."
 		      destination-directory origin-directory))
-      (create-directory destination-directory :require-fresh-directory t)
-      (create-directory origin-directory :require-fresh-directory t)
+      (port-path:create-directory destination-directory
+				  :require-fresh-directory t)
+      (port-path:create-directory origin-directory :require-fresh-directory t)
       (format t "DESTINATION CHANGES ~S" destination-changes)
       ;; Only the common files have to be fetched from the destination
       ;; branch because only those have to be merged. The other
@@ -375,7 +379,8 @@ Origin files are in ~S."
 	(dolist (file uncommon-files)
 	  (let ((complete-filename (merge-pathnames file
 						    origin-branch-absolute)))
-	    (copy-file complete-filename destination-branch-absolute)))
+	    (port-path:copy-file complete-filename
+				 destination-branch-absolute)))
 	;; Merge common files.
 	(dolist (file common-files)
 	  (let ((origin-file (merge-pathnames file
@@ -431,7 +436,7 @@ Origin files are in ~S."
 	    ;; in-temporary-directory macro does not delete the
 	    ;; temporary-directory on the non-local exit.
 	    (progn
-	      (delete-directory-tree origin-directory)
+	      (port-path:delete-directory-tree origin-directory)
 	      (format t "There were conflicts which have to be resolved.")
 	      (format t "The conflicting files are in ~S."
 		      (namestring destination-directory))
@@ -444,7 +449,7 @@ Origin files are in ~S."
 		  (common-files-prefixed (branch-prefix-file-list
 					  common-files
 					  destination-branch-directory)))
-	      (in-directory (destination-directory)
+	      (port-path:in-directory (destination-directory)
 		(backend-commit module
 				(log-message-merge origin-branch
 						   origin-access origin-change)
@@ -467,7 +472,7 @@ Origin files are in ~S."
 as for merge and directory and files are merge's return values.
 The directory is deleted after"
   (let ((destination-directory (merge-pathnames *destination* directory)))
-    (in-directory (destination-directory)
+    (port-path:in-directory (destination-directory)
       (let* ((branch-directory (branch-identifier-to-directory branch))
 	     ;; Include change file into list.
 	     (files-prefixed (branch-prefix-file-list
@@ -476,4 +481,4 @@ The directory is deleted after"
 	;; Include access file into list.
 	(backend-commit module "merge-finish" access
 			(cons *access-file* files-prefixed)))))
-  (delete-directory-tree directory))
+  (port-path:delete-directory-tree directory))

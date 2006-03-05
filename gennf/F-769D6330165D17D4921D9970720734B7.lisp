@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.7 2006/03/03 16:53:04 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.8 2006/03/05 18:48:15 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.

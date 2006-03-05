@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.15 2006/03/03 16:53:04 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.16 2006/03/05 18:48:15 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -91,12 +91,6 @@ a macro. Taken from Peter Seibel's book, chapter 8."
 ;;
 ;; Miscellaneous miscellaneous.
 ;;
-
-(defmacro ensure-string-pathname (pathspec)
-  "SETF pathspec to its namestring if it is
-a pathname."
-  `(when (typep ,pathspec 'pathname)
-    (setf ,pathspec (namestring ,pathspec))))
 
 (defun search-multiple (sequences sequence)
   "Search all items of sequences in sequences

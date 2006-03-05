@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.30 2006/02/17 22:38:59 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.31 2006/03/05 18:48:15 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -144,7 +144,7 @@ checked out content to."
   "Return if the checked out copy of file is
 an up to date copy (or a modification of an up
 to ate copy(."
-  (ensure-string-pathname file)
+  (port-path:ensure-string-pathname file)
   (with-cvs-output ((list "-d" (root access)
 			  "-n" "up" file)
 		    :output stream)
@@ -155,7 +155,7 @@ to ate copy(."
 	  
 (defun cvs-known-file-p (access file)
   "Returns if file is known by cvs (if it is already added)."
-  (ensure-string-pathname file)
+  (port-path:ensure-string-pathname file)
   (with-cvs-output ((list "-d" (root access)
 			  "log" file)
 		    :exit-code exit-code)
@@ -189,7 +189,7 @@ routine for some arbitrary cvs sandbox.)"
   "Checks out all given files to destination. destination
 has to be a cvs sandbox, i. e. it contains *cvs-meta-directory*"
   (unless files (return-from cvs-get-update)) ; No files, do nothing.
-  (in-directory (destination)
+  (port-path:in-directory (destination)
     (let ((default-argument-list (list "-d" (root access)
 				       "up" "-jHEAD")))
       (dolist (file files)
@@ -212,7 +212,7 @@ to the destination. This includes cvs meta data. Subsequently
 calling cvs-get-checkout for the same destination results in meta data
 that is only consistent for the last chunk that was checked out."
   (unless files (return-from cvs-get-checkout)) ; No files, do nothing.
-  (in-temporary-directory ()
+  (port-path:in-temporary-directory ()
     (let ((default-argument-list (list "-d" (root access)
 				       "co" "-jHEAD"))
 	  (module-path (make-pathname :directory
@@ -229,9 +229,9 @@ that is only consistent for the last chunk that was checked out."
       ;; and delete temporary subdirectory module-path.
       (port-path:with-directory-form ((destination-directory
 				       destination))
-	(move-directory-tree module-path
-			     destination-directory)
-	(delete-directory-tree module-path)))))
+	(port-path:move-directory-tree module-path
+				       destination-directory)
+	(port-path:delete-directory-tree module-path)))))
   
 (defun cvs-commit (message access files)
   "If files are not known to cvs they are added.
@@ -274,7 +274,7 @@ to the repository."
     (let* ((directory-prefixes (cdr (port-path:pathname-prefixes file)))
 	   (paths (append directory-prefixes (list file))))
       (dolist (path paths)
-	(ensure-string-pathname path)
+	(port-path:ensure-string-pathname path)
 	(invoke-cvs "-d" (root access)
 		    "add"
 		    path)))))

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.10 2006/02/19 16:27:59 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.11 2006/03/05 18:48:15 florenz Exp $
 
 ;; ASDF system defintion in ASDF-INSTALL style.
 
@@ -40,13 +40,13 @@
 	  :depends-on ("packages" "distribution"))
    (:file "distribution"
 	  :depends-on ("packages" "directories" "configuration" "access"
-				  "backend" "branch" "change"))
+				  "backend" "branch" "change" "debug"))
    (:file "access"
 	  :depends-on ("packages" "configuration" "files"))
    (:file "backend"
 	  :depends-on ("packages" "backend-cvs" "miscellaneous" "directories"))
    (:file "backend-cvs"
-	  :depends-on ("packages" "miscellaneous" "sbcl"
+	  :depends-on ("packages" "miscellaneous" "sbcl" "debug"
 				  "configuration" "directories"))
    (:file "merge"
 	  :depends-on ("packages" "files" "change"))
@@ -56,8 +56,6 @@
 	  :depends-on ("packages" "miscellaneous" "files" "configuration"))
    (:file "change"
 	  :depends-on ("packages" "miscellaneous" "files" "configuration"))
-   (:file "commit"
-	  :depends-on ("packages" "miscellaneous" "files"))
    (:file "configuration"
 	  :depends-on ("packages"))
    (:file "directories"
@@ -71,4 +69,4 @@
    (:file "mapping"
 	  :depends-on ("packages" "files"))
    (:file "debug"
-	  :depends-on ("packages"))))
+	  :depends-on ("packages" "configuration"))))

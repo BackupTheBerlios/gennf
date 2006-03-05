@@ -239,9 +239,6 @@
   "MCVS/F-E9DFED59ECE7621E4773E6B51E9D2881.lisp"
   "sbcl-port/posix.lisp")
  (:FILE
-  "MCVS/F-EADDB60DB86A4481CF5D126F61D78F8E.lisp"
-  "prototype/commit.lisp")
- (:FILE
   "MCVS/F-F0479D3BD4B6A3EB301F19E55A829B7E"
   "sbcl-port/unix-bindings-linking-set/clisp_mcvs"
   (:EXEC
