@@ -16,21 +16,33 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.9 2006/02/16 19:41:35 sigsegv Exp $
+;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.10 2006/03/05 18:46:40 florenz Exp $
 
 ;; Defines the exported function of port-path.
 
 (defpackage :port-path
   (:use :cl)
   (:export
+   :change-directory
+   :change-directory-up
+   :copy-file
+   :create-directory
    :create-temporary-directory
+   :current-directory
+   :delete-directory-tree
    :directory-listing
    :directory-pathname-p
+   :ensure-string-pathname
+   :find-all-files
    :get-parent-directory
+   :in-directory
+   :in-temporary-directory
+   :move-directory-tree
+   :move-file
    :parent-dirs
    :path-exists-p
-   :pathname-prefix-p
    :pathname-prefixes
+   :pathname-prefix-p
    :pathname-to-directory-form
    :pathname-to-file-form
    :root-p

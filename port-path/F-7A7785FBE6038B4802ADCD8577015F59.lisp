@@ -16,16 +16,192 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.7 2006/02/16 19:41:35 sigsegv Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.8 2006/03/05 18:46:40 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
 
 (in-package :port-path)
 
+(defmacro with-gensyms ((&rest names) &body forms)
+  "Generate symbols for all names given to be used in
+a macro. Taken from Peter Seibel's book, chapter 8."
+  `(let ,(loop for n in names collect `(,n (gensym)))
+    ,@forms))
+
 (uffi:def-function ("port_path_tempnam" c-tempnam) ()
   :module "port-path"
   :returning (* :char))
+
+(defmacro with-directory-form (variable-pathspec-pairs &body forms)
+  "Assigns each variable the pathname in directory form denoted
+by pathspec."
+  `(let ,(mapcar
+	  (lambda (pair)
+	    `(,(first pair) (pathname-to-directory-form ,(second pair))))
+	  variable-pathspec-pairs)
+    ,@forms))
+
+(defun change-directory (pathspec)
+  "Change current working directory. Keep the process'
+current working directory and *default-pathname-defaults*
+synchronized."
+  (with-directory-form ((directory (merge-pathnames pathspec)))
+    (if (path-exists-p directory)
+	(progn
+	  (setf (osicat:current-directory) directory)
+	  (setf *default-pathname-defaults* directory))
+	(error "Directory ~S does not exist." directory))))
+
+(defun current-directory ()
+  "Return the current working directory."
+  *default-pathname-defaults*)
+
+(defun change-directory-up ()
+  "Same as cd .. in Unix. If current directory is root
+root stays current directory."
+  (change-directory (get-parent-directory (current-directory))))
+
+(defmacro in-directory ((directory) &body forms)
+  "Evaluate forms in directory and change back
+to old working directory afterwards."
+  (let ((current-directory (gensym "current-directory-")))
+    `(let ((,current-directory (current-directory)))
+      (change-directory ,directory)
+      ,@forms
+      (change-directory ,current-directory))))
+
+(defun delete-directory-tree (pathspec)
+  "pathspec is interpreted as directory-form
+and deleted -- along with all files and subdirectories."
+  (with-directory-form ((directory pathspec))
+    (let ((listing (directory-listing directory)))
+      (dolist (entry listing)
+	(if (directory-pathname-p entry)
+	    (delete-directory-tree entry)
+	    (delete-file entry)))
+	(osicat:delete-directory directory))))
+
+(defun create-directory (pathspec &key (require-fresh-directory nil))
+  "pathspec is interpreted as a pathname in directory-form. Then all
+directories in this path are created. If require-fresh-directory is T
+an error is signalled if pathspec already existed."
+  (with-directory-form ((directory pathspec))
+    (let ((absolute-directory (merge-pathnames directory)))
+      (multiple-value-bind (path created)
+	  (ensure-directories-exist (merge-pathnames absolute-directory))
+	(if (and require-fresh-directory (not created))
+	    (error "Could not create fresh directory ~S, already existent."
+		   absolute-directory)
+	    path)))))
+
+(defun find-all-files (pathspec)
+  "pathspec is interpreted as a directory and a list
+of all files with full pathname below this directory is
+returned. That means all pathnames are in file form."
+  (with-directory-form ((directory pathspec))
+    (let* ((listing (directory-listing directory))
+	   (files (remove-if #'directory-pathname-p listing))
+	   (directories (remove-if-not #'directory-pathname-p
+				       listing))
+	   (file-lists (mapcar #'find-all-files directories)))
+      (append files (apply #'append file-lists)))))
+
+(defun move-directory-tree (source-pathspec destination-pathspec)
+  "source-pathspec and destination-pathspec are interpreted as
+pathnames in directory form. All files and directories below
+source-pathspec are moved below destination-pathspec. The
+last directory of source-pathspec still exists afterwards."
+  (with-directory-form ((source (merge-pathnames source-pathspec))
+			(destination (merge-pathnames
+				      destination-pathspec)))
+    (let* ((all-sources (find-all-files source))
+	   (all-sources-relative
+	    (mapcar #'(lambda (file)
+			(parse-namestring (enough-namestring file source)))
+		    all-sources))
+	   (all-destinations
+	    (mapcar #'(lambda (file)
+			(merge-pathnames file destination))
+		    all-sources-relative)))
+      (mapcar #'(lambda (source-file destination-file)
+		  (ensure-directories-exist destination-file)
+		  (move-file source-file destination-file))
+	      all-sources all-destinations)
+      (mapcar #'delete-directory-tree
+	      (directory-listing source)))))
+
+(defun copy-stream (in out &optional (buffer-size 8192))
+  "Copies all data from in to until in is empty.
+Streams' elements must be compatible types."
+  (unless (subtypep (stream-element-type in) (stream-element-type out))
+    (error "Incompatible types of streams' elements."))
+  (loop with buffer = (make-array buffer-size
+				  :element-type (stream-element-type in))
+	for length = (read-sequence buffer in)
+	until (= length 0)
+	do (write-sequence buffer out :end length)
+	finally (return t)))
+
+(defun copy-file (source destination &key overwrite)
+  "Copies a file from source to destination. Overwrites
+a possibly existing file if overwrite is T.
+T is returned if file was cpoied, NIL otherwise.
+source is interpreted as a pathspec in file-form, destination may
+be in file- or directory-form. If it is in directory-form
+the filename from source is taken.
+All directories in destination have to exist."
+  (when (wild-pathname-p source)
+    (error "Cannot copy a wild pathname."))
+  (when (wild-pathname-p destination)
+    (error "Cannot copy to a wil location."))
+  (let* ((from (pathname-to-file-form source))
+	 (to (if (directory-pathname-p destination)
+		 (merge-pathnames
+		  (make-pathname
+		   :name (pathname-name from)
+	   :type (pathname-type from))
+		  destination)
+		 destination)))
+    (with-open-file (in from
+			:direction :input
+			:if-does-not-exist :error
+			:element-type '(unsigned-byte 8))
+      (with-open-file (out to
+			   :direction :output
+			   :if-does-not-exist :create
+			   :if-exists (when overwrite :supersede)
+			   :element-type '(unsigned-byte 8))
+	(when out
+	  (copy-stream in out))))))
+
+(defun move-file (source destination &key overwrite)
+  "Moves a file from source to destination. If
+overwrite is T and destination exists it is overwritten.
+move-file returns T if file was actually moved, NIL
+otherwise.
+Rules from copy-file for source and destination apply.
+This move works also for cross file-system moves on
+Unix. SBCL's RENAME-FILE e. g. fails in such cases."
+  (when (copy-file source destination :overwrite overwrite)
+    (delete-file source)))
+
+(defmacro in-temporary-directory ((&optional temporary-pathname) &body forms)
+  "Save creation of a temporary directory (e. g. under /tmp),
+evaluate forms with temporary directory as working directory,
+change back to old working directory and throw away
+the temporary directory-tree.
+If provided, temporary-pathname is bound to the pathname of the
+temporary directory."
+  (with-gensyms (temporary-directory)
+    `(let ((,temporary-directory (create-temporary-directory)))
+      (in-directory (,temporary-directory)
+       ,(if temporary-pathname
+	    `(let ((,temporary-pathname ,temporary-directory))
+	      ,@forms)
+	    `(progn
+	      ,@forms)))
+      (delete-directory-tree ,temporary-directory))))
 
 (defun create-temporary-directory ()
   "Create a temporay directory and return its pathname.
@@ -52,6 +228,12 @@ if the directory did not exist, when creating it."
 		(error "Tried to create a temporary directory
 but someone else was quicker.")))))))
 
+(defmacro ensure-string-pathname (pathspec)
+  "SETF pathspec to its namestring if it is
+a pathname."
+  `(when (typep ,pathspec 'pathname)
+    (setf ,pathspec (namestring ,pathspec))))
+
 (defmacro with-pathname (variable-pathspec-pairs &body forms)
   "Assigns each variable the pathname denoted by a pathspec (may
 be a pathname, open or closed stream or string)."
@@ -61,14 +243,6 @@ be a pathname, open or closed stream or string)."
 	  variable-pathspec-pairs)
     ,@forms))
 
-(defmacro with-directory-form (variable-pathspec-pairs &body forms)
-  "Assigns each variable the pathname in directory form denoted
-by pathspec."
-  `(let ,(mapcar
-	  (lambda (pair)
-	    `(,(first pair) (pathname-to-directory-form ,(second pair))))
-	  variable-pathspec-pairs)
-    ,@forms))
 
 (defun component-defined-p (component)
   "Test if a given component of a pathname is defined, i. e.
@@ -230,6 +404,8 @@ all directory-prefixes is generated:
 			(pathname-type pathname)))))
     
 (defun list-prefix-p (prefix list &key (test-function #'equal))
+  "Check if prefix is a prefix of list. Equality of list
+elements if tested by using test-function."
   (cond
     ((null prefix)
      t)
@@ -240,7 +416,7 @@ all directory-prefixes is generated:
 		    :test-function test-function))
     (t nil)))
 
-;; Taken from Peter Seibel Book.
+;; Taken from Peter Seibel'a book.
 (defun walk-directory (dirname fn &key dirs (test (constantly t)))
   (labels ((walk (name)
 	     (cond 
@@ -253,20 +429,18 @@ all directory-prefixes is generated:
 		(funcall fn name)))))
     (walk (pathname-to-directory-form dirname))))
 		
-
-
 (defun parent-dirs (&optional (path *default-pathname-defaults*))
-  "creates a list of all parent dirs from given dir. Default is 
+  "Creates a list of all parent dirs from given dir. Default is 
 *default-pathname-defaults*"
   (loop
-     for x = path then (port-path:get-parent-directory x)
+     for x = path then (get-parent-directory x)
      collect x
-     until (port-path:root-p x)))
-
+     until (root-p x)))
 
 (defun search-directory-in-directories (name path-list)
-  "searches for directory name in path-list.
-returns a list of found directories. "
+  "Searches for directory name in path-list.
+returns a list of found directories."
   (let ((search-dir (make-pathname :directory `(:relative ,name))))
-    (remove-if-not #'(lambda (p) (port-path:path-exists-p p))
-		   (mapcar #'(lambda (p) (merge-pathnames search-dir p)) path-list))))
+    (remove-if-not #'(lambda (p) (path-exists-p p))
+		   (mapcar #'(lambda (p) (merge-pathnames search-dir p))
+			   path-list))))

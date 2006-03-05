@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-1231D4BAEA3A8B48DC3D68CF2C53A2D2.asd,v 1.2 2006/02/13 17:21:07 florenz Exp $
+;; $Id: F-1231D4BAEA3A8B48DC3D68CF2C53A2D2.asd,v 1.3 2006/03/05 18:46:40 florenz Exp $
 
 ;; ASDF definition for port-path.
 
@@ -67,7 +67,7 @@ in Common-Lisp in a portable manner. This library is based on
 Peter Seibel's pathnames, which can be found at
 http://www.gigamonkeys.com/.
 port-path is used in gennf (http://gennf.berlios.de/)."
-  :depends-on (:uffi)
+  :depends-on (:uffi :osicat)
   :components
   ((:file "packages")
    (:file "port-path" :depends-on ("packages" "port-path-posix"))
