@@ -17,8 +17,6 @@ TODO
   number of retries is exceeded.
 * When merging, proper mark up functions, which inserts filenames
   and stuff, should be used.
-* When creating a new repository module it is not checked if it
-  already exists.
 * A function to get changed files is required to do proper updateing of
   the sandbox (as update requires a list of files).
 
