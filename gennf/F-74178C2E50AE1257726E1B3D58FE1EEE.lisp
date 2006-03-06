@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.5 2006/03/05 18:48:15 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.6 2006/03/06 14:58:16 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -153,7 +153,8 @@ the box able to retrieve intermittently added files."
 			files-to-update-branch-prefixed))
 	;; Checkout the new revisions of the files to
 	;; a temporary directory.
-	(port-path:in-temporary-directory (temporary-directory)
+	(port-path:in-temporary-directory
+	    (:temporary-pathname temporary-directory)
 	  ;; Create one directory for the new revisions of files
 	  ;; and one for the ancestor revisions. The latter are
 	  ;; necessary because they might be changed in the sandbox.
@@ -244,7 +245,8 @@ before calling this routine."
 	      ;; checked-out to this temporary-directory. Then the
 	      ;; files from the sandbox are written to those files
 	      ;; and the commit is performed.
-	      (port-path:in-temporary-directory (temporary-directory)
+	      (port-path:in-temporary-directory
+		  (:temporary-pathname temporary-directory)
 		(debug
 		  (debug-format "Doing commit in directory: ~S"
 				temporary-directory))
@@ -295,7 +297,9 @@ directory and files.
 If no conflicts happen merge returns NIL and temporary data is
 deleted (no conflicts is the ususal case when using merge for
 branching."
-  (port-path:in-temporary-directory (temporary-directory)
+  (port-path:in-temporary-directory
+      (:temporary-pathname temporary-directory
+       :always-cleanup nil)
     ;; In temporary-directory two directories are created:
     ;; destination and origin. The data to be merged in is
     ;; stored in origin and the latest change of the branch
@@ -356,13 +360,14 @@ branching."
       (unless origin-change
 	(setf origin-change (length origin-changes)))
       (debug
-	(debug-format "Destination files are in ~S.
+        (debug-format "Destination files are in ~S.
 Origin files are in ~S."
 		      destination-directory origin-directory))
       (port-path:create-directory destination-directory
 				  :require-fresh-directory t)
       (port-path:create-directory origin-directory :require-fresh-directory t)
-      (format t "DESTINATION CHANGES ~S" destination-changes)
+      (debug 
+        (debug-format "DESTINATION CHANGES ~S" destination-changes))
       ;; Only the common files have to be fetched from the destination
       ;; branch because only those have to be merged. The other
       ;; files can just be added.
@@ -434,7 +439,8 @@ Origin files are in ~S."
 	    ;; temporary-directory is kept and its name returned.
 	    ;; At this point it is important, that the
 	    ;; in-temporary-directory macro does not delete the
-	    ;; temporary-directory on the non-local exit.
+	    ;; temporary-directory on the non-local exit
+	    ;; (cf. always-cleanup option).
 	    (progn
 	      (port-path:delete-directory-tree origin-directory)
 	      (format t "There were conflicts which have to be resolved.")

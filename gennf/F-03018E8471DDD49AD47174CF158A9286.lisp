@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.13 2006/03/05 18:48:15 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.14 2006/03/06 14:58:16 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -307,7 +307,7 @@ directly from the repository."
 	(change-file
 	 (merge-pathnames *change-file*
 			  (branch-identifier-to-directory branch))))
-    (port-path:in-temporary-directory (temporary-directory)
+    (port-path:in-temporary-directory (:temporary-pathname temporary-directory)
       (backend-get module access (list change-file) temporary-directory)
       (setf changes (read-change-file change-file)))
     changes))

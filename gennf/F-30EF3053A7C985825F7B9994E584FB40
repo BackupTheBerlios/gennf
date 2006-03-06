@@ -2,15 +2,6 @@ TODO
 ====
 
 * A log message browser should be offered.
-* Log messages should be handled by temporary files in the backend and
-  not by commandline.
-* in-temporary-directory must ensure that directory is removed
-  if non-local exit occurs. This should be the default behaviour
-  but if must be possible to disable this, because sometimes
-  the temporary data is required afterwards.
-  Similair holds for in-directory: the old working directory has
-  to be restored as current working directory in case of non-local
-  exit.
 * For the merging: An equality predicate which disregards differences
   in whitespace might be helpful.
 * commit should offer a restart to do an update if conflicts

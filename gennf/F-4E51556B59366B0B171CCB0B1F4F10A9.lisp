@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.31 2006/03/05 18:48:15 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.32 2006/03/06 14:58:16 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -243,27 +243,32 @@ case no files are committed at all."
     (dolist (file files)
       (unless (cvs-known-file-p access file)
 	(cvs-add access (list file))))
-    (setf argument-list (append (list "-d" (root access)
-				      "ci" "-m" message)
-				(mapcar #'namestring files)))
-    (with-cvs-output (argument-list :error error :exit-code exit-code)
-      (unless (= exit-code 0)
-	;; Check if files were outdated and signal appropriately.
-	(let ((outdated-files
-	       (loop with filenames = (mapcar #'namestring files)
-		     for line = (read-line error nil)
-		     do (format t "~S" line)
-		     while line
-		     when (search "Up-to-date check failed" line)
-		     append (search-multiple filenames line))))
-	  (if outdated-files
-	      (progn
-		(setf outdated-files (mapcar #'pathname outdated-files))
-		(error 'backend-outdated-error :code exit-code
-		       :description "Some files are outdated."
-		       :files outdated-files))
-	      (error  'backend-error :code exit-code
-		      :description "Something went wrong with cvs ci.")))))))
+    ;; Open temporary file for log message and write log message.
+    (port-path:with-temporary-file (message-stream message-file)
+      (write-string message message-stream)
+      (finish-output message-stream)
+      ;; Construct argument list cor cvs.
+      (setf argument-list (append (list "-d" (root access)
+					"ci" "-F" (namestring message-file))
+				  (mapcar #'namestring files)))
+      (with-cvs-output (argument-list :error error :exit-code exit-code)
+	(unless (= exit-code 0)
+	  ;; Check if files were outdated and signal appropriately.
+	  (let ((outdated-files
+		 (loop with filenames = (mapcar #'namestring files)
+		       for line = (read-line error nil)
+		       do (format t "~S" line)
+		       while line
+		       when (search "Up-to-date check failed" line)
+		       append (search-multiple filenames line))))
+	    (if outdated-files
+		(progn
+		  (setf outdated-files (mapcar #'pathname outdated-files))
+		  (error 'backend-outdated-error :code exit-code
+			 :description "Some files are outdated."
+			 :files outdated-files))
+		(error  'backend-error :code exit-code
+			:description "Something wrong with cvs ci."))))))))
 
 (defun cvs-add (access files)
   "Do a cvs add for all files. files have to be in
