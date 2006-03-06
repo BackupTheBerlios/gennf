@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.6 2006/03/06 14:58:16 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.7 2006/03/06 15:52:46 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -59,7 +59,8 @@ It returns the identifier of the branch created."
 
 (defun create-empty-repository (module access)
   "Create a completely empty repository only containing an
-access and branch file."
+access and branch file. If the module already exists an error is
+signalled."
   (port-path:in-temporary-directory ()
     (create-meta-directory)
     (in-meta-directory

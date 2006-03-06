@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.32 2006/03/06 14:58:16 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.33 2006/03/06 15:52:46 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -161,9 +161,26 @@ to ate copy(."
 		    :exit-code exit-code)
     (= exit-code 0)))
 
+(defun cvs-known-module-p (access module)
+  "Returns if module is known at access. It is checked if
+a branch file is stored for that module. That means 
+that a 'normal' cvs repository is not recognized."
+  (let ((file (format nil "~A/~A" module (namestring *branch-file*)))
+	known)
+    (port-path:in-temporary-directory ()
+      (with-cvs-output ((list "-d" (root access)
+			      "co" file)
+			:exit-code exit-code)
+	(setf known (= exit-code 0))))
+    known))
+		      
 (defun cvs-import (module access)
   "Interface to cvs import command, which is
 necessary to create a new repository."
+  (when (cvs-known-module-p access module)
+    (error 'backend-module-exists-error
+	   :module module
+	   :description "The module already exists."))
   (cvs-default-error-handling "-d" (root access)
 			      "import"
 			      "-m" *cvs-import-log-message*
@@ -242,6 +259,8 @@ case no files are committed at all."
   (let (argument-list)
     (dolist (file files)
       (unless (cvs-known-file-p access file)
+	(debug
+	  (debug-format "Checking if file ~S is known to cvs." file))
 	(cvs-add access (list file))))
     ;; Open temporary file for log message and write log message.
     (port-path:with-temporary-file (message-stream message-file)

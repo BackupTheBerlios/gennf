@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.23 2006/02/12 22:15:07 florenz Exp $
+;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.24 2006/03/06 15:52:46 florenz Exp $
 
 ;; This file is gennf's backend abstraction layer.
 ;; All interaction with a backend will be by routines of this file.
@@ -37,6 +37,12 @@ wrong in the backend."))
 	  :documentation "List of files which were not up to date."))
   (:documentation "A condition which is signalled when some files
 to be checked in are not modifications of the last revision."))
+
+(define-condition backend-module-exists-error (backend-error)
+  ((module :initarg :module :reader :module
+	   :documentation "Name of outdated module."))
+  (:documentation "Condition which is signalled of a new module
+which is already there is to be created."))
 
 (defun backend-get (module access files destination)
   "Get the indicated files from access and module and
