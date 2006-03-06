@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.10 2006/03/05 18:46:40 florenz Exp $
+;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.11 2006/03/06 14:34:03 florenz Exp $
 
 ;; Defines the exported function of port-path.
 
@@ -28,6 +28,7 @@
    :copy-file
    :create-directory
    :create-temporary-directory
+   :create-temporary-file
    :current-directory
    :delete-directory-tree
    :directory-listing
@@ -49,7 +50,8 @@
    :search-directory-in-directories
    :wild-pathname-p
    :with-directory-form
-   :with-pathname)
+   :with-pathname
+   :with-temporary-file)
   (:documentation "A library providing operations related
 with pathnames. Many ideas are taken from Peter Seibel's
 pathname library."))

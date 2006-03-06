@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.8 2006/03/05 18:46:40 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.9 2006/03/06 14:34:03 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -64,12 +64,15 @@ root stays current directory."
 
 (defmacro in-directory ((directory) &body forms)
   "Evaluate forms in directory and change back
-to old working directory afterwards."
-  (let ((current-directory (gensym "current-directory-")))
+to old working directory afterwards. The old working directory is
+restored in any case."
+  (with-gensyms (current-directory)
     `(let ((,current-directory (current-directory)))
-      (change-directory ,directory)
-      ,@forms
-      (change-directory ,current-directory))))
+      (unwind-protect
+	   (progn
+	     (change-directory ,directory)
+	     ,@forms)
+	(change-directory ,current-directory)))))
 
 (defun delete-directory-tree (pathspec)
   "pathspec is interpreted as directory-form
@@ -186,22 +189,69 @@ Unix. SBCL's RENAME-FILE e. g. fails in such cases."
   (when (copy-file source destination :overwrite overwrite)
     (delete-file source)))
 
-(defmacro in-temporary-directory ((&optional temporary-pathname) &body forms)
+(defmacro in-temporary-directory ((&key temporary-pathname
+					(always-cleanup t)) &body forms)
   "Save creation of a temporary directory (e. g. under /tmp),
 evaluate forms with temporary directory as working directory,
 change back to old working directory and throw away
 the temporary directory-tree.
+If always-cleanup is set to NIL the temporary directory is only
+removed, if no non-local exit occurs. That means, if a
+RETURN-FROM or something similair is executed in the macro's body
+the temporary directory is not removed. The default behaviour is
+to alway remove the temporary directory and all its contents.
 If provided, temporary-pathname is bound to the pathname of the
 temporary directory."
-  (with-gensyms (temporary-directory)
-    `(let ((,temporary-directory (create-temporary-directory)))
-      (in-directory (,temporary-directory)
-       ,(if temporary-pathname
-	    `(let ((,temporary-pathname ,temporary-directory))
-	      ,@forms)
-	    `(progn
-	      ,@forms)))
-      (delete-directory-tree ,temporary-directory))))
+  (with-gensyms (temporary-directory normal-cleanup)
+    `(let ((,temporary-directory (create-temporary-directory))
+	   (,normal-cleanup nil))
+      (unwind-protect
+	   (in-directory (,temporary-directory)
+	     ,(if temporary-pathname
+		  `(let ((,temporary-pathname ,temporary-directory))
+		    ,@forms)
+		  `(progn
+		    ,@forms))
+	     (delete-directory-tree ,temporary-directory)
+	     (setf ,normal-cleanup t))
+	(when ,always-cleanup
+	  (unless ,normal-cleanup
+	    (delete-directory-tree ,temporary-directory)))))))
+
+(defmacro with-temporary-file ((stream &optional filename) &body forms)
+  "This is like the with-temporary-file macro from osicat but allows
+for binding the name of the temporary file to filename."
+  (with-gensyms (stream-internal filename-internal)
+    `(let ,(remove () `(,stream ,(when filename filename)))
+      (multiple-value-bind (,stream-internal ,filename-internal)
+	  (create-temporary-file)
+	(unwind-protect
+	     (progn
+	       ,@(remove ()
+			`((setf ,stream ,stream-internal)
+			  ,(when filename
+				 `(setf ,filename ,filename-internal))))
+	       ,@forms)
+	  (when ,stream-internal
+	    (close ,stream :abort t)))))))
+
+(defun create-temporary-file ()
+  "Open a temporary file for read-write. The stream and the filename is
+returned as multiple-values."
+  (let ((foreign-string (c-tempnam)))
+    (if (uffi:null-pointer-p foreign-string)
+	(error "Unable to create a temporary file.")
+	(let* ((temporary-name
+		(uffi:convert-from-foreign-string foreign-string))
+	       (temporary-file
+		(pathname-to-file-form temporary-name))
+	       (stream (open temporary-file :if-exists nil
+			     :direction :io)))
+	  (uffi:free-foreign-object foreign-string)
+	  (if stream
+	      (values stream temporary-file)
+	      (error "Tried to open create temporary file ~S but
+someone else was quicker." temporary-file))))))
 
 (defun create-temporary-directory ()
   "Create a temporay directory and return its pathname.
@@ -242,7 +292,6 @@ be a pathname, open or closed stream or string)."
 	    `(,(first pair) (pathname ,(second pair))))
 	  variable-pathspec-pairs)
     ,@forms))
-
 
 (defun component-defined-p (component)
   "Test if a given component of a pathname is defined, i. e.
