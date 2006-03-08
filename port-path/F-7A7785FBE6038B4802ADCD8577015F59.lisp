@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.9 2006/03/06 14:34:03 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.10 2006/03/08 15:20:08 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -206,12 +206,13 @@ temporary directory."
     `(let ((,temporary-directory (create-temporary-directory))
 	   (,normal-cleanup nil))
       (unwind-protect
-	   (in-directory (,temporary-directory)
-	     ,(if temporary-pathname
-		  `(let ((,temporary-pathname ,temporary-directory))
-		    ,@forms)
-		  `(progn
-		    ,@forms))
+	   (progn
+	     (in-directory (,temporary-directory)
+	       ,(if temporary-pathname
+		    `(let ((,temporary-pathname ,temporary-directory))
+		      ,@forms)
+		    `(progn
+		      ,@forms)))
 	     (delete-directory-tree ,temporary-directory)
 	     (setf ,normal-cleanup t))
 	(when ,always-cleanup
@@ -437,14 +438,17 @@ all directory-prefixes is generated:
 			     :defaults pathname) pathname-prefixes))
       pathname-prefixes)))
 
-
 (defun pathname-prefix-p (prefix pathname)
+  "Returns if prefix is a pefix of pathname. This done by
+converting both pathnames to lists -- cf. pathname-to-list --
+and checking for list-prefixes."
   (let ((pathname-list (pathname-to-list pathname))
 	(prefix-list (pathname-to-list prefix)))
     (list-prefix-p prefix-list pathname-list)))
   
-
 (defun pathname-to-list (pathname)
+  "Converts a pathname to a list. The order of elements
+is host, device, directory-components, name, type."
   (remove nil
 	  (append (list (pathname-host pathname)
 			(pathname-device pathname))
