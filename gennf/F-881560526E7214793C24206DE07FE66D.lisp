@@ -16,18 +16,13 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.9 2006/02/19 16:27:59 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.10 2006/03/08 14:35:35 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
 
 
 ;; TODO: 
-;; - interface
-;;   - adding file
-;;   - removing file
-;;   - ... 
-;; - dublicate checking
 ;; - structure generating
 ;; - structure syncing
 ;; 
@@ -35,7 +30,13 @@
 ;; - reading
 ;; - writing
 ;; - generating Universal ID
-;;
+;; - dublicate checking
+;; 
+;; Not needed:
+;; - interface
+;;   - adding file
+;;   - removing file
+
 
 (in-package :gennf)
 
@@ -78,7 +79,7 @@
 
 
 (defun read-map-file (&optional (file *map-file*))
-  "Reads mcvs mapping-file and returns map-list."
+  "Reads mcvs mapping-file and returns list of mapings."
   (convert-map-file-in (read-file file)))
 
 (defun write-map-file (map-list &optional (file *map-file*))
@@ -194,7 +195,8 @@ path have to bee in the same form (directory) "
 
 (defun mapping-prefix-lookup (filemap prefix)
   ;; taken from mcvs
-  (if (path-equal *this-dir* prefix)
+  ;; mcvs uses *this-dir* for "."
+  (if (equal #p"." prefix)
     (first filemap)
     (find prefix filemap :test #'equal :key #'path)))
 
@@ -218,7 +220,7 @@ path have to bee in the same form (directory) "
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-;; Check
+;; Checks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
 ;; FIXME: Not yet used in existing code.
@@ -248,6 +250,14 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
       (error "duplicates in map: correct and run mcvs update.")))
   filemap)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Syncing 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun sync-files ()
+
+)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
