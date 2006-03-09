@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.33 2006/03/06 15:52:46 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.34 2006/03/09 11:17:47 sigsegv Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -177,7 +177,7 @@ that a 'normal' cvs repository is not recognized."
 (defun cvs-import (module access)
   "Interface to cvs import command, which is
 necessary to create a new repository."
-  (when (cvs-known-module-p access module)
+ (when (cvs-known-module-p access module)
     (error 'backend-module-exists-error
 	   :module module
 	   :description "The module already exists."))

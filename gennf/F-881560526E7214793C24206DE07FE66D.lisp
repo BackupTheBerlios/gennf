@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.10 2006/03/08 14:35:35 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.11 2006/03/09 11:17:47 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -172,7 +172,7 @@ path have to bee in the same form (directory) "
 "Compares two filemapes on equality."
   (let ((same t))
     (mapc #'(lambda (le re)
-	      (setf same (and same (equal-mapping-entries le re))))
+	      (setf same (and same (equal-mapping le re))))
 	    left right)
     same))
 
