@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.9 2006/03/09 11:17:16 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.10 2006/03/09 12:57:50 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -82,10 +82,11 @@ access file and the branch subdirectory with it's change file."
   (create-meta-directory)
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
-	   (change-file (merge-pathnames branch-directory *change-file*)))
-      ;; Get change, branch and access file.
+	   (change-file (merge-pathnames branch-directory *change-file*))
+	   (map-file (merge-pathnames branch-directory *map-file*)))
+      ;; Get change, branch, map and access file.
       (backend-get module access
-		   (list *access-file* *branch-file* change-file)
+		   (list *access-file* *branch-file* change-file map-file)
 		   *meta-directory*)
       ;; If no change is given, take latest.
       (unless change
@@ -97,6 +98,7 @@ access file and the branch subdirectory with it's change file."
 						 :identifier change)
 		    branch-directory)))
 	;; Retrieve the files into *meta-directory*.
+	(format t "files: ~a~%" files)
 	(backend-get module access files *meta-directory*)
 	;; Write sandbox-file.
 	(write-sandbox-file
@@ -283,6 +285,7 @@ before calling this routine."
 (defparameter *destination* (make-pathname :directory
 					   '(:relative "destination"))
   "Where files are merged on a merge.")
+
 (defparameter *origin* (make-pathname :directory
 				      '(:relative "origin"))
   "Where files to be merged in a temporally stored.")
