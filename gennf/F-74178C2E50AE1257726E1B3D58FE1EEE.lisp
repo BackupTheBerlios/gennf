@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.8 2006/03/08 14:35:35 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.9 2006/03/09 11:17:16 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -44,16 +44,21 @@ It returns the identifier of the branch created."
 					  :identifier identifier
 					  :symbolic-name symbolic-name
 					  :description description))
-		   (change-file (make-pathname)))
+		   (change-file (make-pathname))
+		   (map-file (make-pathname)))
 	      (setf branch-directory
 		    (branch-identifier-to-directory identifier))
 	      (setf change-file
 		    (merge-pathnames branch-directory *change-file*))
+	      (setf map-file
+		    (merge-pathnames branch-directory *map-file*))
 	      (add-branch branch *branch-file*)
 	      (port-path:create-directory branch-directory)
 	      (create-new-change-file change-file)
+	      (write-map-file '() map-file) ; creates empty map file,
+					    ; containing only "NIL"
 	      (backend-commit module *log-empty-branch* access
-			      (list change-file *branch-file*)))))
+			      (list change-file *branch-file* map-file)))))
 	(remove-meta-directory)))
     identifier))
 
@@ -67,6 +72,7 @@ signalled."
       (create-new-branch-file)
       (add-access access *access-file*)
       (backend-import module access))))
+
 
 (defun checkout (module access branch &optional change)
   "Checkout a change into a sandbox. If no change number is given,
