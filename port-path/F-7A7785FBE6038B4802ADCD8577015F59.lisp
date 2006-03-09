@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.10 2006/03/08 15:20:08 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.11 2006/03/09 16:46:09 sigsegv Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -62,7 +62,7 @@ synchronized."
 root stays current directory."
   (change-directory (get-parent-directory (current-directory))))
 
-(defmacro in-directory ((directory) &body forms)
+(defmacro in-directory (directory &body forms)
   "Evaluate forms in directory and change back
 to old working directory afterwards. The old working directory is
 restored in any case."
@@ -205,19 +205,19 @@ temporary directory."
   (with-gensyms (temporary-directory normal-cleanup)
     `(let ((,temporary-directory (create-temporary-directory))
 	   (,normal-cleanup nil))
-      (unwind-protect
-	   (progn
-	     (in-directory (,temporary-directory)
-	       ,(if temporary-pathname
-		    `(let ((,temporary-pathname ,temporary-directory))
-		      ,@forms)
-		    `(progn
-		      ,@forms)))
-	     (delete-directory-tree ,temporary-directory)
-	     (setf ,normal-cleanup t))
-	(when ,always-cleanup
-	  (unless ,normal-cleanup
-	    (delete-directory-tree ,temporary-directory)))))))
+       (unwind-protect
+	    (progn
+	      (in-directory ,temporary-directory
+		,(if temporary-pathname
+		     `(let ((,temporary-pathname ,temporary-directory))
+			,@forms)
+		     `(progn
+			,@forms)))
+	      (delete-directory-tree ,temporary-directory)
+	      (setf ,normal-cleanup t))
+	 (when ,always-cleanup
+	   (unless ,normal-cleanup
+	     (delete-directory-tree ,temporary-directory)))))))
 
 (defmacro with-temporary-file ((stream &optional filename) &body forms)
   "This is like the with-temporary-file macro from osicat but allows
