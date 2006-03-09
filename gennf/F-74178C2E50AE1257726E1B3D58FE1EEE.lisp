@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.10 2006/03/09 12:57:50 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.11 2006/03/09 16:48:23 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -55,7 +55,7 @@ It returns the identifier of the branch created."
 	      (add-branch branch *branch-file*)
 	      (port-path:create-directory branch-directory)
 	      (create-new-change-file change-file)
-	      (write-map-file '() map-file) ; creates empty map file,
+	      (create-new-map-file map-file) ; creates empty map file,
 					    ; containing only "NIL"
 	      (backend-commit module *log-empty-branch* access
 			      (list change-file *branch-file* map-file)))))
@@ -465,7 +465,7 @@ Origin files are in ~S."
 		  (common-files-prefixed (branch-prefix-file-list
 					  common-files
 					  destination-branch-directory)))
-	      (port-path:in-directory (destination-directory)
+	      (port-path:in-directory destination-directory
 		(backend-commit module
 				(log-message-merge origin-branch
 						   origin-access origin-change)
@@ -488,7 +488,7 @@ Origin files are in ~S."
 as for merge and directory and files are merge's return values.
 The directory is deleted after"
   (let ((destination-directory (merge-pathnames *destination* directory)))
-    (port-path:in-directory (destination-directory)
+    (port-path:in-directory destination-directory
       (let* ((branch-directory (branch-identifier-to-directory branch))
 	     ;; Include change file into list.
 	     (files-prefixed (branch-prefix-file-list

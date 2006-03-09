@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.11 2006/03/09 11:17:47 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.12 2006/03/09 16:48:23 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -25,6 +25,7 @@
 ;; TODO: 
 ;; - structure generating
 ;; - structure syncing
+;; - implementing usal gennf file interface
 ;; 
 ;; Done:
 ;; - reading
@@ -55,7 +56,8 @@
    (path
     :initform ""
     :initarg :path
-    :accessor path)
+    :accessor path
+    :documentation "Hardlink path")
    (target
     :initform ""
     :initarg :target
@@ -93,31 +95,33 @@
 (defun convert-map-file-in (raw-filemap)
 ;; Taken from mcvs:mapping.lisp
   "Converts a gennf filemap as read from a file into its internal
-representation -- a list of mapping-entry structures."
+representation -- a list of mapping objects."
   (flet ((map-fun (item)
 	   (when (or (not (consp item))
 		     (not (and (keywordp (first item))
 			       (stringp (second item)))))
 	     (error "map-file broken"))
 	   (case (first item)
-	     ((:file)
+	     ((:FILE)
 	      (let ((entry (make-instance 'mapping
-					  :kind :file
-					  :id (second item)
-					  :path (third item)
+					  :kind :FILE
+					  ;; internaly representing
+					  ;; all paths as pathnames
+					  :id (pathname (second item))
+					  :path (pathname (third item))
 					  :raw-plist (fourth item))))
 		(when (fourth item)
 		  (mapping-entry-parse-plist entry))
 		entry))
-	     ((:symlink)
+	     ((:SYMLINK)
 	      (when (not (third item))
 		(error "bad map: symlink ~a has no target."
 		       (second item)))
 	      (make-instance 'mapping  
-			     :kind :symlink
-			     :id (second item)
-			     :path (third item)
-			     :target (fourth item)
+			     :kind :SYMLINK
+			     :id (pathname (second item))
+			     :path (pathname (third item))
+			     :target (pathname (fourth item))
 			     :raw-plist (fifth item)))
 	     (otherwise (error "bad type keyword ~s in map." 
 			       (first item))))))
@@ -141,12 +145,16 @@ representation -- a list of mapping-entry structures."
 		 (setf (getf raw-plist :exec) t)
 		 (remf raw-plist :exec))
 	     (ccase kind
-	       (:file (list kind id path
+	       (:FILE (list* kind (namestring id) (namestring path)
 			    (if raw-plist 
 				(list raw-plist))))
-	       (:symlink (list kind id path target
+	       (:SYMLINK (list* kind (namestring id) (namestring path) (namestring target)
 				(if raw-plist (list raw-plist))))))))
 	 (mapcar #'map-fun map-list)))
+
+(defun create-new-map-file (&optional (file *map-file*))
+  (write-map-file '() file))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
@@ -165,7 +173,9 @@ path have to bee in the same form (directory) "
   (and (eq (kind left) (kind right))
        (string= (id left) (id right))
        (equal (path left) (path right))
-       (equal (target left) (target right))))
+       (equal (target left) (target right))
+
+))
 
 (defun equal-filemaps (left right)
   ;; taken from mcvs
@@ -185,6 +195,7 @@ path have to bee in the same form (directory) "
 		 :key #'kind))
 
 (declaim (inline mapping-extract-paths))
+
 (defun mapping-extract-paths (filemap)
   ;; taken from mcvs
   (mapcar #'path filemap))
@@ -255,9 +266,30 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
 ;; Syncing 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun sync-files ()
+(defgeneric sync (mapping) 
+  (:documentation "syncs files from *meta-directory* to 'sandbox'"))
 
-)
+(defmethod sync ((map mapping))
+  (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
+    (with-slots (kind id path) map
+      (ecase kind
+	;; Hardlinking
+	(:FILE
+	 (let* ((sandbox-path (merge-pathnames path))
+		(upper-dirs (port-path:pathname-prefixes sandbox-path))
+		(not-existing-pathes (delete-if #'port-path:path-exists-p upper-dirs)))
+	   ;;  create missing directories
+	   (mapcar #'port-path:create-directory not-existing-pathes)
+	   ;;  create hardlink
+	   (if (not (port-path:path-exists-p sandbox-path))
+	     (osicat:make-link sandbox-path :target (merge-pathnames id) :hard t)
+	     (format t "DEBUG: ~a file already exist. Not creating hardlink!" sandbox-path))))
+	;; FIXME: Softlinking 
+	(:SYMLINK (format t "    file: NIL")
+		  (error "SYMLINKS are NOT yet Implemented"))))))
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.34 2006/03/09 11:17:47 sigsegv Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.35 2006/03/09 16:48:23 sigsegv Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -206,7 +206,7 @@ routine for some arbitrary cvs sandbox.)"
   "Checks out all given files to destination. destination
 has to be a cvs sandbox, i. e. it contains *cvs-meta-directory*"
   (unless files (return-from cvs-get-update)) ; No files, do nothing.
-  (port-path:in-directory (destination)
+  (port-path:in-directory destination
     (let ((default-argument-list (list "-d" (root access)
 				       "up" "-jHEAD")))
       (dolist (file files)
