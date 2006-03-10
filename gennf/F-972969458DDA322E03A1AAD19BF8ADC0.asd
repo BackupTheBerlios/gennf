@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.12 2006/03/05 19:00:10 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.13 2006/03/10 13:47:52 sigsegv Exp $
 
 ;; ASDF system defintion in ASDF-INSTALL style.
 
@@ -68,7 +68,7 @@
    (:file "sbcl"
 	  :depends-on ("packages"))
    (:file "mapping"
-	  :depends-on ("packages" "files"))
+	  :depends-on ("packages" "files" "configuration"))
    (:file "error"
 	  :depends-on ("packages" "miscellaneous"))
    (:file "debug"

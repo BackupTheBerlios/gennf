@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.12 2006/03/09 16:48:23 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.13 2006/03/10 13:47:52 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -49,12 +49,12 @@
     :accessor kind
     :documentation "Type of the mapping")
    (id
-    :initform ""
+    :initform (error ":id must be specified")
     :initarg :id
     :accessor id
     :documentation "F-file name")
    (path
-    :initform ""
+    :initform (error ":path must be specified")
     :initarg :path
     :accessor path
     :documentation "Hardlink path")
@@ -76,56 +76,9 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Reading and Writing
+;; Operations (Reading, Writing, Adding)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
-
-(defun read-map-file (&optional (file *map-file*))
-  "Reads mcvs mapping-file and returns list of mapings."
-  (convert-map-file-in (read-file file)))
-
-(defun write-map-file (map-list &optional (file *map-file*))
-  "Writes map-lists to file."
-  (let ((converted-map-list (convert-map-list-out map-list))
-	(*print-pretty* t)
-	(*print-right-margin* 1))
-    (prin1-file file converted-map-list)))
-
-
-(defun convert-map-file-in (raw-filemap)
-;; Taken from mcvs:mapping.lisp
-  "Converts a gennf filemap as read from a file into its internal
-representation -- a list of mapping objects."
-  (flet ((map-fun (item)
-	   (when (or (not (consp item))
-		     (not (and (keywordp (first item))
-			       (stringp (second item)))))
-	     (error "map-file broken"))
-	   (case (first item)
-	     ((:FILE)
-	      (let ((entry (make-instance 'mapping
-					  :kind :FILE
-					  ;; internaly representing
-					  ;; all paths as pathnames
-					  :id (pathname (second item))
-					  :path (pathname (third item))
-					  :raw-plist (fourth item))))
-		(when (fourth item)
-		  (mapping-entry-parse-plist entry))
-		entry))
-	     ((:SYMLINK)
-	      (when (not (third item))
-		(error "bad map: symlink ~a has no target."
-		       (second item)))
-	      (make-instance 'mapping  
-			     :kind :SYMLINK
-			     :id (pathname (second item))
-			     :path (pathname (third item))
-			     :target (pathname (fourth item))
-			     :raw-plist (fifth item)))
-	     (otherwise (error "bad type keyword ~s in map." 
-			       (first item))))))
-    (mapcar #'map-fun raw-filemap)))
 
 (defun mapping-entry-parse-plist (entry)
 ;; Taken from mcvs:mapping.lisp
@@ -136,25 +89,120 @@ representation -- a list of mapping objects."
       (setf executable exec)))
   (values))
 
+(defmethod convert-to-alist append ((map mapping))
+  (with-slots (kind id path target executable raw-plist) map
+    (if executable
+	(setf (getf raw-plist :exec) t)
+	(remf raw-plist :exec))
+    (case kind
+      ((:FILE) (list* kind id path 
+		      (if raw-plist (list raw-PLIST))))
+      ((:SYMLINK) (list* kind id path target
+			 (if raw-plist (list raw-plist))))
+      (otherwise (error "unknown mapping entry type ~s." kind)))))
 
-(defun convert-map-list-out (map-list) 
-;; Taken from mcvs:mapping.lisp
-  (flet ((map-fun (map) 
-	   (with-slots (kind id path target executable raw-plist) map
-	     (if executable
-		 (setf (getf raw-plist :exec) t)
-		 (remf raw-plist :exec))
-	     (ccase kind
-	       (:FILE (list* kind (namestring id) (namestring path)
-			    (if raw-plist 
-				(list raw-plist))))
-	       (:SYMLINK (list* kind (namestring id) (namestring path) (namestring target)
-				(if raw-plist (list raw-plist))))))))
-	 (mapcar #'map-fun map-list)))
+(defun alist-to-mapping (alist)
+  "Convert a list into a mapping"
+  (when (or (not (consp alist))
+	    (not (and (keywordp (first alist))
+		      (stringp (second alist)))))
+    (error "map-file broken"))
+  (case (first alist)
+    ((:FILE)
+     (let ((entry (make-instance 'mapping
+				 :kind :FILE
+				 ;; internaly representing
+				 ;; all paths as pathnames
+				 :id (pathname (second alist))
+				 :path (pathname (third alist))
+				 :raw-plist (fourth alist))))
+       (when (fourth alist)
+	 (mapping-entry-parse-plist entry))
+       entry))
+    ((:SYMLINK)
+     (when (not (third alist))
+       (error "bad map: symlink ~a has no target."
+	      (second alist)))
+     (make-instance 'mapping  
+		    :kind :SYMLINK
+		    :id (pathname (second alist))
+		    :path (pathname (third alist))
+		    :target (pathname (fourth alist))
+		  :raw-plist (fifth alist)))
+    (otherwise (error "bad type keyword ~s in map." 
+		      (first alist)))))
+
+(defun read-map-file (&optional (file *map-file*))
+  "Reads mcvs mapping-file and returns list of mapings."
+  (mapcar #'alist-to-mapping (read-file file)))
+
+(defun write-map-file (map-list &optional (file *map-file*))
+  "Writes map-lists to file."
+  (prin1-file file map-list))
+
+(defmethod print-object ((map mapping) stream)
+  "printing the obeject readable as alist"
+  (if *print-readably*
+            (call-next-method)
+      (prin1 (convert-to-alist map) stream)))
 
 (defun create-new-map-file (&optional (file *map-file*))
   (write-map-file '() file))
 
+(defgeneric add-mapping (mapping store)
+  (:documentation "Add a new mapping to store"))
+
+(defmethod add-mapping (map (file pathname))
+  "Add a mapping (converted) into file."
+  (prepend-to-list-file file map))
+
+(defmethod add-mapping  (map (sequence list))
+  "add a mapping to sequence"
+  (cons map sequence))
+
+(defgeneric get-mapping (id store)
+  (:documentation "Return mapping from store"))
+
+(defmethod get-mapping ((identifier string) (sequence list))
+  "Search the list for pathname- and filename-strings of
+id and path"
+  (find-if #'(lambda (x) 
+	       (with-slots (id path) x
+		 (let ((id-namestring (namestring id))
+		       (id-filename (file-namestring id))
+		       (path-namestring (namestring path))
+		       (path-filename (file-namestring path)))
+		   (or
+		    (string= identifier id-namestring)
+		    (string= identifier id-filename)
+		    (string= identifier path-namestring)
+		    (string= identifier path-filename)))))
+	   sequence))
+
+(defmethod get-mapping ((id pathname) (sequence list))
+  (find id sequence :key #'id :test #'equal))
+
+(defmethod get-mapping (id (file pathname))
+  (get-mapping id (read-map-file file)))
+
+;; this one checks for file existence etc. 
+(defun create-new-mapping (&key
+			   (kind :file)
+			   (id nil)
+			   (path nil)
+			   (target nil)
+			   (executable nil)
+			   (raw-plist nil))
+  "Wraps make-instance for consintency checks"
+  (unless (or id path)
+       (error "Must specify :id and :path"))
+  (unless (and (port-path:path-exists-p id)
+		(port-path:path-exists-p path))
+      (error "Both, :id and :path, must exist. Changed path?"))
+  (if (eql kind :symlink)
+      (if (not target)
+	  (error ":kind is symlink. Specify :target")))
+  (format t "all your base are belong to us"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
@@ -272,24 +320,23 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
 (defmethod sync ((map mapping))
   (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
     (with-slots (kind id path) map
-      (ecase kind
-	;; Hardlinking
-	(:FILE
-	 (let* ((sandbox-path (merge-pathnames path))
-		(upper-dirs (port-path:pathname-prefixes sandbox-path))
-		(not-existing-pathes (delete-if #'port-path:path-exists-p upper-dirs)))
-	   ;;  create missing directories
-	   (mapcar #'port-path:create-directory not-existing-pathes)
-	   ;;  create hardlink
-	   (if (not (port-path:path-exists-p sandbox-path))
-	     (osicat:make-link sandbox-path :target (merge-pathnames id) :hard t)
-	     (format t "DEBUG: ~a file already exist. Not creating hardlink!" sandbox-path))))
-	;; FIXME: Softlinking 
-	(:SYMLINK (format t "    file: NIL")
-		  (error "SYMLINKS are NOT yet Implemented"))))))
-
-
-
+      (let ((absolute-path (merge-pathnames path)))
+	(ecase kind
+	  ;; Hardlinking
+	  (:FILE
+	   (if (not (port-path:path-exists-p  absolute-path))
+	       (let* ((upper-dirs (port-path:pathname-prefixes absolute-path))
+		      (not-existing-pathes
+		       (delete-if #'port-path:path-exists-p upper-dirs)))
+		 ;;  create missing directories
+		 (mapcar #'port-path:create-directory not-existing-pathes)
+		 ;;  create hardlink
+		 (osicat:make-link absolute-path :target (merge-pathnames id) :hard t))
+	       (format t "DEBUG: ~a file already exist. Not creating hardlink!"
+		       absolute-path)))
+	  ;; FIXME: Softlinking 
+	  (:SYMLINK 
+	   (error "SYMLINKS are NOT yet Implemented")))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -330,16 +377,6 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
 		     :executable 'nil)
       *test-data*)
 
-
-;; Prints object *only* human readable to stream
-;; This is not the output format of MCVS!
-(defmethod print-object ((map mapping) stream)
-  "Converting mapping into a human readable format.
-This is not the format of mcvs." 
-  (print-unreadable-object (map stream)
-      (with-slots (kind id path executable raw-plist) map
-        (format stream "(~%:KIND ~s~%:ID ~s~%:PATH ~s~%:EXEC ~s~%:RAW ~s)"
-                kind id path executable raw-plist))))
 
 
 
