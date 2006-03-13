@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.6 2006/03/03 16:53:04 florenz Exp $
+;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.7 2006/03/13 16:22:55 florenz Exp $
 
 ;; This file contains routines to manipulate access entries.
 
@@ -137,5 +137,5 @@ a sequence of accesses."
 
 (defmethod log-message-format ((access access))
   "Return a string that containts root and the access method."
-  (format nil "~S:~S" (symbol-name (backend access))
+  (format nil "~A:~A" (symbol-name (backend access))
 	  (root access)))

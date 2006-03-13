@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.15 2006/03/13 15:40:27 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.16 2006/03/13 16:22:55 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -318,6 +318,6 @@ directly from the repository."
 (defmethod log-message-format ((change change))
   "Returns a string suitable to be put into a log message
 containg the change number and all changed files."
-  (format nil "Change ~A.~%Changed files: ~A."
+  (format nil "Change-identifier ~A.~%Changed files: ~A."
 	  (identifier change)
 	  (list-to-string (all-changed-files change) :convert #'namestring)))

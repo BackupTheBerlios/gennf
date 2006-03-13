@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.11 2006/03/09 16:48:23 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.12 2006/03/13 16:22:55 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -72,7 +72,6 @@ signalled."
       (create-new-branch-file)
       (add-access access *access-file*)
       (backend-import module access))))
-
 
 (defun checkout (module access branch &optional change)
   "Checkout a change into a sandbox. If no change number is given,
@@ -467,8 +466,7 @@ Origin files are in ~S."
 					  destination-branch-directory)))
 	      (port-path:in-directory destination-directory
 		(backend-commit module
-				(log-message-merge origin-branch
-						   origin-access origin-change)
+				(log-message-merge (first new-changes))
 				access
 				(append uncommon-files-prefixed
 					common-files-prefixed
@@ -478,10 +476,10 @@ Origin files are in ~S."
   ;; (because in the case of conflicts the temporary pathname is returned).
   nil)
 
-(defun log-message-merge (branch access change)
+(defun log-message-merge (merge)
   "Generate a log message for a merge."
-  (format nil "Merged in change ~S from branch ~S at ~S."
-	  change branch (log-message-format access)))
+  (format nil "Created the following merge.~%~A"
+	  (log-message-format merge)))
 
 (defun merge-finish (module branch access directory files)
   "Finishes a stuck merge. branch and access have to be the same

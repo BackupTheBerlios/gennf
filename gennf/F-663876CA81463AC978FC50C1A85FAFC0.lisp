@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.3 2006/02/12 20:19:51 florenz Exp $
+;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.4 2006/03/13 16:22:55 florenz Exp $
 
 ;; Manipulations of merges.
 
@@ -93,3 +93,18 @@ not with new code but with code from some other change."))
   (if *print-readably*
       (call-next-method)
       (prin1 (convert-to-alist origin) stream)))
+
+(defmethod log-message-format ((merge merge))
+  "Returns a description of a merge suitable for a log
+message as a string."
+  (format nil "Merge-identifier ~A.~%Changed files: ~A~%~A"
+	  (identifier merge)
+	  (list-to-string (all-changed-files merge))
+	  (log-message-format (origin merge))))
+
+(defmethod log-message-format ((origin origin))
+  "Returns a descrption of an origin, suitable for a log message."
+  (format nil "Origin: access=~A, branch=~A, change-identifier=~A"
+	  (access origin)
+	  (branch origin)
+	  (identifier origin)))
