@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.14 2006/03/06 14:58:16 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.15 2006/03/13 15:40:27 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -217,17 +217,20 @@ sequence incremented by one."
   "Computes a new change identifier using changes in file."
   (get-new-change-identifier (read-file file)))
 
-(defgeneric get-change (identifier store)
-  (:documentation "Return the indicated change."))
+(defgeneric get-change (store &optional identifier)
+  (:documentation "Return the indicated change, latest if no identifier
+is given."))
 
-(defmethod get-change (identifier (sequence list))
+(defmethod get-change ((sequence list)
+		       &optional (identifier (length sequence)))
   "Return the indicated change from sequence."
   ;; Sequences of changes are in reversed order.
   (nth (- (length sequence) identifier) sequence))
 
-(defmethod get-change (identifier (file pathname))
+(defmethod get-change ((file pathname) &optional identifier)
   "Read file and then return the indicated change."
-  (get-change identifier (read-file file)))
+  (let ((changes (read-change-file file)))
+    (get-change changes (if identifier identifier (length changes)))))
 
 (defgeneric add-change (change store)
   (:documentation "Add a new change to the given store. The
@@ -311,3 +314,10 @@ directly from the repository."
       (backend-get module access (list change-file) temporary-directory)
       (setf changes (read-change-file change-file)))
     changes))
+
+(defmethod log-message-format ((change change))
+  "Returns a string suitable to be put into a log message
+containg the change number and all changed files."
+  (format nil "Change ~A.~%Changed files: ~A."
+	  (identifier change)
+	  (list-to-string (all-changed-files change) :convert #'namestring)))

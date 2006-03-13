@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.17 2006/03/05 19:00:10 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.18 2006/03/13 15:40:27 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -47,6 +47,22 @@
   (append (subseq list 0 index)
 	  sublist
 	  (subseq list index)))
+
+(defun list-to-string (list &key
+		       (convert #'(lambda (element)
+				    (format nil "~A" element)))
+		       (separator ", ")
+		       (open "") (close ""))
+  "Convert a list to a string, elements are separated by separator and
+converted to strings by convert. open and close are the forst and
+the last string elements in the result respectively."
+  (format nil "~A~A~A" open
+	  (reduce #'(lambda (element1 element2)
+		      (format nil "~A~A~A" element1 separator element2))
+		  (mapcar convert list))
+	  close))
+  
+
 
 ;;
 ;; Functions for alists.
