@@ -2,102 +2,90 @@
 %
 % This file is part of gennf.
 %
-% gennf is free software; you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
+% gennf is free software; you can redistribute it and/or modify it
+% under the terms of the GNU General Public License as published by
 % the Free Software Foundation; either version 2 of the License, or
 % (at your option) any later version.
 %
-% gennf is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
+% gennf is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+% or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+% License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with gennf; if not, write to the Free Software
-% Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+% along with gennf; if not, write to the Free Software Foundation,
+% Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 %
-% $Id: F-BB223D44B63BE9E1F84D89EE7FDDFB69.tex,v 1.25 2006/02/19 16:27:59 florenz Exp $
+% $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.8 2006/02/18
+% 10:45:02 sigsegv Exp $
 
-% This is the project's report stateing on the course of
-% development as well as on design and technical issues.
+% This is the project's report stateing on the course of development
+% as well as on design and technical issues.
 
-\documentclass[fleqn, 10pt, a4paper]{report}
-\usepackage{amssymb}
-\setlength{\parindent}{0pt}
+\documentclass[fleqn, 10pt, a4paper]{report} \usepackage{amssymb}
+\usepackage{stmaryrd} \setlength{\parindent}{0pt}
 
 \newcommand{\GENNF}{\textsc{gennf}}
 
 \begin{document}
 
+\thispagestyle{empty}
 \begin{center}
   {\scshape Infrastrukturen zur Open Source Softwareentwicklung} \\
   WS05/06, TU~Berlin, FG Formal Modelle, Logik und
   Programmierung \\
-  Prof.~Dr.~Bernd~Mahr, Steffen~Evers
-  \bigskip
-  \bigskip
+  Prof.~Dr.~Bernd~Mahr, Steffen~Evers \bigskip \bigskip
 
-  {\LARGE
-    \GENNF{} -- Distributed Version Management System with Code
-    Signing}
-  \medskip
+  {\LARGE \GENNF{} -- Distributed Version Management System with Code
+    Signing} \medskip
 
-  {\Large
-    -- Project Report --}
-  \bigskip
-  \bigskip
+  {\Large -- Project Report --} \bigskip \bigskip
 
   {\large
-    \begin{minipage}[t]{0.25\linewidth}
+    \begin{minipage}[t]{0.35\linewidth}
       \begin{center}
-        Fabian~Otto \\ \vspace{-2mm}
-        {\scriptsize\ttfamily sigsegv@cs.tu-berlin.de}
+        Fabian~Otto \\ \vspace{-2mm} {\scriptsize\ttfamily
+          sigsegv@cs.tu-berlin.de}
       \end{center}
     \end{minipage}\hspace{8mm}
-    \begin{minipage}[t]{0.25\linewidth}
+    \begin{minipage}[t]{0.35\linewidth}
       \begin{center}
-        Hannes~Mehnert \\ \vspace{-2mm}
-        {\scriptsize\ttfamily mehnert@cs.tu-berlin.de}
-      \end{center}
-    \end{minipage}\hspace{8mm}
-    \begin{minipage}[t]{0.25\linewidth}
-      \begin{center}
-        Florian~Lorenzen \\ \vspace{-2mm}
-        {\scriptsize\ttfamily florenz@cs.tu-berlin.de}
+        Florian~Lorenzen \\ \vspace{-2mm} {\scriptsize\ttfamily
+          florenz@cs.tu-berlin.de}
       \end{center}
     \end{minipage}
-    \bigskip
-    \bigskip
+    \bigskip \bigskip
 
     \today}
 
 \end{center}
 
 \tableofcontents
+\newpage
 
 \section*{Prologue}
 \addcontentsline{toc}{section}{Prologue}
 
-This document is the project report of \GENNF{}, a distributed
-version management system enhanced with code signing as
-part of the \emph{Infrastrukturen zur Open Source Software Entwicklung}
-course held by Steffen Evers at Berlin Technical University.
+This document is the project report of \GENNF{}, a distributed version
+management system enhanced with code signing as part of the
+\emph{Infrastrukturen zur Open Source Software Entwicklung} course
+held by Steffen Evers at Berlin Technical University.
 
-The document started as a scratchpad we sketched our ideas and
-plans and is currently being transformed into an intermediate report
-and once will be the final report.
+The document started as a scratchpad we sketched our ideas and plans
+and is currently being transformed into an intermediate report and
+once will be the final report.
 
 The documente is divided into two chapters:
 \begin{itemize}
 \item The first chapter describes the course of the project in
-chronologically order. Decisions and steps we undertook are
-explained as well as comments from a review perspective.
-\item The second chapter describes the desgin and concepts of
-\GENNF{} in a more technical fashion. Large parts of this
-section were written as a desgin document in an early period
-of the project, some parts were corrected and adjusted during
-development or thereafter. Thus, this chapter can be considered
-as a part of the project's outcome.
+  chronologically order. Decisions and steps we undertook are
+  explained as well as comments from a review perspective.
+\item The second chapter describes the desgin and concepts of \GENNF{}
+  in a more technical fashion. Large parts of this section were
+  written as a desgin document in an early period of the project, some
+  parts were corrected and adjusted during development or thereafter.
+  Thus, this chapter can be considered as a part of the project's
+  outcome.
 \end{itemize}
 
 \section*{Developers}
@@ -106,41 +94,40 @@ as a part of the project's outcome.
 \GENNF{} is being developed by
 \begin{itemize}
 \item Fabian Otto, \texttt{sigsegv@cs.tu-berlin.de}
-\item Hannes Mehnert, \texttt{mehnert@cs.tu-berlin.de}
 \item Florian Lorenzen, \texttt{florenz@cs.tu-berlin.de}
 \end{itemize}
 
 
 \chapter{The project's course \label{course}}
 
-This chapter describes in rough chronological order the
-different steps we undertook during the development of \GENNF{}.
+This chapter describes in rough chronological order the different
+steps we undertook during the development of \GENNF{}.
 
 \section{The planning}
 
-The planning phase covers all the time prior to any coding. As
-we changed plans at several points there is some interleaving during
-the middle period of the project.
+The planning phase covers all the time prior to any coding. As we
+changed plans at several points there is some interleaving during the
+middle period of the project.
 
 \subsection{In search of a project}
 
 In the time from mid of October to begin of November we were looking
 for this term's project. At end of October it was clear that at least
 Hannes Mehnert and Florian Lorenzen would risk a try in the area of
-version management software. Fabian Otto definitely joined in during the
-first days of November.
+version management software. Fabian Otto definitely joined in during
+the first days of November.
 
-During the first half of November lots of issues concerning
-already existent software and the project's goals were discussed.
+During the first half of November lots of issues concerning already
+existent software and the project's goals were discussed.
 
 Among them were a few we abandoned:
 
 \subsubsection{Plans we abandoned}
 
-We thought about improving the code merging capabilities
-which are heavily relied on in version control software. The idea was to
-do a merge not of streams of characters (the source code) but of
-abstract syntax trees of the programming language used. This seemd very
+We thought about improving the code merging capabilities which are
+heavily relied on in version control software. The idea was to do a
+merge not of streams of characters (the source code) but of abstract
+syntax trees of the programming language used. This seemd very
 promising because fewer conflicts should arise. We abandoned this plan
 for several reasons:
 
@@ -177,77 +164,75 @@ for several reasons:
   semester.
 \end{itemize}
 
-As we found out later in February 2006, exactly this approach
-was taken by Hayase et. al. \cite{HMI05}.
+As we found out later in February 2006, exactly this approach was
+taken by Hayase et. al. \cite{HMI05}.
 
-\subsubsection{Plans, which shouldn't stay on paper}
+\subsubsection{Plans that should not stay only on paper}
 
-We more or less settled on two other aspects which seemed
-improvable to us:
+We more or less settled on two other aspects which seemed improvable
+to us:
 
 \begin{itemize}
 \item Code signing
 \item Ditributed repositories
 \end{itemize}
 
-Code signing means, that each chunk of code checked into the repository
-has to be signed by the programmer using some public/private key scheme
-to enable other developers or users to verify the origin of the code (as
-long as keys are trustworthy).
+Code signing means, that each chunk of code checked into the
+repository has to be signed by the programmer using some
+public/private key scheme to enable other developers or users to
+verify the origin of the code (as long as keys are trustworthy).
 
 Distributed means that the repository is not stored on a single server
 but that commits can be done on several servers and the results be
 merged. The advantages are a better failure behaviour and the
 possibility to structure the repositories according to some external
-requirements, e.~g. responsibilities for or maintenance of certain code
-sections by certain parties.
+requirements, e.~g. responsibilities for or maintenance of certain
+code sections by certain parties.
 
 The code signing part should be mainly worked on by Hannes Mehnert,
 whereas Florian Lorenzen felt more reponsible for the distributive
 part. Fabian Otto would participate in both parts of the project.
 
-It was fairly clear right from the beginning that we could not
-and want not write a version management system from scratch but
-to improcve an existing system. The two systems in question
-were \textsc{darcs} and \textsc{metacvs}.
+It was fairly clear right from the beginning that we could not and
+want not write a version management system from scratch but to
+improcve an existing system. The two systems in question were
+\textsc{darcs} and \textsc{metacvs}.
 
-\textsc{darcs} is already a distributed system -- but it is 
-too distributed for our taste: every working copy is a repository.
-This should not be necessary and one option was to offer greater
+\textsc{darcs} is already a distributed system -- but it is too
+distributed for our taste: every working copy is a repository.  This
+should not be necessary and one option was to offer greater
 flexibility concering repositores and working copies in
 \textsc{darcs}.
 
 \textsc{metacvs} is a wrapper around \textsc{cvs} and requires only
 \textsc{cvs} onb the server side. It circumvents some quirks of
 \textsc{cvs}, especially the weak handling of directory structure of a
-project. Like \textsc{cvs} it is a central-server oriented system
-and consequently the option as to introduce distribution into this
-system.
+project. Like \textsc{cvs} it is a central-server oriented system and
+consequently the option as to introduce distribution into this system.
 
 Concerning code signing neither of the two had support in our sense
 (\textsc{darcs} has some rudimentary support using digitally signed
 mails).
 
-We decided to build on \textsc{metacvs} because it is, in turn, based on
-\textsc{cvs} which we know quite well and because it is written in
+We decided to build on \textsc{metacvs} because it is, in turn, based
+on \textsc{cvs} which we know quite well and because it is written in
 \textsc{Common~Lisp} which makes rapid development at least possible.
 Another reason is that \textsc{cvs} is widely available on services
-like SourceForge or BerliOS and thus existing infrastructure
-is available to the new system.
+like SourceForge or BerliOS and thus existing infrastructure is
+available to the new system.
 
 We also had a look on a system called \textsc{dcvs}, distributed
-\textsc{cvs} but this was ruled out right from the start, beacuse
-its support several repositories is rather unflexible:
-each repository is assigned a
-part of code which is the only one that can be modified.
-That means the distribution must follow the responsibilities
-and/or maintenanceships of the projects which imposes to
-strong rules on the development process in our opinion.
+\textsc{cvs} but this was ruled out right from the start, beacuse its
+support several repositories is rather unflexible: each repository is
+assigned a part of code which is the only one that can be modified.
+That means the distribution must follow the responsibilities and/or
+maintenanceships of the projects which imposes to strong rules on the
+development process in our opinion.
 
 \subsection{Infrastructure}
 
-Around the same time that we had stated the two overall goals of
-the project we applied for a project at BerliOS which was approved on
+Around the same time that we had stated the two overall goals of the
+project we applied for a project at BerliOS which was approved on
 November 7 with the following proposal:
 
 \begin{verbatim}
@@ -290,24 +275,23 @@ References:
 \end{verbatim}
 
 We installed a \textsc{cvs} repository at
-\texttt{cvs.gennf.berlios.de:/cvsroot/gennf} which we used
-with \textsc{metacvs}. For this reason the \textsc{viewcvs}
-interface of BerliOS is not so usable, because it cannot resolve
-\textsc{metacvs}'s F-files.
+\texttt{cvs.gennf.berlios.de:/cvsroot/gennf} which we used with
+\textsc{metacvs}. For this reason the \textsc{viewcvs} interface of
+BerliOS is not so usable, because it cannot resolve \textsc{metacvs}'s
+F-files.
 
 The first version of our web-page at \texttt{http://gennf.berlios.de}
 was online about a month later on December 12.
 
 To ease communication among the developers we installed an publicly
 open mailing list \texttt{gennf-devel@lists.berlios.de} on
-November~30. Some days later commit mails were enabled.
-The Perl script \texttt{log\_accum.pl} used
-originally stems from the FreeBSD project and found the
-way to us via the ZEDV group at Berlin's Free University's physics
-department and the \texttt{octopus} project. Until mid of January
-it had the same problem as \textsc{viewcvs}: it could not resolve
-\textsc{metacvs}'s F-file names, until a very basic \texttt{MAP}-file
-parser was included into the script.
+November~30. Some days later commit mails were enabled.  The Perl
+script \texttt{log\_accum.pl} used originally stems from the FreeBSD
+project and found the way to us via the ZEDV group at Berlin's Free
+University's physics department and the \texttt{octopus} project.
+Until mid of January it had the same problem as \textsc{viewcvs}: it
+could not resolve \textsc{metacvs}'s F-file names, until a very basic
+\texttt{MAP}-file parser was included into the script.
 
 The mailing list archives are found at
 \texttt{http://lists.berlios.de/pipermail/gennf-devel/} and as all
@@ -316,31 +300,30 @@ it reads like a (not properly edited, though) logbook of the project.
 
 \subsection{Designing and planning the implementation}
 
-Until mid of november we had did not have a schedule or
-distinct milestones. The reason for this was twofold:
-Firstly, it took some time to get the goals of the project straight.
-Secondly, we had the problem that among the three developers was one
-(Florian Lorenzen) who had to do most of the work until the mid of
-February 2006 and two others (Hannes Mehnert and Fabian Otto, then)
-who would not start intensive work before that point of time.
-That constrained us to plan a handing over of the code at around
-the middle of February in a defined state.
+Until mid of november we had did not have a schedule or distinct
+milestones. The reason for this was twofold: Firstly, it took some
+time to get the goals of the project straight. Secondly, we had the
+problem that among the three developers was one (Florian Lorenzen) who
+had to do most of the work until the mid of February 2006 and two
+others (hence Hannes Mehnert and Fabian Otto) who would not start
+intensive work before that point of time. That constrained us to plan
+a handing over of the code at around the middle of February in a
+defined state.
 
 Having this discussed it was made up the plan, that the basic
-operations for the handling of distributed repositories should
-be protypically implemented until then. The code signing, the code
-signing and the user-interface should be built on top of this
-the following one and a half months.
+operations for the handling of distributed repositories should be
+protypically implemented until then. The directory structure, the code
+signing and the user-interface should be built on top of this during the
+following one and a half months.
 
 A concept how the distribution shall take place had to be finished
-until end of the year 2005. This was done in several steps and
-finally completed on January 3, 2005.
+until end of the year 2005. This was done in several steps and finally
+completed on January 3, 2005.
 
 A more in depth description of the requirements of the code signing
 was written mid of November.
 
-Our schedule then looked like this:
-\bigskip
+Our schedule then looked like this: \bigskip
 
 \begin{tabular}{|p{.3\textwidth}|p{.6\textwidth}|}
   \hline
@@ -351,13 +334,16 @@ Our schedule then looked like this:
   and drafting a design for distributiveness and signing. \\
   \hline
   Dec. 15, 2005 to Jan. 1 2006 &
-  Porting \textsc{metacvs} to \textsc{sbcl} \\
+  Porting \textsc{metacvs} to \textsc{sbcl}. \\
   \hline
   Jan. 9 to Feb. 19, 2006 & Prototypic implementation of
-  distributed repositories. \\
+  distributed repositories (by Florian Lorenzen). \\
   \hline
   Jan. 24 to Jan. 30, 2006 & Preparation of the intermediate
   presentation. \\
+  \hline
+  Feb. 20 to Mar. 31, 2006 & Implementation of the code signing
+  and the directory structure (by Hannes Mehnert and Fabian Otto). \\
   \hline
   Apr. 1 to Apr. 6, 2006 & Finishing the project's report
   and preparing the presentation for final colloquium. \\
@@ -366,64 +352,72 @@ Our schedule then looked like this:
   \hline
 \end{tabular}
 
+\subsection{Throw over of the plan}
+
+On March 10, the team receives a mail message from Hannes Mehnert that he
+quits the project due to more important things to do. As he has not written
+a single line of code (apart from some \TeX-code in section \ref{codesigning})
+there is nothing for someone else has to take over.
+
+But the reduced number of team members causes cutting features, of course.
+
 \subsection{Working on \textsc{metacvs}}
 
-As we decided to extend \textsc{metacvs} we started investigating
-the code of version 1.0.13 in December.
+As we decided to extend \textsc{metacvs} we started investigating the
+code of version 1.0.13 in December.
 
 The system is written in \textsc{clisp}, a particular
-\textsc{Common~Lisp} implementation. For the code signing part
-we wanted to rely on the \textsc{gpgme} library. For this reason
+\textsc{Common~Lisp} implementation. For the code signing part we
+wanted to rely on the \textsc{gpgme} library. For this reason
 including \textsc{c}-libraries was an important issue. At some point
 in the mid of December we decided to use \textsc{sbcl} as the
 \textsc{lisp} implementation of choice because it supports
 \textsc{uffi}, which is a cross-platform foreign function interface,
 and is less clumsy than \textsc{clisp} at some points.
 
-This implied porting \textsc{metacvs} to \textsc{sbcl}. After
-close looks on the implementation dependent parts of the code
-it was clear that most of them could be replaced by a portable
-library called \textsc{osicat}, which is a high level \textsc{posix}
-interface. Inclusion of this library would make the code cleaner
-and more portable. Furthermore, we decided that the current build
-system of \textsc{metacvs} is very clumsy and that it should be
-replaced by the widely used \textsc{asdf}-package to compile and
-load \textsc{Common~Lisp} software.
+This implied porting \textsc{metacvs} to \textsc{sbcl}. After close
+looks on the implementation dependent parts of the code it was clear
+that most of them could be replaced by a portable library called
+\textsc{osicat}, which is a high level \textsc{posix} interface.
+Inclusion of this library would make the code cleaner and more
+portable. Furthermore, we decided that the current build system of
+\textsc{metacvs} is very clumsy and that it should be replaced by the
+widely used \textsc{asdf}-package to compile and load
+\textsc{Common~Lisp} software.
 
 The system was ported to \textsc{sbcl} at the end of December 2005.
 This turned out to be a waste of time some days later:
 
 After the specification for the distributed repositories was finished,
 it turned out, that \textsc{metacvs} is to tightly written around
-\textsc{cvs} to easily incorporate the modifications required
-for the concept of changes. For the distributed repositories and
-the its central concept of changes a clean backend abstraction,
-i.~e. a \textsc{cvs} abstraction, was required. The reason is that
-quite a different development model than \textsc{cvs}'s model
-should be realised. \textsc{metacvs} did not change the development
-model in any way but just improved \textsc{cvs} at some points.
-The result of this philosophy ws that basically a wrapper for
-each \textsc{cvs} operation was provided and that the executable
-was called when needed.
+\textsc{cvs} to easily incorporate the modifications required for the
+concept of changes. For the distributed repositories and the its
+central concept of changes a clean backend abstraction, i.~e. a
+\textsc{cvs} abstraction, was required. The reason is that quite a
+different development model than \textsc{cvs}'s model should be
+realised. \textsc{metacvs} did not change the development model in any
+way but just improved \textsc{cvs} at some points.  The result of this
+philosophy ws that basically a wrapper for each \textsc{cvs} operation
+was provided and that the executable was called when needed.
 
 Unfortunately, \textsc{metacvs} has no inner interface that we could
-build on to benefit from its improvements over \textsc{cvs} and
-at the same time abstracting from the sandbox centered development
-model. The only possibility would have been wrapping the program
-once again which would not be a very clean solution.
+build on to benefit from its improvements over \textsc{cvs} and at the
+same time abstracting from the sandbox centered development model. The
+only possibility would have been wrapping the program once again which
+would not be a very clean solution.
 
 So we sorted out the aspect of \textsc{metacvs} that were very good
 ideas, which are basically the indirection layer for directory
 structure, and decided to implement a protype from scratch
-incorporating these ideas (and code fragments from \textsc{metacvs}
-as far as possible). At this point it was clear that a patch for
+incorporating these ideas (and code fragments from \textsc{metacvs} as
+far as possible). At this point it was clear that a patch for
 \textsc{metacvs} as project result was out of sight. It was
 furthermore obvious that all the porting was not necessary at all.
 
 From a review perspective it can be stated that the decision to take
-\textsc{scbl} as development platform was not a good decision. If
-we had sticked with \textsc{clisp} there would have been some quirks
-to ship around but it would have been clear that patching was not
+\textsc{scbl} as development platform was not a good decision. If we
+had sticked with \textsc{clisp} there would have been some quirks to
+ship around but it would have been clear that patching was not
 possible at least two weeks earlier. Unlucky enough those two weeks
 were the academic holidays -- and there would have been plenty of time
 to do useful codeing, instead of writing a superflouos port.
@@ -437,11 +431,11 @@ The implementation phase started at begin of January 2005.
 
 \subsection{The distribution prototype}
 
-The protoype for distribute repositories should provide
-all necessary basic operations as described in section \ref{distrib}
-but only for flat repositories, i.~e. without any directory
-structure. The idea behind this was that all structure would be set on
-top of this as it is done in \textsc{metacvs}.
+The protoype for distribute repositories should provide all necessary
+basic operations as described in section \ref{distrib} but only for
+flat repositories, i.~e. without any directory structure. The idea
+behind this was that all structure would be set on top of this as it
+is done in \textsc{metacvs}.
 
 The first task for this part was to find a suitable backend
 abstraction. This turned out to be much more difficult than expected,
@@ -482,216 +476,218 @@ Again, it would have been better to work without \textsc{cvs} and
 using simpler software to store the revisions of files like
 \textsc{Common~Lisp} versions of \texttt{diff} and \texttt{patch}.
 
+However, it seems that the prototype could be finished until mid of
+February -- though probably very buggy -- and can be handed to Fabian
+Otto, to be enriched by 
 
 
 \chapter{Concepts and desgin}
 
-\section{Code Signing}
+\section{Code Signing \label{codesigning}}
+
+As Hannes Mehnert left the team Code Signing is not implemented and
+this section is to be read as a draft what could have been done.
 
 \subsection{Motivation}
 
-Currently most version management systems don't use any digital signatures
-for code (apart from \textsc{tla}). Authentication is done by an own password
-server (\textsc{cvs}: pserver), via a ssh public key (\textsc{cvs},
-\textsc{subversion}, \textsc{darcs}, \textsc{metacvs}) or
-via a digitally signed mail (\textsc{darcs}).
+Currently most version management systems don't use any digital
+signatures for code (apart from \textsc{tla}). Authentication is done
+by an own password server (\textsc{cvs}: pserver), via a ssh public
+key (\textsc{cvs}, \textsc{subversion}, \textsc{darcs},
+\textsc{metacvs}) or via a digitally signed mail (\textsc{darcs}).
 
-On the other hand, data integrity is not supported.
-Every user has to trust the repository server
-to be secure from a possible hacker breaking into it.
-A hacker with access to the repository is able to compromise the
-software by unperceived insert of a backdoor.
+On the other hand, data integrity is not supported.  Every user has to
+trust the repository server to be secure from a possible hacker
+breaking into it.  A hacker with access to the repository is able to
+compromise the software by unperceived insert of a backdoor.
 
 In the past, several big repositories have been hacked, including
-KDE\footnote{http://seclists.org/lists/fulldisclosure/2004/May/0349.html},
-sourceforge, jabber.org [TODO: add links].
+KDE\footnote{
+  \texttt{http://seclists.org/lists/fulldisclosure/2004/May/0349.html}},
+SourceForge, \texttt{jabber.org}.
 
 
 \subsection{Vision}
-A developer using \textsc{gennf} should be able to sign his patches via
-an already known-to-work and widely deployed public key cryptosystem.
+
+A developer using \textsc{gennf} should be able to sign his patches
+by an already known-to-work and widely deployed public key
+cryptosystem.
 
 An auditor should be able to look at any number of parts of the code
 and sign them digitally after a successful code audit.
 
-A user checking out the code should be able to verify the code, looking
-at the different trust levels of the lines of code.
-He should be able to easily spot the lines
-which are least trusted according to his web of trust. If he cares much
-about security, he can audit those hot spots and sign them in the repository,
-becoming an auditor.
+A user checking out the code should be able to verify the code,
+looking at the different trust levels of the lines of code. He should
+be able to easily spot the lines which are least trusted according to
+his web of trust. If he cares much about security, he can audit those
+hot spots and sign them in the repository, becoming an auditor.
 
-So, the trust is moved from the single point of failure (the repository
-server) to every developer (able to protect his private key, or otherwise
-revoke his key).
+Thus, the trust is moved from the single point of failure (the
+repository server) to every developer (able to protect his private
+key, or otherwise revoke his key).
 
 \subsection{Workflows}
 
-A possible workflow for the developer would be that he first starts coding,
-fixing a bug or implementing a new feature. When he has done with that,
-during the commit he'll be asked whether he wants to sign this commit.
-If he chooses to sign, he is asked for the passphrase protecting
-his private key. After successfully verification of the passphrase,
-the commit will be signed and transferred to the server.
-Authentication could probably also be done via the signature on the code,
-so no user management is anymore needed on the server, only a public keyring
-including all developer keys, but possibly anyone can commit, and the user
-has to choose who to trust during checkout.
+A possible workflow for the developer would be that he first starts
+coding, fixing a bug or implementing a new feature. When he is done
+with that, during the commit he'll be asked whether he wants to sign
+this commit.  If he chooses to sign, he is asked for the passphrase
+protecting his private key. After successfully verification of the
+passphrase, the commit will be signed and transferred to the server.
+Authentication could probably also be done via the signature on the
+code, so no user management is anymore needed on the server, only a
+public keyring including all developer keys, but possibly anyone can
+commit, and the user has to choose who to trust during checkout.
 
-A user with access to the repository checking out can verify the checked
-out code, and see how safe it is.
-Via \texttt{metacvs blame} he should be able to look which lines are
-at which trust levels.
+A user with access to the repository checking out can verify the
+checked out code, and see how safe it is.  Via \texttt{gennf blame}
+he should be able to look which lines are at which trust levels.
 
-Via \texttt{metacvs sign} a code auditor (or user) should be able to
+Via \texttt{gennf sign} a code auditor (or user) should be able to
 sign parts of code (line-, file-based).
 
 \subsection{Implementation overview}
+
 \begin{itemize}
-\item Public key cryptography interface for \textsc{clisp}.
-\item Unique patchset number, like in subversion, to match a signature to a revision.
-\item Virtual patchsets describing regions in source files for auditor.
-\item Decide where to store signatures.
-(I think, there should be a new meta file containg the signatures, what
-lines and revisions they apply to. Putting it this way audits can be handled
-in the same mannner. Change and audit signatures have to distinguished by
-some tag. Storeing all this in a meta file makes audit signs an
-ordinary check in operation on this file -- which should be wrapped in
-a nice command of course. The same applies to normal commits: they
-change the F-files and make a change to the new meta file. [Florian])
-\item Integration in \textsc{metacvs} commands like \texttt{commit},
-\texttt{checkout}, \texttt{blame}.
-\item Implement more \textsc{metacvs} commands like \texttt{verify},
-\texttt{sign}.
+\item Public key cryptography interface for \textsc{sbcl}.
+\item Unique patchset number, like in subversion, to match a signature
+  to a revision.
+\item Virtual patchsets describing regions in source files for
+  auditor.
+\item Decide where to store signatures.  One possibility is to provide a
+  new meta file containg the signatures, what lines and revisions they
+  apply to. Putting it this way, audits can be handled in the same
+  mannner. Change and audit signatures have to distinguished by some
+  tag. Storeing all this in a meta file makes audit signs an ordinary
+  check in operation on this file -- which should be wrapped in a nice
+  command of course. The same applies to normal commits: they change
+  the F-files and make a change to the new meta file.
+\item Integration in \textsc{gennf} commands like \texttt{commit},
+  \texttt{checkout}, \texttt{blame}.
+\item Implement more \textsc{gennf} commands like \texttt{verify},
+  \texttt{sign}.
 \end{itemize}
 
 \subsection{Implementation detail}
+
 OpenPGP will be used as pulic key cryptosystem, because it has an
 open-source implementation \textsc{gpg} (GNU Privacy Guard), is not
 hierarchically structured due to the web of trust and keyserver rings.
 It is also widely deployed in open source developer communities.
 
 It has a \texttt{GnuPG Made Easy} \textsc{gpgme} development library,
-which needs to be wrapped in a C-Interface for \textsc{clisp}.
+which needs to be wrapped in a C-Interface for \textsc{sbcl}.
 
-The signatures has to be stored somewhere in \textsc{metacvs}, probably
-in the metadata.
+The signatures has to be stored somewhere in \textsc{gennf},
+probably in the meta files (cf. previous section).
 
-Some parts should be configurable for \textsc{metacvs} code signing,
-a default key ID for the developer, a public keyring file for authentication
-on the repository server, and possibly other things.
+Some parts should be configurable for \textsc{gennf} code signing, a
+default key ID for the developer, a public keyring file for
+authentication on the repository server, and possibly other things.
 
-Probably an \textsc{emacs}-integration for \textsc{metacvs}, including the
-audit-part, would be useful.
+Probably an \textsc{emacs}-integration for \textsc{gennf} including
+the audit-part would be useful.
 
 
 \section{Distributed repositories \label{distrib}}
 
 \subsection{Outline}
 
-By support for \emph{distributed repository} we mean support for the following
-features:
+By support for \emph{distributed repository} we mean support for the
+following features:
 
 \begin{itemize}
-\item \textsc{gennf} will provide a possibility to \emph{inherit} from an
-already existing repository which means to create a branch
-at another site. It is not necessary for this new site to store the
-whole history of the project: \textsc{gennf} will establish
-a link between the two.
-Whenever someone at the new repository requests a version not locally
-available, it will be fetched from the original site. It is of course
-possible to replicate large parts of or the whole history to improve
-performance or redundancy. However, replicated parts of the history still
-know where they come from.
+\item \textsc{gennf} will provide a possibility to \emph{inherit} from
+  an already existing repository which means to create a branch at
+  another site. It is not necessary for this new site to store the
+  whole history of the project: \textsc{gennf} will establish a link
+  between the two.  Whenever someone at the new repository requests a
+  version not locally available, it will be fetched from the original
+  site. It is of course possible to replicate large parts of or the
+  whole history to improve performance or redundancy. However,
+  replicated parts of the history still know where they come from.
 
 \item The different lines of development can be merged together.
-\textsc{gennf} keeps track of the origin of the code merged in. The mechanism
-of merge is used to create branches. In fact, a merge is the only
-basic operation \textsc{gennf} knows about, apart from ordinary commits (which
-do not come from another site but out of some developer's head).
-Both -- commits and merges -- are called changes.
+  \textsc{gennf} keeps track of the origin of the code merged in. The
+  mechanism of merge is used to create branches. In fact, a merge is
+  the only basic operation \textsc{gennf} knows about, apart from
+  ordinary commits (which do not come from another site but out of
+  some developer's head).  Both -- commits and merges -- are called
+  changes.
 \end{itemize}
 
 \subsection{Modelling distributiveness}
 
 In the following section we propose an abstract model for distributed
-repositories and their interaction. It is still incomplete
-especially concerning sandbox-repository interaction but gives already
-some implementation hints.
+repositories and their interaction.
 
 \subsubsection{The basic notions: Repository, branch and change}
 
-A \emph{repository} $r$ for a certain project is the set of development
-branches the project consists of.
+A \emph{repository} $r$ for a certain project is the set of
+development branches the project consists of.
 
-A \emph{branch} $b$ is an ordered pair $[\beta, s]$ with $\beta$ being
-a \emph{branch identifier} and $s$ being
-a sequence of changes..
+A \emph{branch} $b$ is an ordered pair $(\beta, s)$ with $\beta$ being
+a \emph{branch identifier} and $s$ being a sequence of changes.
 
-A \emph{change} $c$ is the building block of repositories.
-Addition of changes to a repository is the basic modification
-of repositories.
+A \emph{change} $C$ is the building block of repositories.  Addition
+of changes to a repository is the basic modification of repositories.
 
 A change can be a commit or a merge.
 
-A \emph{commit} is a 4-tuple $[\nu, \beta, \alpha, f]$ with
+A \emph{commit} is a 4-tuple $(\nu, \beta, \alpha, f)$ with
 \begin{itemize}
 \item $\nu$ being the branch-unique change-number,
-\item $\beta$ being the branch identifier of the branch
-this commit belongs to,
+\item $\beta$ being the branch identifier of the branch this commit
+  belongs to,
 \item $\alpha$ being an access identifier and
 \item $f$ being a map $\mathnormal{filename} \rightarrow
-\mathnormal{revision\_number}$.
+  \mathnormal{revision\_number}$.
 \end{itemize}
 
-The domain of $f$ is the set of files modified by a certain
-commit $c$. $f(\mathtt{file})$ is the revision-number the
-backend assigned to \texttt{file}, which is necessary to
-retrieve the state of \texttt{file} at checkin time of $c$.
+The domain of $f$ is the set of files modified by a certain commit
+$c$. $f\ \mathtt{file}$ is the revision-number the backend assigned to
+\texttt{file}, which is necessary to retrieve the state of
+\texttt{file} at checkin time of $c$.
 
 The \emph{access identifier} $\alpha$ is an abstraction layer for the
 backend. This includes things like hostname and path where the
-repository is stored, the corresponding authentication method
-and functions to checkin and -out files to and from this backend.
+repository is stored, the corresponding authentication method and
+functions to checkin and -out files to and from this backend.
 
-A \emph{merge} is a change with two ancestors:
-One is its predecessing change in the same branch the merge
-goes to. The second one is the change being merged in which is
-called \emph{origin} of the merge.
+A \emph{merge} is a change with two ancestors: One is its predecessing
+change in the same branch the merge goes to. The second one is the
+change being merged in which is called \emph{origin} of the merge.
 
-The origin of a merge was a change at some
-point in history to another branch. Consequently, a merge $m$ is
-a 5-tuple $[\nu, \beta, \alpha, f, o]$. The first four elements
-have the same meaning as in a commit, the fifth links this change
-to its origin.
+The origin of a merge was a change at some point in history to another
+branch. Consequently, a merge $m$ is a 5-tuple $(\nu, \beta, \alpha,
+f, o)$. The first four elements have the same meaning as in a commit,
+the fifth links this change to its origin.
 
-The origin $o$ is a 4-tuple $[\nu, \beta, \alpha, \varrho]$. The meaning
-of $\nu$, $\beta$, $\alpha$ is the same as for commits. But
-in this case they establish a link to a (possibly remote)
-change with number $\nu$
-on branch $\beta$ reachable via access identifier $\alpha$.
+The origin $o$ is a 4-tuple $(\nu, \beta, \alpha, \varrho)$. The
+meaning of $\nu$, $\beta$, $\alpha$ is the same as for commits. But in
+this case they establish a link to a (possibly remote) pchange with
+number $\nu$ on branch $\beta$ reachable via access identifier
+$\alpha$.
 
 $\varrho$ indicates if the change-part of a merge $\varrho$eplicates
-the commit part of its origin. In this case traversing history
-along the merge's branch leads to the same result as traversing
-the origin's history -- at least for the one commit.
-This feature is useful as merges are used for inheritance.
-$\varrho$ is not necessary for inheritance to work but
-is convenient as it indicates that traversing the origin's history
-is the same as traversing the merge's history.
+the commit part of its origin. In this case traversing history along
+the merge's branch leads to the same result as traversing the origin's
+history -- at least for the one commit.  This feature is useful as
+merges are used for inheritance.  $\varrho$ is not necessary for
+inheritance to work but is convenient as it indicates that traversing
+the origin's history is the same as traversing the merge's history.
 
-changes, merges and commits can be implemented as classes like the following
-diagram shows:
+changes, merges and commits can be implemented as classes like the
+following diagram shows:
 
 \begin{center}
-\setlength{\unitlength}{1mm}
-\begin{picture}(25, 50)
-\put(0, 40){\framebox(25,10){\texttt{change}}}
-\put(12.5, 30){\vector(0, 1){10}}
-\put(0, 20){\framebox(25,10){\texttt{commit}}}
-\put(12.5, 10){\vector(0, 1){10}}
-\put(0, 0){\framebox(25, 10){\texttt{merge}}}
-\end{picture}
+  \setlength{\unitlength}{1mm}
+  \begin{picture}(25, 50) \put(0,
+    40){\framebox(25,10){\texttt{change}}} \put(12.5, 30){\vector(0,
+      1){10}} \put(0, 20){\framebox(25,10){\texttt{commit}}}
+    \put(12.5, 10){\vector(0, 1){10}} \put(0, 0){\framebox(25,
+      10){\texttt{merge}}}
+  \end{picture}
 \end{center}
 
 
@@ -701,180 +697,187 @@ The following helper functions are introduced for brevity:
 
 \begin{itemize}
 \item $\mathnormal{nu}:\ \mathnormal{branch} \rightarrow \mathbb{N}$ \\
-The number of a branch (its identifier).
-\item $\mathnormal{ma}:\ \mathnormal{branch} \rightarrow \mathnormal{filename}$ \\
-Returns the name of the map file for this branch. More on map files follows in
-a later section.
-\item $\mathnormal{sy}:\ \mathnormal{branch} \rightarrow \mathnormal{string}$ \\
-A symbolic name for this branch.
-\item $\mathnormal{de}:\ \mathnormal{branch} \rightarrow \mathnormal{string}$ \\
-A description of this branch.
+  The number of a branch (its identifier).
+\item $\mathnormal{ma}:\ \mathnormal{branch} \rightarrow
+  \mathnormal{filename}$ \\
+  Returns the name of the map file for this branch. More on map files
+  follows in a later section.
+\item $\mathnormal{sy}:\ \mathnormal{branch} \
+  \mathnormal{string}$ \\
+  A symbolic name for this branch.
+\item $\mathnormal{de}:\ \mathnormal{branch}
+  \rightarrow \mathnormal{string}$ \\
+  A description of this branch.
 \item $\mathnormal{nu}:\ \mathnormal{commit} \rightarrow \mathbb{N}$ \\
-The number of a change.
-\item $\mathnormal{br}:\ \mathnormal{commit} \rightarrow \mathnormal{branch\_identifier}$ \\
-The branch identifier of the branch the change belongs to.
-\item $\mathnormal{ac}:\ \mathnormal{commit} \rightarrow \mathnormal{access\_identifier}$ \\
-The access identifier of the change.
-\item $\mathnormal{fi}:\ \mathnormal{commit} \rightarrow (\mathnormal{filename}
-\rightarrow \mathnormal{revision\_number})$ \\
-The filename-revision-map of this change.
-\item $\mathnormal{oi}:\ \mathnormal{merge} \rightarrow \mathnormal{origin}$ \\
-The origin of the merge.
+  The number of a change.
+\item $\mathnormal{br}:\ \mathnormal{commit}
+  \rightarrow \mathnormal{branch\_identifier}$ \\
+  The branch identifier of the branch the change belongs to.
+\item $\mathnormal{ac}:\ \mathnormal{commit}
+  \rightarrow \mathnormal{access\_identifier}$ \\
+  The access identifier of the change.
+\item $\mathnormal{fi}:\ \mathnormal{commit} \rightarrow
+  (\mathnormal{filename}
+  \rightarrow \mathnormal{revision\_number})$ \\
+  The filename-revision-map of this change.
+\item $\mathnormal{oi}:\ \mathnormal{merge} \rightarrow
+  \mathnormal{origin}$ \\
+  The origin of the merge.
 \item $\mathnormal{nu}:\ \mathnormal{origin} \rightarrow \mathbb{N}$ \\
-The origin's change-number.
-\item $\mathnormal{br}:\ \mathnormal{origin} \rightarrow \mathnormal{branch\_identifier}$ \\
-The origin's branch identifier.
-\item $\mathnormal{ac}:\ \mathnormal{origin} \rightarrow \mathnormal{access\_identifier}$ \\
-How to access the origin (its access identifier).
+  The origin's change-number.
+\item $\mathnormal{br}:\ \mathnormal{origin} \
+  \mathnormal{branch\_identifier}$ \\
+  The origin's branch identifier.
+\item $\mathnormal{ac}:\ \mathnormal{origin} \rightarrow
+  \mathnormal{access\_identifier}$ \\
+  How to access the origin (its access identifier).
 \item $\mathnormal{re}:\ \mathnormal{origin} \rightarrow \mathbb{B}$ \\
-The replication identifier. If $\mathnormal{re}(o) = \mathtt{true}$
-histories are equal. In general it is $\mathtt{false}$.
+  The replication identifier. If $\mathnormal{re}(o) = \mathtt{true}$
+  histories are equal. In general it is $\mathtt{false}$.
 \end{itemize}
 
 This abbreviation is used for merges:
 
-$\hat c = [\nu', \beta', \alpha', f', o]$ with $o=[\nu, \beta, \alpha, d]$ and
-$c=[\nu, \beta, \alpha, f]$. That means $\hat c$ is the result of mergeing
-change $c$ to some other branch $\beta'$.
+$\hat C = (\nu', \beta', \alpha', f', o)$ with $o=(\nu, \beta, \alpha,
+d)$ and $C=(\nu, \beta, \alpha, f)$. That means $\hat C$ is the result
+of mergeing change $C$ to some other branch $\beta'$.
 
 Now follow important properties for repositories and their elements.
 
 A repository $r$ is a set of branches:
 
 \begin{displaymath}
-r = \{b \ |\ b\ \mbox{\textsc{isa}}\ \mathnormal{branch}\}
+  r = \{b \ |\ b\ :\ \mathnormal{branch}\}
 \end{displaymath}
 
 Branch numbers must be unique:
 
 \begin{displaymath}
-\forall b_1, b_2 \in r:\, \mathnormal{nu}\ b_1 \neq \mathnormal{nu}\ b_2
+  \forall b_1, b_2 \in r:\, \mathnormal{nu}\ b_1 \neq \mathnormal{nu}\ b_2
 \end{displaymath}
 
-A branch $b$ is a sequence of changes, which all belong to
-$b$ and are accessible in the same way:
+A branch $b$ is a sequence of changes, which all belong to $b$ and are
+accessible in the same way:
 
 \begin{displaymath}
-b\ \mbox{\textsc{isa}}\ \mathnormal{change}\ \mathnormal{sequence}\ \wedge\
-\forall c_1, c_2 \in b:\, \mathnormal{br}\ c_1 = \mathnormal{br}\ c_2\ \wedge
-\mathnormal{ac}\ c_1 = \mathnormal{ac}\ c_2
+  b\ :\ \mathnormal{change}\ \mathnormal{sequence}\ \wedge\
+  \forall C_1, C_2 \in b:\, \mathnormal{br}\ C_1 = \mathnormal{br}\ C_2\ \wedge
+  \mathnormal{ac}\ C_1 = \mathnormal{ac}\ C_2
 \end{displaymath}
 
 Change numbers in a branch must be unique:
 
 \begin{displaymath}
-\forall c_1, c_2 \in b:\, \mathnormal{nu}\ c_1 \neq
-\mathnormal{nu}\ c_2
+  \forall C_1, C_2 \in b:\, \mathnormal{nu}\ C_1 \neq
+  \mathnormal{nu}\ C_2
 \end{displaymath}
 
 \subsubsection{Operations on repositories}
 
-The effect of basic operations is described below. $r$ is an
-existing repository and initially looks like this:
-$r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$
+The effect of basic operations is described below. $r$ is an existing
+repository and initially looks like this: $r = \{(\beta, \langle C_1,
+C_2, C_3, \ldots, C_n\rangle )\}$
 
 The following notations are used:
 
 \begin{itemize}
-\item $c \rhd c'$: $c$ is merged in $c'$.
-\item $\triangledown c$: A branch from $c$ is created, i.~e. $c \rhd \emptyset$
-is performed with $\emptyset$ being the empty branch.
-\item $\underline\triangledown_n c$: A branch from $c$ is created including $n$
-predecessors of $c$. $\underline\triangledown_0 c$ is equivalent to
-$\triangledown c$.
-An operation $\underline\triangledown_n c$ with $n>0$ is called inheriting from c.
-If all predecessors of $c$ are inherited this is denoted
-by $\underline\triangledown_\star$
-and called total inheritance and in fact is replication. A
-$\underline\triangledown_n$ operation is the only one to cause
-$\mathnormal{re}(\hat c)\neq \mathtt{false}$. For convenience,
-$\varrho$ is always false if not mentioned in the tuple $o$ ($[\nu, \beta, \alpha,
-\mathtt{false}]=[\nu, \beta, \alpha]$)
-or indicated otherwise.
+\item $C \rhd C'$: $c$ is merged in $c'$.
+\item $\triangledown C$: A branch from $C$ is created, i.~e. $C \rhd
+  \boxempty$ is performed with $\boxempty$ being the empty branch.
+\item $\underline\triangledown_n C$: A branch from $C$ is created
+  including $n$ predecessors of $C$. $\underline\triangledown_0 C$ is
+  equivalent to $\triangledown C$.  An operation
+  $\underline\triangledown_n C$ with $n>0$ is called inheriting from
+  $C$.  If all predecessors of $C$ are inherited this is denoted by
+  $\underline\triangledown_\star$ and called total inheritance and in
+  fact is replication. A $\underline\triangledown_n$ operation is the
+  only one to cause $\mathnormal{re}(\hat c)\neq \mathtt{false}$. For
+  convenience, $\varrho$ is always false if not mentioned in the tuple
+  $o$ -- $(\nu, \beta, \alpha, \mathtt{false})=(\nu, \beta, \alpha)$
+  -- or indicated otherwise.
 \end{itemize}
 
 The basic operations inherit, branch, merge are ``defined'' by the
-following transitions:	
+following transitions:
 
 \begin{itemize}
-\item The empty repository $r'=\{\}$ \emph{inherits} the whole repository $r$
-($\underline\triangledown_\star c_n$):
+\item The empty repository $r'=\emptyset$ \emph{inherits} the whole
+  repository $r$ ($\underline\triangledown_\star C_n$):
 
-$r' = \{[\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_n\rangle]\}$ with
-$m'_i = [\nu'_i, \beta'_i, \alpha'_i, f'_i, \hat c_i]$ (as reminder:
-$\hat c_i = [\nu_i, \beta_i, \alpha_i, \mathtt{true}]\
-\wedge\ c_i=[\nu_i, \beta_i, \alpha_i, f]$, note $\forall
-\hat c_i:\, \mathnormal{du}(d_i)=\mathtt{true}$).
+  $r' = \{(\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_n\rangle)\}$
+  with $m'_i = (\nu'_i, \beta'_i, \alpha'_i, f'_i, \hat C_i)$ (as
+  reminder: $\hat C_i = (\nu_i, \beta_i, \alpha_i, \mathtt{true})\
+  \wedge\ C_i=(\nu_i, \beta_i, \alpha_i, f)$, note $\forall\ \hat
+  c_i:\, \mathnormal{re}\ d_i=\mathtt{true}$).
 
-\item $r'$ \emph{inherits parts} of the repository ($\underline\triangledown_
-{n-k}c_k$):
+\item $r'$ \emph{inherits parts} of the repository
+  ($\underline\triangledown_ {n-k}C_k$):
 
-$r'=\{[\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_{n-k}, m'_{n-k+1}\rangle]\}$ with
-$m'_i=[\nu'_i, \beta'_i, \alpha'_i, f, \hat c_{i+k-1}]$ and
-$c_{i}=[\nu_i, \beta_i, \alpha_i, f_i]$, $k<n$.
+  $r'=\{(\beta', \langle m'_1, m'_2, m'_3, \ldots, m'_{n-k},
+  m'_{n-k+1}\rangle)\}$ with $m'_i=(\nu'_i, \beta'_i, \alpha'_i, f,
+  \hat C_{i+k-1})$ and $C_{i}=(\nu_i, \beta_i, \alpha_i, f_i)$, $k<n$.
 
-\item Create a \emph{branch} from a change $c_k$ inside $r$
-($\triangledown c_k$):
+\item Create a \emph{branch} from a change $C_k$ inside $r$
+  ($\triangledown C_k$):
 
-$r = \{[\beta, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [\beta^2, \langle m_1^2
-\rangle]\}$ with $m_1^2=[\nu_1^2, \beta_1^2, \alpha_1^2, f_1^2, \hat c_k]$ and
-$\mathnormal{du}(\hat c_k)=\mathtt{false}$.	
+  $r = \{(\beta, \langle C_1, \ldots, C_k, \ldots, C_n\rangle),
+  (\beta^2, \langle m_1^2 \rangle)\}$ with $m_1^2=(\nu_1^2, \beta_1^2,
+  \alpha_1^2, f_1^2, \hat C_k)$ and $\mathnormal{re}\ \hat
+  C_k=\mathtt{false}$.
 
-After doing some changes to the new branch the repository looks like
+  After doing some changes to the new branch the repository looks like
 
-$r = \{[\beta, \langle c_1, \ldots, c_k, \ldots, c_n\rangle], [\beta^2, \langle m_1^2,
-c_2^2, c_3^2, \ldots, c_m^2\rangle ]\}$
+  $r = \{(\beta, \langle C_1, \ldots, C_k, \ldots, C_n\rangle),
+  (\beta^2, \langle m_1^2, C_2^2, C_3^2, \ldots, C_m^2\rangle )\}$
 
-\item Inside $r$, the heads of two branches are \emph{merged}
-($c_n^1 \rhd
- c_m^2$):
+\item Inside $r$, the heads of two branches are \emph{merged} ($C_n^1
+  \rhd C_m^2$):
 
-Before the merge, the repository has this form:
+  Before the merge, the repository has this form:
 
-$\{[\beta^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
-[\beta^2, \langle c_1^2, c_2^2, \ldots, c_m^2\rangle]\}$	
+  $\{(\beta^1, \langle C_1^1, C_2^1, \ldots, C_n^1\rangle), (\beta^2,
+  \langle C_1^2, C_2^2, \ldots, C_m^2\rangle)\}$
 
-Afterwards branch $b^2$ has one more change:
+  Afterwards branch $b^2$ has one more change:
 
-$\{[\beta^1, \langle c_1^1, c_2^1, \ldots, c_n^1\rangle],
-[\beta^2, \langle c_1^2, c_2^2, \ldots, c_m^2, m_{m+1}^2\rangle]\}$
+  $\{(\beta^1, \langle C_1^1, C_2^1, \ldots, C_n^1\rangle), (\beta^2,
+  \langle C_1^2, C_2^2, \ldots, C_m^2, m_{m+1}^2\rangle)\}$
 
-with $m_{m+1}^2=[\nu_{m+1}^2, \beta_{m+1}^2, \alpha_{m+1}^2, f_{m+1}^2,
-\hat c_n^1]$
+  with $m_{m+1}^2=(\nu_{m+1}^2, \beta_{m+1}^2, \alpha_{m+1}^2,
+  f_{m+1}^2, \hat C_n^1)$
 
-It is obvious that the result looks the same when changes
-from different repositories are merged. Given
+  It is obvious that the result looks the same when changes from
+  different repositories are merged. Given
 
-$r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n\rangle]\}$ and \\
-$r' = \{[\beta', \langle c'_1, c'_2, c'_3, \ldots, c'_m\rangle]\}$,
+  $r = \{(\beta, \langle C_1, C_2, C_3, \ldots, C_n\rangle)\}$ and \\
+  $r' = \{(\beta', \langle C'_1, C'_2, C'_3, \ldots, C'_m\rangle)\}$,
 
-merging their heads $c'_m \rhd c_n$ leads to one more change in
-$r$:
+  merging their heads $c'_m \rhd C_n$ leads to one more change in $r$:
 
-$r = \{[\beta, \langle c_1, c_2, c_3, \ldots, c_n, m_{n+1}\rangle]\}$
-with a link $\hat c'_m$ as last element in $m_{n+1}$.
+  $r = \{(\beta, \langle C_1, C_2, C_3, \ldots, C_n,
+  m_{n+1}\rangle)\}$ with a link $\hat C'_m$ as last element in
+  $m_{n+1}$.
 \end{itemize}
 
 \subsubsection{How to store branches}
 
-\textsc{metacvs} introduces F-files. They are called F-files
-because their names start with an ``F'' followed by a dash and
-32 randomly generated hexadecimal digits. The name of an F-file
-is the unique identifier for a file which is under \textsc{metacvs}'s
-control.
+\textsc{metacvs} introduces F-files. They are called F-files because
+their names start with an ``F'' followed by a dash and 32 randomly
+generated hexadecimal digits. The name of an F-file is the unique
+identifier for a file which is under \textsc{metacvs}'s control.
 
 \textsc{metacvs} introduces a mapping $\mathnormal{F\_file}
-\rightarrow filename$ to map the unique identifiers to
-a ``physical'' filename. This map ist stored in a file
-called \texttt{MAP} which has the format:
+\rightarrow filename$ to map the unique identifiers to a ``physical''
+filename. This map ist stored in a file called \texttt{MAP} which has
+the format:
 
 \begin{verbatim}
 (mapping*)
 \end{verbatim}
 
-A \texttt{mapping} is a list which stores the F-filename,
-the ``physical'' filename and meta information like
-executable state of the file:
+A \texttt{mapping} is a list which stores the F-filename, the
+``physical'' filename and meta information like executable state of
+the file:
 
 \begin{verbatim}
 (:KEY
@@ -886,116 +889,119 @@ executable state of the file:
 \texttt{:KEY} can be \texttt{:FILE} indicating that \texttt{filename}
 is an ordinary file or \texttt{:LINK} to version symbolic links.
 
-The main goal of the \texttt{MAP}-file is to resolve the
-trouble \textsc{cvs} has with directories and file moves. The entire
-project hierarchy is flattened (my guess is that the ``F'' in
-the F-files stands for \emph{flat}) and structure is provided
-by the \texttt{MAP}-file.
+The main goal of the \texttt{MAP}-file is to resolve the trouble
+\textsc{cvs} has with directories and file moves. The entire project
+hierarchy is flattened (my guess is that the ``F'' in the F-files
+stands for \emph{flat}) and structure is provided by the
+\texttt{MAP}-file.
 
 A project $p$ may have a structure like
+
 \begin{displaymath}
-\begin{array}{l}
-p/ \\
-\qquad d_1/ \\
-\qquad\qquad f_{11} \\
-\qquad\qquad f_{12} \\
-\qquad\qquad \vdots \\
-\qquad\qquad f_{1k} \\
-\qquad \vdots \\
-\qquad d_m/ \\
-\qquad\qquad f_{m1} \\
-\qquad\qquad \vdots \\
-\qquad\qquad f_{ml}
-\end{array}
+  \begin{array}{l}
+    p/ \\
+    \qquad d_1/ \\
+    \qquad\qquad f_{11} \\
+    \qquad\qquad f_{12} \\
+    \qquad\qquad \vdots \\
+    \qquad\qquad f_{1k} \\
+    \qquad \vdots \\
+    \qquad d_m/ \\
+    \qquad\qquad f_{m1} \\
+    \qquad\qquad \vdots \\
+    \qquad\qquad f_{ml}
+  \end{array}
 \end{displaymath}
+
+\newpage
 
 This leads to a \texttt{MAP}-file as follows -- the $a$, $b$, $c$,
 \ldots are randomly generated numbers:
+
 \begin{displaymath}
-\begin{array}{l@{}l}
-\mathtt{((} & \mathtt{:KEY} \\
-            & \mathtt{"MCVS/F-}a \mathtt{"} \\
-            & \mathtt{"}d_1/f_{11}\mathtt{")} \\
-\mathtt{(}  & \mathtt{:KEY} \\
-            & \mathtt{"MCVS/F-}b \mathtt{"} \\
-            & \mathtt{"}d_1/f_{12}\mathtt{")} \\
-            & \vdots \\
-\mathtt{(}  & \mathtt{:KEY} \\
-            & \mathtt{"MVCS/F-}c \mathtt{"} \\
-            & \mathtt{"}d_1/f_{1k}\mathtt{")} \\
-            & \vdots \\
-\mathtt{(}  & \mathtt{:KEY} \\
-            & \mathtt{"MCVS/F-}d \mathtt{"} \\
-            & \mathtt{"}d_m/f_{m1}\mathtt{")} \\
-	    & \vdots \\
-\mathtt{(}  & \mathtt{:KEY} \\
-            & \mathtt{"MCVS/F-}e \mathtt{"} \\
-            & \mathtt{"}d_m/f_{ml}\mathtt{"))} \\
-\end{array}
+  \begin{array}{l@{}l}
+    \mathtt{((} & \mathtt{:KEY} \\
+    & \mathtt{"MCVS/F-}a \mathtt{"} \\
+    & \mathtt{"}d_1/f_{11}\mathtt{")} \\
+    \mathtt{(}  & \mathtt{:KEY} \\
+    & \mathtt{"MCVS/F-}b \mathtt{"} \\
+    & \mathtt{"}d_1/f_{12}\mathtt{")} \\
+    & \vdots \\
+    \mathtt{(}  & \mathtt{:KEY} \\
+    & \mathtt{"MVCS/F-}c \mathtt{"} \\
+    & \mathtt{"}d_1/f_{1k}\mathtt{")} \\
+    & \vdots \\
+    \mathtt{(}  & \mathtt{:KEY} \\
+    & \mathtt{"MCVS/F-}d \mathtt{"} \\
+    & \mathtt{"}d_m/f_{m1}\mathtt{")} \\
+    & \vdots \\
+    \mathtt{(}  & \mathtt{:KEY} \\
+    & \mathtt{"MCVS/F-}e \mathtt{"} \\
+    & \mathtt{"}d_m/f_{ml}\mathtt{"))} \\
+  \end{array}
 \end{displaymath}
 
-The reason that all F-file paths are prepended by
-\texttt{MCVS} is that \textsc{metacvs} stores its
-administrative information in a directory \texttt{MCVS}
-inside the project directory -- like \texttt{cvs} does
-with its \texttt{CVS} directory. The \texttt{MCVS}
+The reason that all F-file paths are prepended by \texttt{MCVS} is
+that \textsc{metacvs} stores its administrative information in a
+directory \texttt{MCVS} inside the project directory -- like
+\texttt{cvs} does with its \texttt{CVS} directory. The \texttt{MCVS}
 directory keeps all F-files.
 
-The trick is to hard link the F-files into the project's
-sandbox according to the \texttt{MAP}-file. Now moving or
-renaming files is done by a \textsc{metacvs} command which
-renames the hard links and modifies the mappings. A move conflict
-appears as a conflict in the \texttt{MAP}-file.
+The trick is to hard link the F-files into the project's sandbox
+according to the \texttt{MAP}-file. Now moving or renaming files is
+done by a \textsc{metacvs} command which renames the hard links and
+modifies the mappings. A move conflict appears as a conflict in the
+\texttt{MAP}-file.
 
 As gotcha, \texttt{MAP} enables version control of links and
 additional bits like the executable bit.
 
-In later sections the \texttt{MAP}-file will be shown as a
-a map -- omitting the \texttt{MCVS}-path-prefix and quotation
-marks -- like this:
+In later sections the \texttt{MAP}-file will be shown as a a map --
+omitting the \texttt{MCVS}-path-prefix and quotation marks -- like
+this:
 \begin{displaymath}
-\mathtt{MAP} =\left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& d_1/f_{11} \\
-\mathtt{F-}b &\mapsto& d_1/f_{12} \\
-             &\vdots & \\
-\mathtt{F-}c &\mapsto& d_1/f_{1k} \\
-\mathtt{F-}d &\mapsto& d_m/f_{m1} \\
-             &\vdots & \\
-\mathtt{F-}e &\mapsto& d_m/f_{ml} \\
-\end{array}\right]
+  \mathtt{MAP} =\left[
+    \begin{array}{lcl}
+      \mathtt{F-}a &\mapsto& d_1/f_{11} \\
+      \mathtt{F-}b &\mapsto& d_1/f_{12} \\
+      &\vdots & \\
+      \mathtt{F-}c &\mapsto& d_1/f_{1k} \\
+      \mathtt{F-}d &\mapsto& d_m/f_{m1} \\
+      &\vdots & \\
+      \mathtt{F-}e &\mapsto& d_m/f_{ml} \\
+    \end{array}\right]
 \end{displaymath}
 
-The idea to implement branches is to have one \texttt{MAP} file
-for each branch to store which files belong to this branch and what
-their ``physical name'' is. This way, all files are stored without
-any hierarchy. There is one constraint: The identifier in the
-F-file may not change from branch to branch. If it did, one
-needed another mapping from trunk- to branch-F-files. If not done
-so it would be impossible to track down the origin of a file in
-a branch which made merging impossible.
+The idea to implement branches is to have one \texttt{MAP} file for
+each branch to store which files belong to this branch and what their
+``physical name'' is. This way, all files are stored without any
+hierarchy. There is one constraint: The identifier in the F-file may
+not change from branch to branch. If it did, one needed another
+mapping from trunk- to branch-F-files. If not done so it would be
+impossible to track down the origin of a file in a branch which made
+merging impossible.
 
 Hence, it is easiest to let the F-filenames be invariant. As it is
-impossible to have two files of the same name in one directory the
-branch identifier $\beta$ is appended to the F-filename. At this
-point, we should track down branch identifiers to $\mathbb{N}$
-such that possible names of F-files are $\mathtt{F-}a\mathtt{.}\beta$
-with $\beta\in \mathbb{N}$. The same branch identifier is appended
-to the branch's \texttt{MAP}-file. This way, all files of
-branch $b$ with identifier $\beta$ have the same suffix.
+impossible to have two files of the same name in one directory, each
+branch gets its own directory. This is no problem because \textsc{cvs}
+does not care much about directories and they are completely different
+from the project's directories which are stored via the
+\texttt{MAP}-file.  At this point, we should track down branch
+identifiers to $\mathbb{N}$ such that the branch-directories may have
+names like \texttt{1}, \texttt{2}, \texttt{3} etc.
 
-As said, a branch is $[\beta, s]$. To completely store a branch
-$s$ has to be put somewhere. This will be done in a file
-$\mathtt{CHANGE}.\beta$ which is just a list of changes (merges
-and commits) stored in reversed order that the last change is
-accessible as head of the list.
+As said, a branch is $(\beta, s)$. To completely store a branch $s$
+has to be put somewhere. This will be done in a file $\mathtt{CHANGE}$
+which is just a list of changes (merges and commits) stored in
+reversed order that the last change is accessible as head of the list.
+This file is stored along with the branche's F-files in the
+branch-directory.
 
-To complete a repository, a file $\mathtt{BRANCH.}\beta$ is installed,
-which contains a list of existing branches in reversed order,
-i.~e. the branch created last is head of the list.
-For each branch, its identifier $\beta$ ($nu$), a symbolic name
-($sy$), a description ($de$) and the name of it's
-\texttt{MAP}-file ($ma$) is stored.
+To complete a repository, a file $\mathtt{BRANCH}$ is installed, which
+contains a list of existing branches in reversed order, i.~e. the
+branch created last is head of the list.  For each branch, its
+identifier $\beta$ ($nu$), a symbolic name ($sy$), a description
+($de$) is stored.
 
 
 \subsection{Case study}
@@ -1005,17 +1011,16 @@ abstract model in a more implementation-close fashion.
 
 \subsubsection{The situation}
 
-Imagine a developer $\mathnormal{Ensel}$ (or a team of developers
-if you prefer) writing
-some compiler in Lisp. Later, others --
-may their name be $\mathnormal{Krete}$ -- get interested in and join in.
-They decide to have their own repository. The interaction of the two
+Imagine a developer $\mathnormal{Ensel}$ (or a team of developers if
+you prefer) writing some compiler in Lisp. Later, others -- may their
+name be $\mathnormal{Krete}$ -- get interested in and join in.  They
+decide to have their own repository. The interaction of the two
 repositories is presented in the following.
 
 \subsubsection{The initial import}
 
-$\mathnormal{Ensel}$ has written a new cool compiler from scratch
-and the work done so far manifested in four Lisp-files:
+$\mathnormal{Ensel}$ has written a new cool compiler from scratch and
+the work done so far manifested in four Lisp-files:
 
 \begin{verbatim}
 frontend.lisp
@@ -1027,254 +1032,253 @@ parser/absy.lisp
 $\mathnormal{Ensel}$ imports these files into his repository $r$ which
 now stores exactly one branch $b$ consisting of one commit $c_1$:
 
-$r=\{[\beta, \langle c_1\rangle]\}$
+$r=\{(\beta, \langle c_1\rangle)\}$
 
 Digging deeper into this structure brings to light:
 
 \begin{itemize}
-\item $[\beta, \langle c_1\rangle]\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
-\begin{eqnarray*}
-\mathnormal{sy}\ \beta &=& \mbox{``main''} \\
-\mathnormal{de}\ \beta &=& \mbox{``main line of development''} \\
-\mathnormal{nu}\ \beta &=& 1 \\
-\mathnormal{ma}\ \beta &=& \mathtt{MAP.1}
-\end{eqnarray*}
+\item $(\beta, \langle c_1\rangle)\ :\ \mathnormal{branch}$
+  \begin{eqnarray*}
+    \mathnormal{sy}\ \beta &=& \mbox{``main''} \\
+    \mathnormal{de}\ \beta &=& \mbox{``main line of development''} \\
+    \mathnormal{nu}\ \beta &=& 1 \\
+  \end{eqnarray*}
 
-\item $c_1\ \mbox{\textsc{isa}}\ \mathnormal{commit}$ and
-$c_1=[\nu_1, \beta, \alpha, f_1]$.
-\begin{eqnarray*}
-\mathnormal{nu}\ c_1 &=& 1 \\
-\mathnormal{br}\ c_1 &=& \beta \\
-\mathnormal{ac}\ c_1 &=& \mathsf{cvs} \\
-\mathnormal{fi}\ c_1 &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{MAP.1}         & \mapsto & \mathsf{r1.1} \\
-\end{array}\right] \\
-\mathtt{MAP.1} &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F-}d &\mapsto& \mathtt{parser/absy.lisp} \\
-\end{array}\right]
-\end{eqnarray*}
+\item $c_1\ :\mathnormal{commit}$ and $c_1=(\nu_1, \beta, \alpha,
+  f_1)$.
+  \begin{eqnarray*}
+    \mathnormal{nu}\ c_1 &=& 1 \\
+    \mathnormal{br}\ c_1 &=& \beta \\
+    \mathnormal{ac}\ c_1 &=& \mathsf{cvs} \\
+    \mathnormal{fi}\ c_1 &=& \left[
+      \begin{array}{lcl}
+        \mathtt{F-}a & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}b & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}c & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}d & \mapsto & \mathsf{r1.1} \\
+        \mathtt{MAP} & \mapsto & \mathsf{r1.1} \\
+      \end{array}\right] \\
+    \mathtt{MAP} &=& \left[
+      \begin{array}{lcl}
+        \mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+        \mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+        \mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+        \mathtt{F-}d &\mapsto& \mathtt{parser/absy.lisp} \\
+      \end{array}\right]
+  \end{eqnarray*}
 \end{itemize}
 
 \subsubsection{$\mathnormal{Krete}$ joins in}
 
 $\mathnormal{Krete}$ is enthusiastic about the new compiler
 $\mathnormal{Ensel}$ has written but thinks that some basic
-optimization techniques are missing and decides to implement
-them. For easier access and to not clutter $\mathnormal{Ensel}$'s
-repository with intermediate commits (which likely break the code)
-a new repository $r'$ is installed. The first action is
-$\underline{\triangledown}_1 c_1$, i.~e. to inherit the last
-state of $\mathnormal{Ensel}$'s code (which is the first too at
-this time\ldots).
+optimization techniques are missing and decides to implement them. For
+easier access and to not clutter $\mathnormal{Ensel}$'s repository
+with intermediate commits (which likely break the code) a new
+repository $r'$ is installed. The first action is
+$\underline{\triangledown}_1 c_1$, i.~e. to inherit the last state of
+$\mathnormal{Ensel}$'s code (which is the first too at this
+time\ldots).
 
 Examination of $r'$ retrieves this information:
 
 \begin{itemize}
-\item $r=\{[\beta', \langle m'_1\rangle]\}$
-\item $[\beta',\langle m'_1\rangle]\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
-\begin{eqnarray*}
-\mathnormal{sy}\ \beta' &=& \mbox{``optimizer''} \\
-\mathnormal{de}\ \beta' &=& \mbox{``includes tail-recursion elimination''} \\
-\mathnormal{nu}\ \beta' &=& 1 \\
-\mathnormal{ma}\ \beta' &=& \mathtt{MAP.1}a
-\end{eqnarray*}
+\item $r=\{(\beta', \langle m'_1\rangle)\}$
+\item $(\beta',\langle m'_1\rangle)\ :\ \mathnormal{branch}$
+  \begin{eqnarray*}
+    \mathnormal{sy}\ \beta' &=& \mbox{``optimizer''} \\
+    \mathnormal{de}\ \beta' &=& \mbox{``includes tail-recursion elimination''} \\
+    \mathnormal{nu}\ \beta' &=& 1
+  \end{eqnarray*}
 
-\item $m'_1\ \mbox{\textsc{isa}}\ \mathnormal{merge}$ and
-$m'_1=[\nu_1, \beta', \alpha', f'_1, o'_1]$.
-\begin{eqnarray*}
-\mathnormal{nu}\ m'_1 &=& 1 \\
-\mathnormal{br}\ m'_1 &=& \beta' \\
-\mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
-\mathnormal{fi}\ m'_1 &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}d\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{MAP.1}         & \mapsto & \mathsf{r1.1} \\
-\end{array}\right] \\
-\mathnormal{oi}\ m'_1 &=& [\nu_1, \beta, \alpha] = \hat c_1 \\
-\mathtt{MAP.1} &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F-}d &\mapsto& \mathtt{parser/absy.lisp} \\
-\end{array}\right]
-\end{eqnarray*}
+\item $m'_1\ :\ \mathnormal{merge}$ and $m'_1=(\nu_1, \beta', \alpha',
+  f'_1, o'_1)$.
+  \begin{eqnarray*}
+    \mathnormal{nu}\ m'_1 &=& 1 \\
+    \mathnormal{br}\ m'_1 &=& \beta' \\
+    \mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
+    \mathnormal{fi}\ m'_1 &=& \left[
+      \begin{array}{lcl}
+        \mathtt{F-}a & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}b & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}c & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}d & \mapsto & \mathsf{r1.1} \\
+        \mathtt{MAP} & \mapsto & \mathsf{r1.1} \\
+      \end{array}\right] \\
+    \mathnormal{oi}\ m'_1 &=& (\nu_1, \beta, \alpha) = \hat c_1 \\
+    \mathtt{MAP} &=& \left[
+      \begin{array}{lcl}
+        \mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+        \mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+        \mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+        \mathtt{F-}d &\mapsto& \mathtt{parser/absy.lisp} \\
+      \end{array}\right]
+  \end{eqnarray*}
 \end{itemize}
 
-The optimizer code is partly performed on the Absy and partly
-on the backend's intermediate language. Thus, the first commit
-moves the file \texttt{absy.lisp} up one level in the directory
-structure to reflect that it is manipulated in the frontend
-as well as in the backend. Lots of new code is inserted into
-the backend to implement the optimizer.
+The optimizer code is partly performed on the Absy and partly on the
+backend's intermediate language. Thus, the first commit moves the file
+\texttt{absy.lisp} up one level in the directory structure to reflect
+that it is manipulated in the frontend as well as in the backend. Lots
+of new code is inserted into the backend to implement the optimizer.
 
-This commit is added to $\beta'$: $c'_2=[\nu'_2, \beta', \alpha', f'_2]$
+This commit is added to $\beta'$: $c'_2=(\nu'_2, \beta', \alpha',
+f'_2)$
 \begin{eqnarray*}
-\mathnormal{nu}\ c'_2 &=& 2 \\
-\mathnormal{br}\ c'_2 &=& \beta' \\
-\mathnormal{ac}\ c'_2 &=& \mathsf{cvs} \\
-\mathnormal{fi}\ c'_2 &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
-\mathtt{MAP.1}         & \mapsto & \mathsf{r1.2} \\
-\end{array}\right] \\
-\mathtt{MAP.1} &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
-\end{array}\right]
+  \mathnormal{nu}\ c'_2 &=& 2 \\
+  \mathnormal{br}\ c'_2 &=& \beta' \\
+  \mathnormal{ac}\ c'_2 &=& \mathsf{cvs} \\
+  \mathnormal{fi}\ c'_2 &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}b & \mapsto & \mathsf{r1.2} \\
+      \mathtt{MAP} & \mapsto & \mathsf{r1.2} \\
+    \end{array}\right] \\
+  \mathtt{MAP} &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+      \mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+      \mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+      \mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
+    \end{array}\right]
 \end{eqnarray*}
 
 \subsubsection{Feedback}
 
-The performance of the code $\mathnormal{Krete}$'s optimizer puts out is
-astonishing and $\mathnormal{Ensel}$ wants to have it in to see the effect
-on the language extensions he plans to include. The optimizer is
-merged into the first version of the compiler: $c'_2 \rhd c_1$. This
-produces merge $m_2=[\nu_2, \beta, \alpha, f_2, o_2]$.
+The performance of the code $\mathnormal{Krete}$'s optimizer puts out
+is astonishing and $\mathnormal{Ensel}$ wants to have it in to see the
+effect on the language extensions he plans to include. The optimizer
+is merged into the first version of the compiler: $c'_2 \rhd c_1$.
+This produces merge $m_2=(\nu_2, \beta, \alpha, f_2, o_2)$.
 \begin{eqnarray*}
-\mathnormal{nu}\ m_2 &=& 2 \\
-\mathnormal{br}\ m_2 &=& \beta' \\
-\mathnormal{ac}\ m_2 &=& \mathsf{cvs} \\
-\mathnormal{fi}\ m_2 &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
-\mathtt{MAP.1}         & \mapsto & \mathsf{r1.2} \\
-\end{array}\right] \\
-\mathnormal{oi}\ m_2 &=& [\nu'_2, \beta', \alpha'] = \hat c'_2 \\
-\mathtt{MAP.1} &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
-\end{array}\right]
+  \mathnormal{nu}\ m_2 &=& 2 \\
+  \mathnormal{br}\ m_2 &=& \beta' \\
+  \mathnormal{ac}\ m_2 &=& \mathsf{cvs} \\
+  \mathnormal{fi}\ m_2 &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}b & \mapsto & \mathsf{r1.2} \\
+      \mathtt{MAP} & \mapsto & \mathsf{r1.2} \\
+    \end{array}\right] \\
+  \mathnormal{oi}\ m_2 &=& (\nu'_2, \beta', \alpha') = \hat c'_2 \\
+  \mathtt{MAP} &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+      \mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+      \mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+      \mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
+    \end{array}\right]
 \end{eqnarray*}
 
-\medskip
-To summarize, the repositories now have the same code and look like this:
+\medskip To summarize, the repositories now have the same code and
+look like this:
 \begin{eqnarray*}
-r  &=& \{[\beta, \langle c_1, m_1\rangle]\} \\
-r' &=& \{[\beta', \langle m'_1, c'_2\langle]\}
+  r  &=& \{(\beta, \langle c_1, m_1\rangle)\} \\
+  r' &=& \{(\beta', \langle m'_1, c'_2\langle)\}
 \end{eqnarray*}
 
 \subsubsection{Branching ``locally''}
 
-$\mathnormal{Ensel}$ decides that it is probably better to develop
-the language extensions in a separate branch: $\triangledown m_2$.
+$\mathnormal{Ensel}$ decides that it is probably better to develop the
+language extensions in a separate branch: $\triangledown m_2$.
 
 His repository now contains two branches:
 
-$r=\{[b, \langle c_1, m_2\rangle], [\beta^2, \langle m_1^2 \rangle]\}$.
+$r=\{(b, \langle c_1, m_2\rangle), (\beta^2, \langle m_1^2
+\rangle)\}$.
 
 Let's examine this a bit further:
 \begin{itemize}
-\item $[\beta^2, \langle m_1^2 \rangle\ \mbox{\textsc{isa}}\ \mathnormal{branch}$
-\begin{eqnarray*}
-\mathnormal{sy}\ \beta^2 &=& \mbox{``langext''} \\
-\mathnormal{de}\ \beta^2 &=& \mbox{``support for sub-types based on set constraints''} \\
-\mathnormal{nu}\ \beta^2 &=& 2 \\
-\mathnormal{ma}\ \beta^2 &=& \mathtt{MAP.2}
-\end{eqnarray*}
+\item $(\beta^2, \langle m_1^2 \rangle\ :\ \mathnormal{branch}$
+  \begin{eqnarray*}
+    \mathnormal{sy}\ \beta^2 &=& \mbox{``langext''} \\
+    \mathnormal{de}\ \beta^2 &=&
+    \mbox{``support for sub-types based on set constraints''} \\
+    \mathnormal{nu}\ \beta^2 &=& 2
+  \end{eqnarray*}
 
-\item $m_1^2\ \mbox{\textsc{isa}}\ \mathnormal{merge}$ and
-$m_1^2=[\nu_1^2, \beta^2, \alpha^2, f_1^2, o_1^2]$.
-\begin{eqnarray*}
-\mathnormal{nu}\ m'_1 &=& 1 \\
-\mathnormal{br}\ m'_1 &=& \beta^2 \\
-\mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
-\mathnormal{fi}\ m'_1 &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}d\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{MAP.2}         & \mapsto & \mathsf{r1.1} \\
-\end{array}\right] \\
-\mathnormal{oi}\ m_1^2 &=& [\nu_2, b, \alpha] = \hat m_2 \\
-\mathtt{MAP.2} &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
-\end{array}\right]
-\end{eqnarray*}
+\item $m_1^2\ :\ \mathnormal{merge}$ and $m_1^2=(\nu_1^2, \beta^2,
+  \alpha^2, f_1^2, o_1^2)$.
+  \begin{eqnarray*}
+    \mathnormal{nu}\ m'_1 &=& 1 \\
+    \mathnormal{br}\ m'_1 &=& \beta^2 \\
+    \mathnormal{ac}\ m'_1 &=& \mathsf{cvs} \\
+    \mathnormal{fi}\ m'_1 &=& \left[
+      \begin{array}{lcl}
+        \mathtt{F-}a & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}b & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}c & \mapsto & \mathsf{r1.1} \\
+        \mathtt{F-}d & \mapsto & \mathsf{r1.1} \\
+        \mathtt{MAP} & \mapsto & \mathsf{r1.1} \\
+      \end{array}\right] \\
+    \mathnormal{oi}\ m_1^2 &=& (\nu_2, b, \alpha) = \hat m_2 \\
+    \mathtt{MAP} &=& \left[
+      \begin{array}{lcl}
+        \mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+        \mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+        \mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+        \mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
+      \end{array}\right]
+  \end{eqnarray*}
 \end{itemize}
 
 \subsubsection{Hard work\ldots}
 
 \ldots lets the code base grow and the repositories have changed:
 \begin{eqnarray*}
-r &=& \{[\beta, \langle c_1, m_2\rangle], [\beta^2, \langle m_1^2, c_2^2,
-c_3^2, c_4^2\rangle]\} \\
-r' &=& \{[\beta', \langle m'_1, c'_2, c'_3\rangle]\}
+  r &=& \{(\beta, \langle c_1, m_2\rangle), (\beta^2, \langle m_1^2, c_2^2,
+  c_3^2, c_4^2\rangle)\} \\
+  r' &=& \{(\beta', \langle m'_1, c'_2, c'_3\rangle)\}
 \end{eqnarray*}
 
-The most important changes always happen to $f$ and \texttt{MAP}.
-As the next step will be merging the head from $\beta^2$ into $\beta'$
-we look at $f$ and \texttt{MAP} of $c_4^2$:
+The most important changes always happen to $f$ and \texttt{MAP}.  As
+the next step will be merging the head from $\beta^2$ into $\beta'$ we
+look at $f$ and \texttt{MAP} of $c_4^2$:
 \begin{eqnarray*}
-\mathnormal{fi}\ c_4^2 &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}b\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}c\mathtt{.2} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}d\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F-}e\mathtt{.2} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F-}f\mathtt{.2} & \mapsto & \mathsf{r1.3} \\
-\mathtt{MAP.2}         & \mapsto & \mathsf{r1.2} \\
-\end{array}\right] \\
-\mathtt{MAP.2} &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
-\mathtt{F-}e &\mapsto& \mathtt{constraints/search.lisp} \\
-\mathtt{F-}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
-\end{array}\right]
+  \mathnormal{fi}\ c_4^2 &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}a & \mapsto & \mathsf{r1.1} \\
+      \mathtt{F-}b & \mapsto & \mathsf{r1.1} \\
+      \mathtt{F-}c & \mapsto & \mathsf{r1.1} \\
+      \mathtt{F-}d & \mapsto & \mathsf{r1.2} \\
+      \mathtt{F-}e & \mapsto & \mathsf{r1.2} \\
+      \mathtt{F-}f & \mapsto & \mathsf{r1.3} \\
+      \mathtt{MAP} & \mapsto & \mathsf{r1.2} \\
+    \end{array}\right] \\
+  \mathtt{MAP} &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+      \mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+      \mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+      \mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
+      \mathtt{F-}e &\mapsto& \mathtt{constraints/search.lisp} \\
+      \mathtt{F-}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
+    \end{array}\right]
 \end{eqnarray*}
 
-Now it is time for the optimizer team to merge in the constraint solving
-code to write some optimization for it: $c_4^2 \rhd c'_3$.
+Now it is time for the optimizer team to merge in the constraint
+solving code to write some optimization for it: $c_4^2 \rhd c'_3$.
 
-The result is $m'_4=[\nu'_4, \beta', \alpha', f'_4, o'_4]$ with the
+The result is $m'_4=(\nu'_4, \beta', \alpha', f'_4, o'_4)$ with the
 following maps:
 \begin{eqnarray*}
-\mathnormal{fi}\ m_4 &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}b\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F-}c\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}d\mathtt{.1} & \mapsto & \mathsf{r1.2} \\
-\mathtt{F-}e\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{F-}f\mathtt{.1} & \mapsto & \mathsf{r1.1} \\
-\mathtt{MAP.1}         & \mapsto & \mathsf{r1.3} \\
-\end{array}\right] \\
-\mathtt{MAP.2} &=& \left[
-\begin{array}{lcl}
-\mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
-\mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
-\mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
-\mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
-\mathtt{F-}e &\mapsto& \mathtt{constraints/search.lisp} \\
-\mathtt{F-}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
-\end{array}\right]
+  \mathnormal{fi}\ m_4 &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}a & \mapsto & \mathsf{r1.1} \\
+      \mathtt{F-}b & \mapsto & \mathsf{r1.2} \\
+      \mathtt{F-}c & \mapsto & \mathsf{r1.1} \\
+      \mathtt{F-}d & \mapsto & \mathsf{r1.2} \\
+      \mathtt{F-}e & \mapsto & \mathsf{r1.1} \\
+      \mathtt{F-}f & \mapsto & \mathsf{r1.1} \\
+      \mathtt{MAP} & \mapsto & \mathsf{r1.3} \\
+    \end{array}\right] \\
+  \mathtt{MAP} &=& \left[
+    \begin{array}{lcl}
+      \mathtt{F-}a &\mapsto& \mathtt{frontend.lisp} \\
+      \mathtt{F-}b &\mapsto& \mathtt{backend.lisp} \\
+      \mathtt{F-}c &\mapsto& \mathtt{parser/grammar.lisp} \\
+      \mathtt{F-}d &\mapsto& \mathtt{absy.lisp} \\
+      \mathtt{F-}e &\mapsto& \mathtt{constraints/search.lisp} \\
+      \mathtt{F-}f &\mapsto& \mathtt{constraints/propagate.lisp} \\
+    \end{array}\right]
 \end{eqnarray*}
 
 
@@ -1285,124 +1289,93 @@ update in detail.
 
 \subsubsection{Sandbox and Repository}
 
-The sandbox contains the checked out copy of a certain change
-of a certain branch. The information which branch and
-commit lives in the sandbox is stored in the administrative
-directory.
+The sandbox contains the checked out copy of a certain change of a
+certain branch. The information which branch and commit lives in the
+sandbox is stored in the administrative directory.
 
 Two kinds of operations have to be distinguished:
 \begin{itemize}
-\item \emph{Repository only} operations which do
-neither necessarily require any sandbox nor do changes
-in a sandbox effect the result of an operation.
-Branching and merging are such operations.
-\item \emph{Sandbox} operations may cause changes
-in the repository but not necessarily have to but they
-either change the sandbox or changes in the sandbox effect
-the repository. Update, checkin belong to this category.
+\item \emph{Repository only} operations which do neither necessarily
+  require any sandbox nor do changes in a sandbox effect the result of
+  an operation.  Branching and merging are such operations.
+\item \emph{Sandbox} operations may cause changes in the repository
+  but not necessarily have to but they either change the sandbox or
+  changes in the sandbox effect the repository. Update, checkin belong
+  to this category.
 \end{itemize}
 
 
-\subsubsection{create}
+\subsubsection{commit}
 
-A create operation initializes a new module in a repository
-and populates it with the files from a certain directory
-(e.~g. the current directory).
-
-\begin{enumerate}
-\item 
-\end{enumerate}
-
-\subsubsection{checkin}
-
-A checkin adds a new commit to a branch. Checking in is a
-several step procedure:
+A commit adds a new commit to a branch. Checking in is a several step
+procedure:
 
 \begin{enumerate}
-\item Get the latest $\mathtt{CHANGE.}\beta$.
-\item Comparison of the latest $\mathtt{CHANGE.}\beta$ with 
-the one present in the sandbox gives the files changed
-in the meantime from other commits.
+\item Get the latest $\mathtt{CHANGE}$.
+\item Comparison of the latest $\mathtt{CHANGE}$ with the one present
+  in the sandbox gives the files changed in the meantime from other
+  commits.
 \item Check which files are modified locally.
-\item The intersection of the two file sets gives potential
-conflicts. If this intersection is empty create a new commit
-and prepend it to the current $\mathtt{CHANGE.}\beta$
-The file map for the new commit is generated out of
-the revision numbers the backend assigns to each file on
-checkin.
+\item The intersection of the two file sets gives potential conflicts.
+  If this intersection is empty create a new commit and prepend it to
+  the current $\mathtt{CHANGE}$ The file map for the new commit is
+  generated out of the revision numbers the backend assigns to each
+  file on checkin.
 
-Check in the modified $\mathtt{CHANGE.}\beta$ and throw
-away the old one.
-\item If the intersection is not empty check if potential
-conflicts are real conflicts. That means to merge to last
-repository version of all possibly conflicting files with 
-the one in the working copy temporarily. If none of the merges
-fails a new commit is added as indicated above.
+  Check in the modified $\mathtt{CHANGE}$ and throw away the old one.
+\item If the intersection is not empty check if potential conflicts
+  are real conflicts. That means to merge to last repository version
+  of all possibly conflicting files with the one in the working copy
+  temporarily. If none of the merges fails a new commit is added as
+  indicated above.
 \item If the merging fails for at least one file tell the user about
-it and mark the conflicing parts. No file will be checked in and
-the $\mathtt{CHANGE.}\beta$ file is reverted to the original one.
+  it and mark the conflicing parts. No file will be checked in and the
+  $\mathtt{CHANGE}$ file is reverted to the original one.
 \end{enumerate}
 
 
 \subsubsection{branch}
-Branching is a repository only operation but some temporary
-hard disk space will be necessary.
+
+Branching is a repository only operation but some temporary hard disk
+space will be necessary.
 
 As branching cannot conflict it is a pretty straight forward
 procedure:
 \begin{enumerate}
 \item Get the latest $\mathtt{BRANCH}$ file from the repository.
 \item Add a new branch with the appropriate information (branch
-identifier, name, description etc.)
-\item Create a new \texttt{MAP}- and \texttt{CHANGE}-file for
-this branch.
-\item Get the the \texttt{CHANGE}-file of the branch which
-is branched from and extract the change which is head of the new
-branch.
-\item Retrieve all files revisions indicated in this changes
-file map.
-\item Replace the branch identifier in the F-file names and the
-retrieved \texttt{MAP}-file by the branch identifier for the
-new branch.
-\item Put the content of the retrieved \texttt{MAP}-file into
-the new \texttt{MAP}-file.
-\item Check in the retrieved F-files with the new branch identifier
-and create a corresponding merge with modified file map
-and the branch's origin.
-\item Check in the \texttt{CHANGE}- and modified \texttt{BRANCH}-files.
+  identifier, name, description etc.)
+\item Create a new \texttt{CHANGE}-file for this branch.
+\item Get the the \texttt{CHANGE}-file of the branch which is branched
+  from and extract the change which is head of the new branch.
+\item Retrieve all files revisions indicated in this changes file map.
+\item Check in the retrieved files and create a corresponding merge
+  with modified file map and the branch's origin.
+\item Check in the \texttt{CHANGE}- and modified
+  \texttt{BRANCH}-files.
 \end{enumerate}
 
 If replication takes places the steps 4 to 8 are repeated for all
-changes to be replicated starting with the oldest one. For all
-changes incorporated $\varrho$ will hold.
-
-\emph{Problem:} There might be a problem because the file map can
-obly be set upa after checking in the files because the revision
-number is not known before. If -- for some reason -- the checkin
-of the new \texttt{BRANCH}- and \texttt{MAP}-files fails these
-commits cannot be reverted. To solve this a dry-run checkin is necessary
-which returns the revision numbers but does no repository modification.
-This again may lead to inconcistencies.
+changes to be replicated starting with the oldest one. For all changes
+incorporated $\varrho$ will hold.
 
 \subsubsection{merge}
-Merging is -- like branching -- a repository only
-operation.
+Merging is -- like branching -- a repository only operation.
 
 Merging is essentially a checkin of a certain change to a certain
 branch without a sandbox and creating a merge instead of a commit:
 
 \begin{enumerate}
 \item Put the change to merge into a temporary sandbox.
-\item Get the \texttt{CHANGE}-file from the change to which
-the merge will be applied.
-\item In the case of a merge, conflicts cannot in general
-be uncovered by comparing the \texttt{CHANGE}-files. Instead
-dry-run merges have to be done. If all goes well a new merge
-is created and prepended to the \texttt{CHANGE}-file and all files
-including the \texttt{MAP}-file are checked in.
-\item If conflicts arise the user has to resolve them in the
-temporary sandbox and the merge has to be restarted. This point
-may cause trouble.
+\item Get the \texttt{CHANGE}-file from the change to which the merge
+  will be applied.
+\item In the case of a merge, conflicts cannot in general be uncovered
+  by comparing the \texttt{CHANGE}-files. Instead dry-run merges have
+  to be done. If all goes well a new merge is created and prepended to
+  the \texttt{CHANGE}-file and all files including the
+  \texttt{MAP}-file are checked in.
+\item If conflicts arise the user has to resolve them in the temporary
+  sandbox and the merge has to be restarted.
 \end{enumerate}
 
 \subsubsection{update}
@@ -1411,156 +1384,169 @@ The update operation is a sandbox only operation but may cause
 conflicts.
 
 \begin{enumerate}
-\item Get the latest \texttt{CHANGE}-file for the sandbox' branch
-and compare it to the \texttt{CHANGE}-file in the sandbox.
-\item If changes were made to the branch check out the
-changed files and merge them into the files in
-the snadbox. Conflicts are marked and have to be handled by
-the user.
+\item Get the latest \texttt{CHANGE}-file for the sandbox' branch and
+  compare it to the \texttt{CHANGE}-file in the sandbox.
+\item If changes were made to the branch check out the changed files
+  and merge them into the files in the snadbox. Conflicts are marked
+  and have to be handled by the user.
 \end{enumerate}
 
-\subsection{How to put this into \textsc{metacvs}}
-Basically the operations \texttt{mcvs-commit},
-\texttt{mcvs-branch}, \texttt{mcvs-merge} and \texttt{mcvs-update}
-have to be replaced. Other routines like \texttt{mcvs-switch} or
-\texttt{mcvs-list-branches} and many others should be disabled
-until the are replaced by appropriate new ones.
 
-As far as I can see things, all operations should be possible with
-the four discussed previously except for two:
+% \subsection{Access identifier -- backend abstraction}
 
-\begin{itemize}
-\item A history and log message browsing operation was not
-discussed.
-\item The \texttt{mcvs-create} operation has to be upgraded that
-it created the appropriate branch and change handling infrastructure.
-\end{itemize}
+% As a first approximation for \textsc{cvs} as the only backend it is
+% sufficient to store a function in $\alpha$ which is able to set the
+% environment-variable \texttt{CVSROOT} (and perhaps
+% \texttt{CVS\_RSH}). This function is called before \textsc{cvs} is
+% invoked to set up the necessary environment.  All those functions
+% should be stored in a table (a file called \texttt{ACCESSOR}) with
+% increasing numbers such that access identifiers in changes contain
+% the appropriate number.
 
-\subsection{Access identifier -- backend abstraction}
+% If a repository is moved on another machine or something the like
+% the function is exchanged and a new revision of \texttt{ACCESSOR} is
+% stored (this way even movements of repositories are recorded).
 
-As a first approximation for \textsc{cvs} as the only backend
-it is sufficient to store a function in $\alpha$ which is able to
-set the environment-variable \texttt{CVSROOT} (and perhaps
-\texttt{CVS\_RSH}). This function is called before \textsc{cvs}
-is invoked to set up the necessary environment.
-All those functions should be stored in a table (a file called
-\texttt{ACCESSOR}) with increasing numbers such that access
-identifiers in changes contain the appropriate number.
-
-If a repository is moved on another machine or something the like
-the function is exchanged and a new revision of \texttt{ACCESSOR} is
-stored (this way even movements of repositories are recorded).
-
-
-\section{Comments on other software}
-
-\subsection{\textsc{dcvs}}
-
-\textsc{dcvs} implements distributed repositories. But it assigns
-responsibilities for certain parts (branches) of the code to
-a particular site which is not so flexible and not what we want, I think.
-They use \textsc{cvsup} to synchronize repositories which might be
-interesting because the problem of how to exchange data without checking
-out all necessary revisions and not touching the repository directly is
-not yet solved.
- 
-Anyway, \textsc{dcvs} implements a concept of change sets and snapshots.
-Snapshots a hooks into the code at certain point in time and change sets
-are more or less diffs between to snapshots (what others call patchsets).
-In our termninology, the snapshot is the change set and a patchset may
-contain diffs between two or more change sets.
-
-
-\section{Todo and milestones}
-
-\subsection{Zeroth milestone}
-Specification for changes. This includes
-the handling of branches and merges.
-\ldots and is finished by now.
-
-\subsection{First milestone}
-The first thing to do is implementing change and branch handling as describes
-in section \ref{distrib} and writing an
-interface to the \textsc{gpgme} library. At this point, we have to decide
-what \textsc{Common Lisp} implementation will be used because calls
-to foreign functions is not included in the ANSI standard.
-Documentation for \textsc{clisp} can be found at
-\texttt{http://clisp.sourceforge.net/impnotes.html\#dffi} and the like
-for \textsc{cmucl} at \texttt{http://common-lisp.net/project/cmucl/doc/cmu-user/aliens.html}.
-The decision has been taken and \textsc{sbcl} will be the implementation of
-choice. For all FFI-stuff \textsc{UFFI} should be taken and proper
-\textsc{ASDF} definition be written.
-
-\subsection{Second milestone}
-Specification and implementation of the code signing features.
-
-\subsection{Third milestone}
-Optional things:
-\begin{itemize}
-\item Convenient wrappers for the most common use cases based
-on the basic operations described in section \ref{ops} like
-branching and haveing the branch as sandbox and the same for merging
-etc.
-\item Integration of other backends than \textsc{cvs}.
-\item Makeing the code compatible (especially buildable!) with
-other \textsc{Common Lisp} implementations.
-\item \textsc{emacs} integration.
-\item Something else from the \emph{nice features to have section}.
-\end{itemize}
-
-\subsection{Other things}
-\begin{itemize}
-\item Switching the whole thing to use \textsc{asdf} would be great.
-Furthermore, the necessity to build a Lisp image with some Unix bindings
-to build the system should be removed. I think, \textsc{clisp}'s
-\texttt{POSIX}-package could be sufficient.
-\item \textsc{metacvs} does not support empty directories at the moment.
-We could patch this.
-\item The behaviour when issuing a \textsc{cvs} command not shadowed by
-\textsc{metacvs} is to fire the debugger. Perhaps it is sensible to
-just pass those commands to the \textsc{cvs} binary and end up in the debugger
-only if the command is unknown to \textsc{cvs} too.
-(I don't think we should do this. Invoking \textsc[cvs] directly
-is somewhat dangerous and all relevant calls should be wrapped [Florian]).
-\item The user should not see any F-files. Especially not in
-expanded keywords like \texttt{\$Id\$} and the commit message.
-\end{itemize}
-
-\subsection{Nice features to have}
-
-\begin{itemize}
-\item An operation to gather all origins with $\neg \varrho$ as
-local copies into a repository (ending the distributiveness, perhaps
-for a restart).
-\item A possibility to generate a graph to show the links between
-repositories.
-\end{itemize}
-
-\section{References}
 
 \begin{thebibliography}{Loe99}
 \bibitem{HMI05}[HMI05] Yasuhiro Hayase / Makoto Matsushita / Katsuro
   Inoue; \emph{Revision control system using delta script of syntax
-    tree}; ACM Press 2005
+    tree}; ACM Press 200
+\bibitem{MCVS04}[MCVS04] Kaz Kylheku; \texttt{metacvs};
+  \texttt{http://users.footprints.net/\textasciitilde{}kaz/mcvs.html}
+\bibitem{PS05}[PS05] Peter Seibel; \emph{Practical Common Lis}; \texttt{http://www.gigamonkeys.com/book/} is a very good
+  \textsc{Common Lisp} book.
+\bibitem \texttt{http://clisp.cons.org/} is the home of \textsc{clisp}.
+\bibitem \texttt{http://common-lisp.net/project/slime/} is the home of
+  \textsc{slime}, a good interface to different \textsc{Common~Lisp}
+  systems for \textsc{emacs}.
+\bibitem \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the
+  Howto of the GNU arch project using signed archives.
+\bibitem \texttt{http://www.gnupg.org} GNU Privacy Guard.
+\bibitem \textsc{hocvs} is an extension to \textsc{metacvs} with change
+  based revisions. It is done with \textsc{cvs} tags, I believe, but
+  perhaps worth a glance. It can be found at
+  \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
+\bibitem \textsc{dcvs} is a combination of \textsc{cvs} and
+  \textsc{cvsup} to support change sets and distributed repositories.
+  It is found at \texttt{http://www.elegosoft.com/dcvs/}.
+
 \end{thebibliography}
 
+The links below should be in included into the bibliography and be
+properly referenced in the text. There are references missing I think.
+
 \begin{itemize}
-\item \texttt{http://users.footprints.net/\textasciitilde{}kaz/mcvs.html} is the home of
-\textsc{metacvs}.
+\item
+  \texttt{http://users.footprints.net/\textasciitilde{}kaz/mcvs.html}
+  is the home of \textsc{metacvs}.
 \item \texttt{http://www.gigamonkeys.com/book/} is a very good
-\textsc{Common Lisp} book.
+  \textsc{Common Lisp} book.
 \item \texttt{http://clisp.cons.org/} is the home of \textsc{clisp}.
 \item \texttt{http://common-lisp.net/project/slime/} is the home of
-\textsc{slime}, a good interface to different \textsc{Common~Lisp}
-systems for \textsc{emacs}.
-\item \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the Howto of the
-GNU arch project using signed archives.
+  \textsc{slime}, a good interface to different \textsc{Common~Lisp}
+  systems for \textsc{emacs}.
+\item \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the
+  Howto of the GNU arch project using signed archives.
 \item \texttt{http://www.gnupg.org} GNU Privacy Guard.
-\item \textsc{hocvs} is an extension to \textsc{metacvs} with change based
-revisions. It is done with \textsc{cvs} tags, I believe, but perhaps worth a
-glance. It can be found at \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
-\item \textsc{dcvs} is a combination of \textsc{cvs} and \textsc{cvsup}
-to support change sets and distributed repositories. It is found
-at \texttt{http://www.elegosoft.com/dcvs/}.
+\item \textsc{hocvs} is an extension to \textsc{metacvs} with change
+  based revisions. It is done with \textsc{cvs} tags, I believe, but
+  perhaps worth a glance. It can be found at
+  \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
+\item \textsc{dcvs} is a combination of \textsc{cvs} and
+  \textsc{cvsup} to support change sets and distributed repositories.
+  It is found at \texttt{http://www.elegosoft.com/dcvs/}.
 \end{itemize}
+
+
+% I think, all stuff below can basically go away.
+%
+%
+%
+% \section{Comments on other software}
+
+% \subsection{\textsc{dcvs}}
+
+% \textsc{dcvs} implements distributed repositories. But it assigns
+% responsibilities for certain parts (branches) of the code to a
+% particular site which is not so flexible and not what we want, I
+% think.  They use \textsc{cvsup} to synchronize repositories which
+% might be interesting because the problem of how to exchange data
+% without checking out all necessary revisions and not touching the
+% repository directly is not yet solved.
+ 
+% Anyway, \textsc{dcvs} implements a concept of change sets and
+% snapshots.  Snapshots a hooks into the code at certain point in time
+% and change sets are more or less diffs between to snapshots (what
+% others call patchsets).  In our termninology, the snapshot is the
+% change set and a patchset may contain diffs between two or more
+% change sets.
+
+
+% \section{Todo and milestones}
+
+% \subsection{Zeroth milestone}
+% Specification for changes. This includes the handling of branches
+% and merges.  \ldots and is finished by now.
+
+% \subsection{First milestone}
+% The first thing to do is implementing change and branch handling as
+% describes in section \ref{distrib} and writing an interface to the
+% \textsc{gpgme} library. At this point, we have to decide what
+% \textsc{Common Lisp} implementation will be used because calls to
+% foreign functions is not included in the ANSI standard.
+% Documentation for \textsc{clisp} can be found at
+% \texttt{http://clisp.sourceforge.net/impnotes.html\#dffi} and the
+% like for \textsc{cmucl} at
+% \texttt{http://common-lisp.net/project/cmucl/doc/cmu-user/aliens.html}.
+% The decision has been taken and \textsc{sbcl} will be the
+% implementation of choice. For all FFI-stuff \textsc{UFFI} should be
+% taken and proper \textsc{ASDF} definition be written.
+
+% \subsection{Second milestone}
+% Specification and implementation of the code signing features.
+
+% \subsection{Third milestone}
+% Optional things:
+% \begin{itemize}
+% \item Convenient wrappers for the most common use cases based on the
+%   basic operations described in section \ref{ops} like branching and
+%   haveing the branch as sandbox and the same for merging etc.
+% \item Integration of other backends than \textsc{cvs}.
+% \item Makeing the code compatible (especially buildable!) with other
+%   \textsc{Common Lisp} implementations.
+% \item \textsc{emacs} integration.
+% \item Something else from the \emph{nice features to have section}.
+% \end{itemize}
+
+% \subsection{Other things}
+% \begin{itemize}
+% \item Switching the whole thing to use \textsc{asdf} would be great.
+%   Furthermore, the necessity to build a Lisp image with some Unix
+%   bindings to build the system should be removed. I think,
+%   \textsc{clisp}'s \texttt{POSIX}-package could be sufficient.
+% \item \textsc{metacvs} does not support empty directories at the
+%   moment.  We could patch this.
+% \item The behaviour when issuing a \textsc{cvs} command not shadowed
+%   by \textsc{metacvs} is to fire the debugger. Perhaps it is
+%   sensible to just pass those commands to the \textsc{cvs} binary
+%   and end up in the debugger only if the command is unknown to
+%   \textsc{cvs} too.  (I don't think we should do this. Invoking
+%   \textsc[cvs] directly is somewhat dangerous and all relevant calls
+%   should be wrapped [Florian]).
+% \item The user should not see any F-files. Especially not in
+%   expanded keywords like \texttt{\$Id\$} and the commit message.
+% \end{itemize}
+
+% \subsection{Nice features to have}
+
+% \begin{itemize}
+% \item An operation to gather all origins with $\neg \varrho$ as
+%   local copies into a repository (ending the distributiveness,
+%   perhaps for a restart).
+% \item A possibility to generate a graph to show the links between
+%   repositories.
+% \end{itemize}
+
+
 \end{document}
