@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.12 2006/03/13 14:40:58 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.13 2006/03/13 14:52:06 florenz Exp $
 
 ;; All directory related functions and macros live in this file.
 
@@ -26,7 +26,7 @@
   "Evaluate forms with *meta-directory* being current
 directory and change back to previous working directory
 afterwards."
-  `(in-directory *meta-directory*
+  `(pp:in-directory *meta-directory*
     ,@forms))
 
 (defun create-meta-directory ()
