@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.13 2006/03/10 13:47:52 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.14 2006/03/13 15:07:34 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -186,23 +186,44 @@ id and path"
   (get-mapping id (read-map-file file)))
 
 ;; this one checks for file existence etc. 
+;; Redesign: dwim-function
 (defun create-new-mapping (&key
 			   (kind :file)
-			   (id nil)
+			   (id (format nil "~a" (guid-gen))); Generate ID
 			   (path nil)
 			   (target nil)
 			   (executable nil)
 			   (raw-plist nil))
-  "Wraps make-instance for consintency checks"
-  (unless (or id path)
-       (error "Must specify :id and :path"))
-  (unless (and (port-path:path-exists-p id)
-		(port-path:path-exists-p path))
-      (error "Both, :id and :path, must exist. Changed path?"))
-  (if (eql kind :symlink)
+  "Wraps make-instance for consintency checks and filetype detection.
+   
+  Make sure its evaluated in the right directory."
+  (unless path
+    (error "Must specify :path"))
+  (unless (port-path:path-exists-p path)
+    (error ":path, must exist. Changed path?"))
+  (if (eql kind :SYMLINK)
       (if (not target)
 	  (error ":kind is symlink. Specify :target")))
-  (format t "all your base are belong to us"))
+  (flet ((filetype (file)
+	   (case (osicat:file-kind file)
+	     (:REGULAR-FILE :FILE)
+	     (:SYMBOLIC-LINK :SYMLINK))))
+    (case (filetype path)
+      (:FILE (make-instance 'mapping 
+			    :kind :FILE
+			    :id id
+			    :path path
+			    :target target
+			    :executable executable
+			    :raw-plist raw-plist))
+      (:SYMLINK (make-instance 'mapping
+			       :KIND :SYMLINK
+			       :id id
+			       :path path
+			       :target target
+			       :executable executable
+			       :raw-plist raw-plist)))))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
@@ -324,7 +345,7 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
 	(ecase kind
 	  ;; Hardlinking
 	  (:FILE
-	   (if (not (port-path:path-exists-p  absolute-path))
+;	   (if (not (port-path:path-exists-p  absolute-path)) 
 	       (let* ((upper-dirs (port-path:pathname-prefixes absolute-path))
 		      (not-existing-pathes
 		       (delete-if #'port-path:path-exists-p upper-dirs)))
@@ -332,8 +353,9 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
 		 (mapcar #'port-path:create-directory not-existing-pathes)
 		 ;;  create hardlink
 		 (osicat:make-link absolute-path :target (merge-pathnames id) :hard t))
-	       (format t "DEBUG: ~a file already exist. Not creating hardlink!"
-		       absolute-path)))
+	       )
+;	       (format t "DEBUG: ~a file already exist. Not creating hardlink!"
+;		       absolute-path)))
 	  ;; FIXME: Softlinking 
 	  (:SYMLINK 
 	   (error "SYMLINKS are NOT yet Implemented")))))))
@@ -365,17 +387,17 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
 ;; Debuggin and Examples
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *test-data* nil)
+;; (defparameter *test-data* nil)
 
-(push (make-instance 'mapping
-		     :path #p"a/simple/path/which/does/not/exist/"
-		     :executable 't)
-      *test-data*)
+;; (push (make-instance 'mapping
+;; 		     :path #p"a/simple/path/which/does/not/exist/"
+;; 		     :executable 't)
+;;       *test-data*)
 
-(push (make-instance 'mapping 
-		     :path #p"/an/absolute/path/w/d/n/e/"
-		     :executable 'nil)
-      *test-data*)
+;; (push (make-instance 'mapping 
+;; 		     :path #p"/an/absolute/path/w/d/n/e/"
+;; 		     :executable 'nil)
+;;       *test-data*)
 
 
 

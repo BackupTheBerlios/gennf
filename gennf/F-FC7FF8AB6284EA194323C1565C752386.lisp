@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.25 2006/02/19 13:31:36 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.26 2006/03/13 15:07:34 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -54,3 +54,27 @@ The identifier of the newly created branch is returned."
     (merge module access identifier
 	   origin-access origin-branch origin-change)
   identifier))
+
+;; 
+(defun add-file-to-mapping (namestring)
+  ;; - find meta-dir
+  ;; - create new mapping
+  ;; - find mapfile
+  ;; - add mapping to file 
+
+  (let ((*meta-directory* (find-meta-directory)))
+    (in-meta-directory
+      (let* ((branch (branch (read-sandbox-file)))
+	     (map-file (merge-pathnames
+			(branch-identifier-to-directory branch) *map-file*))
+	     (mapping (create-new-mapping :path namestring)))
+	(add-mapping mapping map-file)))))
+	     
+	     
+
+
+      
+
+				   
+
+      
