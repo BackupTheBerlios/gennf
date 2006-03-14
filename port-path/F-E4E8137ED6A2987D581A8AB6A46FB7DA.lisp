@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.13 2006/03/14 14:13:11 florenz Exp $
+;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.14 2006/03/14 16:27:51 florenz Exp $
 
 ;; Defines the exported function of port-path.
 
@@ -24,6 +24,7 @@
   (:nicknames :pp)
   (:use :cl)
   (:export
+   :append-pathnames
    :change-directory
    :change-directory-up
    :copy-file

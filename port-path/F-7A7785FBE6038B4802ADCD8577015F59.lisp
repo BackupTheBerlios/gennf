@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.12 2006/03/14 14:13:11 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.13 2006/03/14 16:27:51 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -506,3 +506,25 @@ returns a list of found directories."
     (remove-if-not #'(lambda (p) (path-exists-p p))
 		   (mapcar #'(lambda (p) (merge-pathnames search-dir p))
 			   path-list))))
+
+(defun append-pathnames (&rest pathspecs)
+  "Appends all given pathspecs to a single pathspec. All but the
+last argument are converted to directory-form, the last one is
+used as directory-form if and only if it is in directory-form.
+Thus /a/b /c/d e/f/g/ h/i is turned into /a/b/c/d/e/f/g/h/i."
+  (unless pathspecs
+    (let ((directories
+	   (reduce #'append
+		   (mapcar #'(lambda (pathspec)
+			       (with-directory-form ((directory pathspec))
+				 (pathname-directory directory)))
+			   (butlast pathspecs))))
+	  (last (last pathspecs)))
+      (if (directory-pathname-p last)
+	  (make-pathname :directory (append directories last))
+	  (make-pathname :directory
+			 (append directories
+				 (pathname-directory last))
+			 :name (pathname-name last)
+			 :type (pathname-type last))))))
+       
