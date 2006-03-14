@@ -47,7 +47,7 @@
   "sbcl-port/gpgme/gpgme.lisp")
  (:FILE
   "MCVS/F-30EF3053A7C985825F7B9994E584FB40"
-  "prototype/TODO")
+  "prototype/NOTES")
  (:FILE
   "MCVS/F-32A3BA955BE6E0F48ABEDF5C42137D5E.lisp"
   "sbcl-port/convert.lisp")

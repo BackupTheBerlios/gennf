@@ -2,6 +2,7 @@ TODO
 ====
 
 * A log message browser should be offered.
+  A repository browser in general would be nice.
 * For the merging: An equality predicate which disregards differences
   in whitespace might be helpful.
 * commit should offer a restart to do an update if conflicts
@@ -17,8 +18,6 @@ TODO
   number of retries is exceeded.
 * When merging, proper mark up functions, which inserts filenames
   and stuff, should be used.
-* A function to get changed files is required to do proper updateing of
-  the sandbox (as update requires a list of files).
 
 
 ABANDONED
@@ -29,6 +28,8 @@ ABANDONED
 
 COMMANDS
 ========
+
+Those are the basic command line instructions.
 			  			   
 * add file	       | 
 * move file1 file2     | File Layer

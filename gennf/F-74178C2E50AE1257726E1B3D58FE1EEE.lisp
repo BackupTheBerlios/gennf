@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.13 2006/03/14 17:36:31 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.14 2006/03/14 21:55:21 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -200,6 +200,30 @@ the box able to retrieve intermittently added files."
 	(setf (change sandbox) change)
 	(write-sandbox-file sandbox)))))
 
+(defun repository-changed-files (module access branch &key files change)
+  "Return a list of files that have changed in the repository relative
+to the current sandbox. If a change is given, only changes between the
+given change and the sandbox are considered. If a list of files is
+provided, the result is the intersection of this file list and
+the changed files from the repository."
+  (in-meta-directory
+   (let* ((branch-directory (branch-identifier-to-directory branch))
+	  (change-file (port-path:append-pathnames *meta-directory*
+						  branch-directory
+						  *change-file*))
+	  (sandbox-changes (read-change-file change-file))
+	  (repository-changes
+	   (let ((latest-changes (retrieve-latest-changes module
+							  access branch)))
+	     (if change
+		 (nthcdr (- (length latest-changes) change) latest-changes)
+		 latest-changes)))
+	  (changed-files (get-modified-files sandbox-changes
+					     repository-changes)))
+     (if files
+	 (intersection files changed-files)
+	 changed-files))))
+
 (defun sandbox-changed-files (module access branch &optional files)
   "Returns a list fo files in the sandbox which have changes.
 All files below the branch directory are considered except
@@ -237,7 +261,8 @@ Rationale: The user may want to restrict update to certain files."
 	     (updatable-files-branch-prefixed
 	      (branch-prefix-file-list updatable-files branch-directory)))
 	(port-path:in-temporary-directory
-	    (:temporary-pathname temporary-directory)
+	    (:temporary-pathname temporary-directory
+				 :always-cleanup nil)
 	  (debug
 	    (debug-format "Doing up-to-date check in ~A."
 			  temporary-directory))
@@ -260,9 +285,14 @@ Rationale: The user may want to restrict update to certain files."
 					 updatable-files)))
 	      (backend-get module access (list fresh-file)
 			   temporary-directory)
-	      (unless (samep (merge-pathnames fresh-file temporary-directory)
-			     aged-file)
-		(push current-filename changed-files)))))
+	      (when
+		  (not-same-p aged-file
+			      (merge-pathnames fresh-file temporary-directory))
+		(progn
+		  (push current-filename changed-files)
+		  (debug
+		    (debug-format "Put file ~A into change list."
+				  current-filename)))))))
 	changed-files))))
 
 (defun commit (module message access branch files)
