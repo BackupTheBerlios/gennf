@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.12 2006/03/13 16:22:55 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.13 2006/03/14 17:36:31 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -56,7 +56,7 @@ It returns the identifier of the branch created."
 	      (port-path:create-directory branch-directory)
 	      (create-new-change-file change-file)
 	      (create-new-map-file map-file) ; creates empty map file,
-					    ; containing only "NIL"
+					     ; containing only "NIL"
 	      (backend-commit module *log-empty-branch* access
 			      (list change-file *branch-file* map-file)))))
 	(remove-meta-directory)))
@@ -199,7 +199,72 @@ the box able to retrieve intermittently added files."
 	;; Write updated sandbox file.
 	(setf (change sandbox) change)
 	(write-sandbox-file sandbox)))))
-		     
+
+(defun sandbox-changed-files (module access branch &optional files)
+  "Returns a list fo files in the sandbox which have changes.
+All files below the branch directory are considered except
+update special meta files. The file list is suitable as argument for commit.
+If an optional file list is given, the check is restricted to
+the intersection of files and the directory listing in the meta directory.
+Rationale: The user may want to restrict update to certain files."
+  (in-meta-directory
+    ;; This function is used to remove files like the change file
+    ;; from the update list because these files have to be treated specially.
+    (flet ((filter-files (file-list)
+	     (remove-if #'(lambda (file)
+			    (listed-file-p file *update-special-meta-files*)) 
+			file-list)))
+      (let* ((changed-files ()) ; This will be the result.
+	     (branch-directory (branch-identifier-to-directory branch))
+	     ;; All files in meta directory (no subdirectories).
+	     (all-files
+	      (remove-if #'port-path:directory-pathname-p
+			 (port-path:directory-listing branch-directory)))
+	     ;; Filter out special files and restrict to user's
+	     ;; update wish-list.
+	     (updatable-files 
+	      (let ((filtered-files (filenames-only (filter-files all-files))))
+		(if files
+		    (intersection (filenames-only files)
+				  filtered-files :test #'equal)
+		    filtered-files)))
+	     (updatable-files-absolute
+	      (mapcar #'(lambda (filename)
+			  (port-path:append-pathnames *meta-directory*
+						      branch-directory
+						      filename))
+		      updatable-files))
+	     (updatable-files-branch-prefixed
+	      (branch-prefix-file-list updatable-files branch-directory)))
+	(port-path:in-temporary-directory
+	    (:temporary-pathname temporary-directory)
+	  (debug
+	    (debug-format "Doing up-to-date check in ~A."
+			  temporary-directory))
+	  ;; Iterate over all possibly changed files, get
+	  ;; latest revision from repository and check if
+	  ;; changes occured.
+	  ;; This could also be performed using the backend's
+	  ;; diffing mechanism but this not done for two reasons:
+	  ;; 1. It is not desireable to have two different diff
+	  ;; algorithm in the program.
+	  ;; 2. CVS as backend has to fetch all files, too, to calculate
+	  ;; the differences. Furthermore, program output parsing is
+	  ;; quite error prone.
+	  (dotimes (file-number (length updatable-files))
+	    (let ((fresh-file (nth file-number
+				   updatable-files-branch-prefixed))
+		  (aged-file (nth file-number
+				  updatable-files-absolute))
+		  (current-filename (nth file-number
+					 updatable-files)))
+	      (backend-get module access (list fresh-file)
+			   temporary-directory)
+	      (unless (samep (merge-pathnames fresh-file temporary-directory)
+			     aged-file)
+		(push current-filename changed-files)))))
+	changed-files))))
+
 (defun commit (module message access branch files)
   "Commit files to the checked out branch. An appropriate change
 record is stored. All files must have been changed. If not
@@ -281,14 +346,6 @@ before calling this routine."
 	      (setf (change sandbox) identifier)
 	      (write-sandbox-file sandbox)))))))
 
-(defparameter *destination* (make-pathname :directory
-					   '(:relative "destination"))
-  "Where files are merged on a merge.")
-
-(defparameter *origin* (make-pathname :directory
-				      '(:relative "origin"))
-  "Where files to be merged in a temporally stored.")
-
 (defun merge (module access branch
 	      origin-access origin-branch &optional origin-change)
   "Merge is a repository only operation.
@@ -313,14 +370,14 @@ branching."
     ;; destination and origin. The data to be merged in is
     ;; stored in origin and the latest change of the branch
     ;; which will receive the merge is stored in destination.
-    (let* ((destination-directory (merge-pathnames *destination*
+    (let* ((destination-directory (merge-pathnames *merge-destination*
 						   temporary-directory))
 	   (destination-branch-directory (branch-identifier-to-directory
 					  branch))
 	   (destination-branch-absolute (merge-pathnames
 					 destination-branch-directory
 					 destination-directory))
-	   (origin-directory (merge-pathnames *origin*
+	   (origin-directory (merge-pathnames *merge-origin*
 					      temporary-directory))
 	   (origin-branch-directory (branch-identifier-to-directory
 				     origin-branch))
@@ -485,7 +542,8 @@ Origin files are in ~S."
   "Finishes a stuck merge. branch and access have to be the same
 as for merge and directory and files are merge's return values.
 The directory is deleted after"
-  (let ((destination-directory (merge-pathnames *destination* directory)))
+  (let ((destination-directory (merge-pathnames *merge-destination*
+						directory)))
     (port-path:in-directory destination-directory
       (let* ((branch-directory (branch-identifier-to-directory branch))
 	     ;; Include change file into list.

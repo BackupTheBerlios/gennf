@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.7 2006/02/17 22:38:59 florenz Exp $
+;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.8 2006/03/14 17:36:31 florenz Exp $
 
 ;; This file provides functions to manipulate meta files
 ;; that contain sequences of alists.
@@ -76,3 +76,26 @@ in file. If file exists, it is overwritten."
 		       :direction :output)
     (loop for element in list
 	  do (write-line element out))))
+
+(defun listed-file-p (pathspec list)
+  "Returns if pathspec is a file listed in list,
+only the name and type components are considered."
+  (port-path:with-file-form ((file pathspec))
+    (let ((file-name (make-pathname :name (pathname-name file)
+				    :type (pathname-type file)))
+	  (file-names
+	   (mapcar #'(lambda (pathspec)
+		       (make-pathname :name (pathname-name pathspec)
+				      :type (pathname-type pathspec)))
+		   list)))
+      (find file-name file-names :test #'equal))))
+
+(defun filenames-only (pathspecs)
+  "Thrwo away any directory or other components from the
+list of pathspecs."
+  (mapcar #'(lambda (pathspec)
+	      (port-path:with-file-form ((file pathspec))
+		(make-pathname :name (pathname-name file)
+			       :type (pathname-type file))))
+	  (remove-if #'port-path:directory-pathname-p pathspecs)))
+						   
