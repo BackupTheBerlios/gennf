@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.4 2006/03/14 18:51:29 sigsegv Exp $
+;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.5 2006/03/14 22:18:20 florenz Exp $
 
 ;; All functions that call SBCL specific extensions (i. e. funtions
 ;; of some sb-* package) go in here.
@@ -34,10 +34,12 @@
 		       :output t)))
 
 (defun posix-arguments ()
+  "Returns the command line arguments."
   sb-ext:*posix-argv*)
 
 (defun quit ()
- ( sb-ext:quit))
+  "Quits the Lisp process."
+  (sb-ext:quit))
 
 (defmacro with-program-output ((program arguments &key exit-code
 					output error) &body forms)

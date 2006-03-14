@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.28 2006/03/14 18:51:29 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.29 2006/03/14 22:18:20 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -39,6 +39,7 @@
   ((text :initarg :text :reader text)))
 
 ;; main function, called by shell script
+;; Should be put straight with main (see below).
 (defun gennf ()
   (format t "Starting GENNF~%")
   (let* ((args (rest (posix-arguments)))
@@ -77,7 +78,6 @@ The identifier of the newly created branch is returned."
 	   origin-access origin-branch origin-change)
   identifier))
 
-
 (defun add (namestring)
   ;; - find meta-dir
   ;; - create new mapping
@@ -109,3 +109,8 @@ The identifier of the newly created branch is returned."
       (let* ((branch (branch (read-sandbox-file))))
 	(format t "NOT Yet implemented")
 	))))
+
+(defun main ()
+  "Like main in C."
+  (format t "This is gennf. It is not operable yet. Sorry.~%")
+  (quit))
