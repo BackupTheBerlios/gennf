@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.27 2006/03/13 16:22:55 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.28 2006/03/14 18:51:29 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -35,7 +35,29 @@
   (proclaim '(optimize (cl:debug 3))))
 ;; End of development only section.
 
+(define-condition interactive-error ()
+  ((text :initarg :text :reader text)))
 
+;; main function, called by shell script
+(defun gennf ()
+  (format t "Starting GENNF~%")
+  (let* ((args (rest (posix-arguments)))
+	 (command (first args))
+	 (command-args (rest args)))
+    (format t "Command:~a~%Arguments:~a~%" command command-args)
+    (unless command
+      (error 'unknown-subcommand :text "Specify a subcommand!"))
+;;; (handler-case 			
+    (dispatch-subcommand command command-args)
+	))
+;;;      (error () (error "Fehler!@!!!")))))
+
+(defun dispatch-subcommand (command command-args)
+  (cond
+    ((equal command "add") (apply #'add command-args))
+    ((equal command "remove") (apply #'remove-file command-args))
+ ))
+      
 (defun initialize-repository (module root
 			      &key symbolic-name description)
   "Initializes a new repository at location root for the named module.
@@ -56,21 +78,34 @@ The identifier of the newly created branch is returned."
   identifier))
 
 
-;; 
-(defun add-file-to-mapping (namestring)
+(defun add (namestring)
   ;; - find meta-dir
   ;; - create new mapping
   ;; - find mapfile
   ;; - add mapping to file 
-
   (let ((*meta-directory* (find-meta-directory)))
     (in-meta-directory
       (let* ((branch (branch (read-sandbox-file)))
 	     (map-file (merge-pathnames
 			(branch-identifier-to-directory branch) *map-file*))
-	     (mapping (create-new-mapping :path namestring)))
+	     (id (format nil "META/~a/~a" branch (guid-gen)))
+	     (path (merge-pathnames (pathname namestring)
+				    (port-path:get-parent-directory
+				     *meta-directory*)))
+	     (mapping (create-new-mapping :path path :id id)))
 	(add-mapping mapping map-file)))))
 
-				   
+(defun remove-file (namestring)
+  (let ((*meta-directory* (find-meta-directory)))
+    (in-meta-directory
+      (let* ((branch (branch (read-sandbox-file)))
+	     (map-file (merge-pathnames
+			(branch-identifier-to-directory branch) *map-file*)))
+	(remove-mapping namestring map-file)))))
 
-      
+(defun move (namestring1 namestring2)
+    (let ((*meta-directory* (find-meta-directory)))
+    (in-meta-directory
+      (let* ((branch (branch (read-sandbox-file))))
+	(format t "NOT Yet implemented")
+	))))

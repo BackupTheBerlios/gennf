@@ -340,7 +340,7 @@ Commands:
 	    (write-line *usage*)
 	    (terpri)
 	    (throw 'mcvs-terminate nil))
-
+	  
 	  (when (not (first global-args))
 	    (write-line "Meta-CVS requires a command argument." *error-output*)
 	    (write-line "Use mcvs -H to view help." *error-output*)

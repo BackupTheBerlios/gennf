@@ -25,3 +25,19 @@ ABANDONED
 =========
 
 * The whole replication is thrown away.
+
+
+COMMANDS
+========
+			  			   
+* add file	       | 
+* move file1 file2     | File Layer
+* remove file	       |    	   
+			  	   	      
+* update [files ...]   |       	   
+* commit [files ...]   |  
+		       |
+* checkout	       | Repository Layer
+		       |
+* branch	       |
+* merge		       |

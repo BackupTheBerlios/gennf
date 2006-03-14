@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.14 2006/03/13 15:07:34 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.15 2006/03/14 18:51:29 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -185,11 +185,32 @@ id and path"
 (defmethod get-mapping (id (file pathname))
   (get-mapping id (read-map-file file)))
 
+(defgeneric remove-mapping (mapping store)
+  (:documentation "Removes a mapping/identifyer from store"))
+
+(defmethod remove-mapping ((map mapping) (sequence list))
+  (remove map sequence :test #'equal-mapping))
+
+(defmethod remove-mapping ((identifier string) (sequence list))
+  (let ((map (get-mapping identifier sequence)))
+    (remove-mapping map sequence)))
+
+(defmethod remove-mapping ((map mapping) (file pathname))
+    (remove-mapping map file))
+
+(defmethod remove-mapping ((identifier string) (file pathname))
+  (let* ((sequence (read-map-file file))
+	 (list nil)
+	 (map (get-mapping identifier sequence)))
+    (unwind-protect
+	 (setf list (remove-mapping map sequence))
+      (write-map-file list file))))
+
 ;; this one checks for file existence etc. 
 ;; Redesign: dwim-function
 (defun create-new-mapping (&key
 			   (kind :file)
-			   (id (format nil "~a" (guid-gen))); Generate ID
+			   (id nil)
 			   (path nil)
 			   (target nil)
 			   (executable nil)
@@ -197,8 +218,8 @@ id and path"
   "Wraps make-instance for consintency checks and filetype detection.
    
   Make sure its evaluated in the right directory."
-  (unless path
-    (error "Must specify :path"))
+  (unless (and path id)
+    (error "Must specify :path and :id"))
   (unless (port-path:path-exists-p path)
     (error ":path, must exist. Changed path?"))
   (if (eql kind :SYMLINK)
@@ -217,7 +238,7 @@ id and path"
 			    :executable executable
 			    :raw-plist raw-plist))
       (:SYMLINK (make-instance 'mapping
-			       :KIND :SYMLINK
+			       :kind :SYMLINK
 			       :id id
 			       :path path
 			       :target target
@@ -233,18 +254,16 @@ id and path"
 (defgeneric equal-mapping (left right)
   (:documentation "Compares two mapping concernig equality"))
 
-
 (defmethod equal-mapping ((left mapping) (right mapping)) 
   ;; taken from mcvs.
   "Compares on following attributes
 \(kind id path target\)
-path have to bee in the same form (directory) "
+path have to be in the same form (directory) "
+  
   (and (eq (kind left) (kind right))
-       (string= (id left) (id right))
+       (equal (id left) (id right))
        (equal (path left) (path right))
-       (equal (target left) (target right))
-
-))
+       (equal (target left) (target right))))
 
 (defun equal-filemaps (left right)
   ;; taken from mcvs
@@ -335,27 +354,35 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
 ;; Syncing 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun make-hard-link (path1 path2)
+  "Creates a hardlink for the missing pathspec.
+Path1 and Path2 must be abolute."
+  (let (existend to-create)
+    (cond 
+      ((port-path:path-exists-p path1)
+       (setf to-create path2)
+       (setf existend path1))
+      ((port-path:path-exists-p path2)
+       (setf to-create path1)
+       (setf existend path2))
+      (t (error "Both files exist.")))
+    ;; pretty strange but....
+    (osicat:make-link to-create :target existend :hard t)))
+
 (defgeneric sync (mapping) 
   (:documentation "syncs files from *meta-directory* to 'sandbox'"))
 
 (defmethod sync ((map mapping))
   (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
     (with-slots (kind id path) map
-      (let ((absolute-path (merge-pathnames path)))
+      (let* ((absolute-path (merge-pathnames path))
+	    (upper-dirs (port-path:pathname-prefixes absolute-path))
+	    (not-existing-pathes
+	     (delete-if #'port-path:path-exists-p upper-dirs)))
+	(mapcar #'port-path:create-directory not-existing-pathes)
 	(ecase kind
 	  ;; Hardlinking
-	  (:FILE
-;	   (if (not (port-path:path-exists-p  absolute-path)) 
-	       (let* ((upper-dirs (port-path:pathname-prefixes absolute-path))
-		      (not-existing-pathes
-		       (delete-if #'port-path:path-exists-p upper-dirs)))
-		 ;;  create missing directories
-		 (mapcar #'port-path:create-directory not-existing-pathes)
-		 ;;  create hardlink
-		 (osicat:make-link absolute-path :target (merge-pathnames id) :hard t))
-	       )
-;	       (format t "DEBUG: ~a file already exist. Not creating hardlink!"
-;		       absolute-path)))
+	  (:FILE (make-hard-link absolute-path (merge-pathnames id)))
 	  ;; FIXME: Softlinking 
 	  (:SYMLINK 
 	   (error "SYMLINKS are NOT yet Implemented")))))))
