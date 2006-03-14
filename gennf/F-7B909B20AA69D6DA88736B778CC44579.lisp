@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.7 2006/02/19 12:39:11 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.8 2006/03/14 14:40:05 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -48,6 +48,19 @@ to compute the differences again."))
   (not-same-p (file-to-list file1)
 	      (file-to-list file2)
 	      :equality equality))
+
+(defgeneric samep (sequence1 sequence2 &key equality)
+  (:documentation "Inverse of not-same-p."))
+
+(defmethod samep ((file1 pathname) (file2 pathname)
+		  &key (equality #'equal))
+  "Test if file1 and file2 differ."
+  (not (not-same-p file1 file2 :equality equality)))
+
+(defmethod samep ((list1 list) (list2 list)
+		  &key (equality #'equal))
+  "Test if list1 and list2 differ."
+  (not (not-same-p list1 list2 :equality equality)))
 
 (defgeneric differences (sequence1 sequence2 &key equality)
   (:documentation "Computes differences between sequence1 and
