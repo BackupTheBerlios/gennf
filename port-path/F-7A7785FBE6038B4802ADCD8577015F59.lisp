@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.13 2006/03/14 16:27:51 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.14 2006/03/14 17:06:14 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -512,19 +512,29 @@ returns a list of found directories."
 last argument are converted to directory-form, the last one is
 used as directory-form if and only if it is in directory-form.
 Thus /a/b /c/d e/f/g/ h/i is turned into /a/b/c/d/e/f/g/h/i."
-  (unless pathspecs
-    (let ((directories
-	   (reduce #'append
-		   (mapcar #'(lambda (pathspec)
-			       (with-directory-form ((directory pathspec))
-				 (pathname-directory directory)))
-			   (butlast pathspecs))))
-	  (last (last pathspecs)))
-      (if (directory-pathname-p last)
-	  (make-pathname :directory (append directories last))
-	  (make-pathname :directory
-			 (append directories
-				 (pathname-directory last))
-			 :name (pathname-name last)
-			 :type (pathname-type last))))))
+  (when pathspecs
+    (flet ((extract-directories (pathspec &optional process)
+	     (let ((processed (if process
+				  (funcall process pathspec)
+				  pathspec)))
+	       (remove-if-not
+		#'stringp (pathname-directory processed)))))
+      (let* ((directories
+	      (append
+	       (reduce #'append
+		       (mapcar
+			#'(lambda (pathspec)
+			    (extract-directories pathspec
+						 #'pathname-to-file-form))
+			       (butlast pathspecs)))
+	       (extract-directories (car (last pathspecs)))))
+	     (last (car (last pathspecs)))
+	     (relative-absolute (first (pathname-directory (first pathspecs))))
+	     (directory-component (append (list relative-absolute)
+					  directories)))
+	(if (directory-pathname-p last)
+	    (make-pathname :directory directory-component)
+	    (make-pathname :directory directory-component
+			   :name (pathname-name last)
+			   :type (pathname-type last)))))))
        
