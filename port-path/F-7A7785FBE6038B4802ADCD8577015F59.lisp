@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.11 2006/03/09 16:46:09 sigsegv Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.12 2006/03/14 14:13:11 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -39,6 +39,15 @@ by pathspec."
   `(let ,(mapcar
 	  (lambda (pair)
 	    `(,(first pair) (pathname-to-directory-form ,(second pair))))
+	  variable-pathspec-pairs)
+    ,@forms))
+
+(defmacro with-file-form (variable-pathspec-pairs &body forms)
+  "Assigns each variable the pathname in file form denoted
+by pathspec."
+  `(let ,(mapcar
+	  (lambda (pair)
+	    `(,(first pair) (pathname-to-file-form ,(second pair))))
 	  variable-pathspec-pairs)
     ,@forms))
 
