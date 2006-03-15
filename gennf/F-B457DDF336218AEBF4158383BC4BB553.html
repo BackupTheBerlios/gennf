@@ -52,17 +52,9 @@ hr {
 
 <h2><a name="overview">Overview</a></h2>
 
-<p>gennf is a version management system for distributed repositories
-which supports code signing.</p>
+<p>gennf is a version management system for distributed repositories.</p>
 
-<p>Code signing intends to open the possibility that the origin of each
-chunk of code of a piece of software can be verified using
-public/private key signing. Without code signing users and other
-developers have to trust the integrity of the machine hosting the
-sources.
-<br>
-
-Distributed version management means that there is no need for a central
+<p>Distributed version management means that there is no need for a central
 repository which avoids single points of failure and provides means to
 structure the repositories according to some external criteria like
 responsibilities or maintenanceships. We implement a system that does
@@ -73,24 +65,14 @@ consumption.</p>
 
 <h2><a name="state">Current state of the project</a></h2>
 
-<p>The handling of distributed repositories is specified. It is
-still some way to an implementation but the necessary ideas are there.
-The next step is to put them into code.
-The requirements for code signing support are laid out but
-the integration into the distributed part is not yet specified.
+<p>A prototype to handle the distribution is written. It
+works with flat repositories only, the structure part is
+currently under development.
 All this can be read in our
 <a href="gennf-report.pdf">report</a> (not yet finished) or, in
 brief, in the <a href="folien.pdf">slides</a> of
 the intermediate project presentation of January 31, 2006
 (in German, though).</p>
-
-<p>The development of a prototype to handle branch, merge,
-commit, checkout, update and import operations in the distribution
-model laid out in the <em>scratchpad</em> has begun.
-<br>
-The prototype will only handle flat repositories. Operations
-for directory structure as provided by Meta-CVS will be integrated
-in a second step.</p>
 
 
 <h2><a name="details">Project details</a></h2>
@@ -120,23 +102,6 @@ every site.<li>
 <p>In detail, the we want to provide the following possibilities:</p>
 
 <ul>
-<li><p>A developer using gennf should be able to sign his patches via
-an already known-to-work and widely deployed public key cryptosystem.</p>
-
-<p>An auditor should be able to look at any number of parts of the code
-and sign them digitally after a successful code audit.</p>
-
-<p>A user checking out code should be able to verify the code, looking
-at the different trust levels of the lines of code.
-He should be able to easily spot the lines
-which are least trusted according to his web of trust. If he cares much
-about security, he can audit those hot spots and sign them in the repository,
-becoming an auditor.</p>
-
-<p>Hence, the trust is moved from the single point of failure (the repository
-server) to every developer (able to protect his private key, or otherwise
-revoke his key).</p></li>
-
 <li><p>Distributing repositories over many sites has several advantages:
 The failover behaviour is much better, the active spots in the code
 are more local to their developers, every developer or group of
@@ -216,7 +181,6 @@ http://lists.berlios.de/mailman/listinfo/gennf-devel/</a></kbd>.
 
 <ul>
 <li>Fabian Otto <kbd>&lt;sigsegv at users.berlios.de&gt;</kbd>,</li>
-<li>Hannes Mehnert <kbd>&lt;hannes23 at users.berlios.de&gt;</kbd>,</li>
 <li>Florian Lorenzen <kbd>&lt;florenz at users.berlios.de&gt</kbd>.</li>
 </ul>
 
@@ -232,8 +196,8 @@ border="0"></a></td>
 src="http://jigsaw.w3.org/css-validator/images/vcss" 
 alt="Valid CSS!">
 </a></td>
-<td valign="middle">$Revision: 1.13 $, last change on
-$Date: 2006/02/19 16:41:35 $ by $Author: florenz $.</td>
+<td valign="middle">$Revision: 1.14 $, last change on
+$Date: 2006/03/15 11:04:45 $ by $Author: florenz $.</td>
 </table>
 
 </body>
