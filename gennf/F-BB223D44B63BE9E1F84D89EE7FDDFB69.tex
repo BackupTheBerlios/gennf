@@ -196,7 +196,7 @@ part. Fabian Otto would participate in both parts of the project.
 It was fairly clear right from the beginning that we could not and
 want not write a version management system from scratch but to
 improcve an existing system. The two systems in question were
-\textsc{darcs} and \textsc{metacvs}.
+\textsc{darcs} \cite{Darc06} and \textsc{metacvs} \cite{Mcvs06}.
 
 \textsc{darcs} is already a distributed system -- but it is too
 distributed for our taste: every working copy is a repository.  This
@@ -204,8 +204,9 @@ should not be necessary and one option was to offer greater
 flexibility concering repositores and working copies in
 \textsc{darcs}.
 
-\textsc{metacvs} is a wrapper around \textsc{cvs} and requires only
-\textsc{cvs} onb the server side. It circumvents some quirks of
+\textsc{metacvs} is a wrapper around \textsc{cvs} \cite{Cvs06}
+and requires only
+\textsc{cvs} on the server side. It circumvents some quirks of
 \textsc{cvs}, especially the weak handling of directory structure of a
 project. Like \textsc{cvs} it is a central-server oriented system and
 consequently the option as to introduce distribution into this system.
@@ -216,13 +217,13 @@ mails).
 
 We decided to build on \textsc{metacvs} because it is, in turn, based
 on \textsc{cvs} which we know quite well and because it is written in
-\textsc{Common~Lisp} which makes rapid development at least possible.
+\textsc{common~lisp} which makes rapid development at least possible.
 Another reason is that \textsc{cvs} is widely available on services
-like SourceForge or BerliOS and thus existing infrastructure is
-available to the new system.
+like SourceForge \cite{Sour06} or BerliOS \cite{Berl06}
+and thus existing infrastructure is available to the new system.
 
-We also had a look on a system called \textsc{dcvs}, distributed
-\textsc{cvs} but this was ruled out right from the start, beacuse its
+We also had a look on a system called \textsc{dcvs} \cite{Dcvs06}, distributed
+\textsc{cvs}, but this was ruled out right from the start, beacuse its
 support several repositories is rather unflexible: each repository is
 assigned a part of code which is the only one that can be modified.
 That means the distribution must follow the responsibilities and/or
@@ -288,7 +289,7 @@ open mailing list \texttt{gennf-devel@lists.berlios.de} on
 November~30. Some days later commit mails were enabled.  The Perl
 script \texttt{log\_accum.pl} used originally stems from the FreeBSD
 project and found the way to us via the ZEDV group at Berlin's Free
-University's physics department and the \texttt{octopus} project.
+University's physics department and the \textsc{octopus} project.
 Until mid of January it had the same problem as \textsc{viewcvs}: it
 could not resolve \textsc{metacvs}'s F-file names, until a very basic
 \texttt{MAP}-file parser was included into the script.
@@ -359,31 +360,33 @@ quits the project due to more important things to do. As he has not written
 a single line of code (apart from some \TeX-code in section \ref{codesigning})
 there is nothing for someone else has to take over.
 
-But the reduced number of team members causes cutting features, of course.
+After talking to Steffen Evers we decided to throw out the Code Signing
+part of the project as this was mostly Hannes Mehnert's part.
 
 \subsection{Working on \textsc{metacvs}}
 
 As we decided to extend \textsc{metacvs} we started investigating the
-code of version 1.0.13 in December.
+code of version 1.0.13 in December 2005.
 
-The system is written in \textsc{clisp}, a particular
-\textsc{Common~Lisp} implementation. For the code signing part we
-wanted to rely on the \textsc{gpgme} library. For this reason
+The system is written in \textsc{clisp} \cite{Clis06}, a particular
+\textsc{common~lisp} implementation. For the code signing part we
+wanted to rely on the \textsc{gpgme} \cite{Gnup06} library. For this reason
 including \textsc{c}-libraries was an important issue. At some point
-in the mid of December we decided to use \textsc{sbcl} as the
+in the mid of December we decided to use \textsc{sbcl} \cite{Sbcl06} as the
 \textsc{lisp} implementation of choice because it supports
-\textsc{uffi}, which is a cross-platform foreign function interface,
+\textsc{uffi} \cite{Uffi06},
+which is a cross-platform foreign function interface,
 and is less clumsy than \textsc{clisp} at some points.
 
 This implied porting \textsc{metacvs} to \textsc{sbcl}. After close
 looks on the implementation dependent parts of the code it was clear
 that most of them could be replaced by a portable library called
-\textsc{osicat}, which is a high level \textsc{posix} interface.
+\textsc{osicat} \cite{Osic06}, which is a high level \textsc{posix} interface.
 Inclusion of this library would make the code cleaner and more
 portable. Furthermore, we decided that the current build system of
 \textsc{metacvs} is very clumsy and that it should be replaced by the
-widely used \textsc{asdf}-package to compile and load
-\textsc{Common~Lisp} software.
+widely used \textsc{asdf}-package \cite{Asdf06} to compile and load
+\textsc{common~lisp} software.
 
 The system was ported to \textsc{sbcl} at the end of December 2005.
 This turned out to be a waste of time some days later:
@@ -463,7 +466,7 @@ relies on merging different revisions of files from different
 branches. It turned out that \textsc{cvs} mergeing capabilities could
 not be used for this because they only handle merges of files that
 live in the same repository. Consequently, this merging had to be done
-by ourselves. We use \textsc{cl-difflib} to compute differences
+by ourselves. We use \textsc{cl-difflib} \cite{Cldi06} to compute differences
 between files and some self-written routines to use this information
 to merge two files. This is not a bad solution but it costed time to
 implement of course. It also introduces the necessity to do the
@@ -474,11 +477,78 @@ piece of software.
 
 Again, it would have been better to work without \textsc{cvs} and
 using simpler software to store the revisions of files like
-\textsc{Common~Lisp} versions of \texttt{diff} and \texttt{patch}.
+\textsc{common~lisp} versions of \texttt{diff} and \texttt{patch}.
 
+\emph{
 However, it seems that the prototype could be finished until mid of
 February -- though probably very buggy -- and can be handed to Fabian
-Otto, to be enriched by 
+Otto, to be enriched by directory structure and a user interface.
+}
+
+
+\section{Review}
+
+Several critical issues arised during development, and some of them
+were already mentioned in the previous sections.
+This sections again summarizes what went wrong and, furthermore, tries
+to analyze why things went wrong and if we could have circumvented
+some dead end developments.
+
+
+\subsection{Investigation phase}
+
+From a review perspective one can state that we have overlooked some
+important things during our project's investigation phase, i. e.
+during the first half of November 2005: There is at least one tool,
+namely \textsc{gnu arch}, which provides at least the functionality
+intended in our distribution approach. That is, our ideas are
+not new in any way, the only difference is that we tried a conservative
+extension of \textsc{cvs} to utilize common infrastructure.
+If we had realized \textsc{gnu arch}'s functionality right from the
+start we had solely concentrated on Code Signing (or had done an
+entirely different project) as the Code Signing support in \textsc{gnu arch}
+is somewhat weaker than our intended approach. As Hannes Mehnert
+left the team this is obsolete anyway.
+
+Furthermore, we have spent too much time to design the distribution model.
+It would have been better to explore the possibilities of realisation
+much earlier due to the overall time period of one semester. Hence,
+a notably substantial part of our project has a conceptual nature.
+
+\subsection{Technical issues}
+
+Our decision to base on \textsc{cvs} (and also on \textsc{metacvs})
+implicated many technical
+undesirable issues. Most of them appeared already in the previous
+section and are summarized below:
+
+\begin{itemize}
+\item Extending \textsc{metacvs} was more difficult than expected
+because the code is tightly written around \textsc{cvs} and has
+no real internal interface we could set our distribution atop.
+The port to \textsc{sbcl}/\textsc{osicat} was superfluous as we decided
+to start from scratch.
+\item Using \textsc{cvs} as storage backend with distinct small functionality
+routines which have precisely defined effects reulted in massive network
+bandwidth (at least for remote repositories) and heay usage of temporary
+hard disk space and copying of files.
+\item One of our design goals was to avoid the necessity to store
+complete repositories in the user's workspace. This again results in
+heavy use of network bandwidth. Systems like \textsc{darcs} or
+\textsc{gnu arch} avoid this high network load by strong usage of
+cacheing. The motivation is to replace (expensive) network bandwidth
+by (cheap) hard disk storage. We have to admit that this statement
+can not be discarded.
+\item \GENNF{} has to merge revisions of files very often. We could
+not use the \textsc{cvs} merge capabilities in all cases and had to
+replace them by self-written routines. Implementing those routines
+consumed a considerable amount of time.
+Furthermore, we implemented only a two-way merge when performing
+a merge of branches because the coimputation of the common ancestor
+for the general case is quite a complex issue.
+As a result, \GENNF{} is quite bad at merging which is very undesireable
+because it is a very central operation.
+\end{itemize}
 
 
 \chapter{Concepts and desgin}
@@ -488,12 +558,14 @@ Otto, to be enriched by
 As Hannes Mehnert left the team Code Signing is not implemented and
 this section is to be read as a draft what could have been done.
 
+
 \subsection{Motivation}
 
 Currently most version management systems don't use any digital
-signatures for code (apart from \textsc{tla}). Authentication is done
-by an own password server (\textsc{cvs}: pserver), via a ssh public
-key (\textsc{cvs}, \textsc{subversion}, \textsc{darcs},
+signatures for code (apart from \textsc{gnu arch} \cite{Gnua06}).
+Authentication is done
+by an own password server (\textsc{cvs}: pserver), via a \textsc{ssh} public
+key (\textsc{cvs}, \textsc{subversion} \cite{Subv06}, \textsc{darcs},
 \textsc{metacvs}) or via a digitally signed mail (\textsc{darcs}).
 
 On the other hand, data integrity is not supported.  Every user has to
@@ -1392,161 +1464,51 @@ conflicts.
 \end{enumerate}
 
 
-% \subsection{Access identifier -- backend abstraction}
-
-% As a first approximation for \textsc{cvs} as the only backend it is
-% sufficient to store a function in $\alpha$ which is able to set the
-% environment-variable \texttt{CVSROOT} (and perhaps
-% \texttt{CVS\_RSH}). This function is called before \textsc{cvs} is
-% invoked to set up the necessary environment.  All those functions
-% should be stored in a table (a file called \texttt{ACCESSOR}) with
-% increasing numbers such that access identifiers in changes contain
-% the appropriate number.
-
-% If a repository is moved on another machine or something the like
-% the function is exchanged and a new revision of \texttt{ACCESSOR} is
-% stored (this way even movements of repositories are recorded).
-
-
-\begin{thebibliography}{Loe99}
-\bibitem{HMI05}[HMI05] Yasuhiro Hayase / Makoto Matsushita / Katsuro
+\begin{thebibliography}{Clis06}
+\bibitem[HMI05]{HMI05} Yasuhiro Hayase / Makoto Matsushita / Katsuro
   Inoue; \emph{Revision control system using delta script of syntax
-    tree}; ACM Press 200
-\bibitem{MCVS04}[MCVS04] Kaz Kylheku; \texttt{metacvs};
+    tree} in Proceedings of the 12th international workshop on
+  Software configuration management SCM '05; ACM Press 2005
+\bibitem[Mcvs06]{Mcvs06} \textsc{metacvs} v1.0.13;
   \texttt{http://users.footprints.net/\textasciitilde{}kaz/mcvs.html}
-\bibitem{PS05}[PS05] Peter Seibel; \emph{Practical Common Lis}; \texttt{http://www.gigamonkeys.com/book/} is a very good
-  \textsc{Common Lisp} book.
-\bibitem \texttt{http://clisp.cons.org/} is the home of \textsc{clisp}.
-\bibitem \texttt{http://common-lisp.net/project/slime/} is the home of
-  \textsc{slime}, a good interface to different \textsc{Common~Lisp}
-  systems for \textsc{emacs}.
-\bibitem \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the
-  Howto of the GNU arch project using signed archives.
-\bibitem \texttt{http://www.gnupg.org} GNU Privacy Guard.
-\bibitem \textsc{hocvs} is an extension to \textsc{metacvs} with change
-  based revisions. It is done with \textsc{cvs} tags, I believe, but
-  perhaps worth a glance. It can be found at
-  \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
-\bibitem \textsc{dcvs} is a combination of \textsc{cvs} and
-  \textsc{cvsup} to support change sets and distributed repositories.
-  It is found at \texttt{http://www.elegosoft.com/dcvs/}.
-
+\bibitem[Darc06]{Darc06} \textsc{darcs};
+  \texttt{http://abridgegame.org/darcs/}
+\bibitem[PS05]{PS05} Peter Seibel; \emph{Practical Common Lis};
+  Apress 2005
+\bibitem[Asdf06]{Asdf06} \textsc{asdf};
+  \texttt{http://http://www.cliki.net/asdf}
+\bibitem[Clis06]{Clis06} \textsc{clisp} v2.35;
+  \texttt{http://clisp.cons.org/}
+\bibitem[Gnua06]{Gnua06} \textsc{gnu arch};
+  \texttt{http://www.gnuarch.org/arch/index.html}
+\bibitem[Gnup06]{Gnup06} \textsc{gnu privacy guard};
+  \texttt{http://www.gnupg.org}
+\bibitem[Hocv06]{Hocv06} \textsc{hocvs};
+  \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}
+\bibitem[Dcvs06]{Dvcs06} \textsc{dcvs};
+  \texttt{http://www.elegosoft.com/dcvs/}
+\bibitem[Sbcl06]{Sbcl06} \textsc{sbcl} v0.9.10;
+  \texttt{http://sbcl.soyrceforge.net/}
+\bibitem[Osic06]{Osic06} \textsc{osicat} v0.5.0;
+  \texttt{http://common-lisp.net/project/osicat/}
+\bibitem[Cldi06]{Cldi06} \textsc{cl-difflib} v0.1;
+  \texttt{http://www.cliki.net/CL-DIFFLIB}
+\bibitem[Cldo06]{Cldo06} \textsc{cldoc} 2006-01-09;
+  \texttt{http://common-lisp.net/project/cldoc/}
+\bibitem[Uffi06]{Uffi06} \textsc{uffi} v1.5.9;
+  \texttt{http://uffi.b9.com/}
+\bibitem[Cvs06]{Cvs06} \textsc{cvs};
+  \texttt{http://www.nongnu.org/cvs/}
+\bibitem[Sour06]{Sour06} SourceForge;
+  \texttt{http://www.sourceforge.net/}
+\bibitem[Berl06]{Berl06} BerliOS;
+  \texttt{http://www.berlios.de/}
+\bibitem[Subv06]{Subv06} \textsc{subversion};
+  \texttt{http://subversion.tigris.org/}
 \end{thebibliography}
 
-The links below should be in included into the bibliography and be
-properly referenced in the text. There are references missing I think.
-
-\begin{itemize}
-\item
-  \texttt{http://users.footprints.net/\textasciitilde{}kaz/mcvs.html}
-  is the home of \textsc{metacvs}.
-\item \texttt{http://www.gigamonkeys.com/book/} is a very good
-  \textsc{Common Lisp} book.
-\item \texttt{http://clisp.cons.org/} is the home of \textsc{clisp}.
-\item \texttt{http://common-lisp.net/project/slime/} is the home of
-  \textsc{slime}, a good interface to different \textsc{Common~Lisp}
-  systems for \textsc{emacs}.
-\item \texttt{http://wiki.gnuarch.org/Signing\_20Archives} is the
-  Howto of the GNU arch project using signed archives.
-\item \texttt{http://www.gnupg.org} GNU Privacy Guard.
-\item \textsc{hocvs} is an extension to \textsc{metacvs} with change
-  based revisions. It is done with \textsc{cvs} tags, I believe, but
-  perhaps worth a glance. It can be found at
-  \texttt{http://retes.hu/\textasciitilde{}mega/ho-cvs/}.
-\item \textsc{dcvs} is a combination of \textsc{cvs} and
-  \textsc{cvsup} to support change sets and distributed repositories.
-  It is found at \texttt{http://www.elegosoft.com/dcvs/}.
-\end{itemize}
-
-
-% I think, all stuff below can basically go away.
-%
-%
-%
-% \section{Comments on other software}
-
-% \subsection{\textsc{dcvs}}
-
-% \textsc{dcvs} implements distributed repositories. But it assigns
-% responsibilities for certain parts (branches) of the code to a
-% particular site which is not so flexible and not what we want, I
-% think.  They use \textsc{cvsup} to synchronize repositories which
-% might be interesting because the problem of how to exchange data
-% without checking out all necessary revisions and not touching the
-% repository directly is not yet solved.
- 
-% Anyway, \textsc{dcvs} implements a concept of change sets and
-% snapshots.  Snapshots a hooks into the code at certain point in time
-% and change sets are more or less diffs between to snapshots (what
-% others call patchsets).  In our termninology, the snapshot is the
-% change set and a patchset may contain diffs between two or more
-% change sets.
-
-
-% \section{Todo and milestones}
-
-% \subsection{Zeroth milestone}
-% Specification for changes. This includes the handling of branches
-% and merges.  \ldots and is finished by now.
-
-% \subsection{First milestone}
-% The first thing to do is implementing change and branch handling as
-% describes in section \ref{distrib} and writing an interface to the
-% \textsc{gpgme} library. At this point, we have to decide what
-% \textsc{Common Lisp} implementation will be used because calls to
-% foreign functions is not included in the ANSI standard.
-% Documentation for \textsc{clisp} can be found at
-% \texttt{http://clisp.sourceforge.net/impnotes.html\#dffi} and the
-% like for \textsc{cmucl} at
-% \texttt{http://common-lisp.net/project/cmucl/doc/cmu-user/aliens.html}.
-% The decision has been taken and \textsc{sbcl} will be the
-% implementation of choice. For all FFI-stuff \textsc{UFFI} should be
-% taken and proper \textsc{ASDF} definition be written.
-
-% \subsection{Second milestone}
-% Specification and implementation of the code signing features.
-
-% \subsection{Third milestone}
-% Optional things:
-% \begin{itemize}
-% \item Convenient wrappers for the most common use cases based on the
-%   basic operations described in section \ref{ops} like branching and
-%   haveing the branch as sandbox and the same for merging etc.
-% \item Integration of other backends than \textsc{cvs}.
-% \item Makeing the code compatible (especially buildable!) with other
-%   \textsc{Common Lisp} implementations.
-% \item \textsc{emacs} integration.
-% \item Something else from the \emph{nice features to have section}.
-% \end{itemize}
-
-% \subsection{Other things}
-% \begin{itemize}
-% \item Switching the whole thing to use \textsc{asdf} would be great.
-%   Furthermore, the necessity to build a Lisp image with some Unix
-%   bindings to build the system should be removed. I think,
-%   \textsc{clisp}'s \texttt{POSIX}-package could be sufficient.
-% \item \textsc{metacvs} does not support empty directories at the
-%   moment.  We could patch this.
-% \item The behaviour when issuing a \textsc{cvs} command not shadowed
-%   by \textsc{metacvs} is to fire the debugger. Perhaps it is
-%   sensible to just pass those commands to the \textsc{cvs} binary
-%   and end up in the debugger only if the command is unknown to
-%   \textsc{cvs} too.  (I don't think we should do this. Invoking
-%   \textsc[cvs] directly is somewhat dangerous and all relevant calls
-%   should be wrapped [Florian]).
-% \item The user should not see any F-files. Especially not in
-%   expanded keywords like \texttt{\$Id\$} and the commit message.
-% \end{itemize}
-
-% \subsection{Nice features to have}
-
-% \begin{itemize}
-% \item An operation to gather all origins with $\neg \varrho$ as
-%   local copies into a repository (ending the distributiveness,
-%   perhaps for a restart).
-% \item A possibility to generate a graph to show the links between
-%   repositories.
-% \end{itemize}
-
-
+\emph{All web page look ups were done on March 15, 2006.
+For some software packages a distinct version number is given. This is
+the version we used in our development, if none is given, the version
+is irrelevant.}
 \end{document}
