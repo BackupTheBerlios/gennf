@@ -16,7 +16,7 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.1 2006/03/14 22:18:20 florenz Exp $
+# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.2 2006/03/15 19:04:13 sigsegv Exp $
 
 LISP = sbcl
 EVALOPT = --eval
@@ -34,7 +34,7 @@ FASLS = access.fasl backend-cvs.fasl backend.fasl branch.fasl \
 gennf: $(SOURCES)
 	$(LISP) $(EVALOPT) "(require :asdf)" \
 		$(EVALOPT) "(asdf:operate 'asdf:load-op :$@)" \
-		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\" :executable t :toplevel #'gennf::main)"
+		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\" :executable t :toplevel #'gennf::gennf)"
 
 clean:
 	rm $(FASLS)
