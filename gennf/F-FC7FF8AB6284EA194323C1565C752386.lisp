@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.30 2006/03/15 19:04:13 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.31 2006/03/15 19:15:08 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -55,8 +55,6 @@
 ;;  FIXME: Use global Variable with subcommands and lambdas.
 (defun dispatch-subcommand (command command-args)
   (apply (cdr(assoc command *subcommand-list* :test #'string=)) command-args))
-
-(defparameter *subcommand-list* nil)
 
 (defparameter *branch* nil)
 

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.13 2006/03/10 13:47:52 sigsegv Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.14 2006/03/15 19:15:08 florenz Exp $
 
 ;; ASDF system defintion in ASDF-INSTALL style.
 
@@ -28,7 +28,7 @@
 
 (defsystem :gennf
   :name "gennf"
-  :author "Hannes Mehnert, Florian Lorenzen, Fabian Otto"
+  :author "Florian Lorenzen, Fabian Otto"
   :version "0.0"
   :maintainer "Florian Lorenzen <florenz@berlios.de>"
   :licence "GPL"

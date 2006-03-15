@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.15 2006/03/14 18:51:29 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.16 2006/03/15 19:15:08 florenz Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -73,6 +73,7 @@
     :initarg :raw-plist
     :accessor raw-plist
     :documentation "Userattributes in a plist")))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -257,8 +258,8 @@ id and path"
 (defmethod equal-mapping ((left mapping) (right mapping)) 
   ;; taken from mcvs.
   "Compares on following attributes
-\(kind id path target\)
-path have to be in the same form (directory) "
+kind id path target
+path have to be in the same form directory"
   
   (and (eq (kind left) (kind right))
        (equal (id left) (id right))
@@ -370,7 +371,7 @@ Path1 and Path2 must be abolute."
     (osicat:make-link to-create :target existend :hard t)))
 
 (defgeneric sync (mapping) 
-  (:documentation "syncs files from *meta-directory* to 'sandbox'"))
+  (:documentation "syncs files from *meta-directory* to sandbox"))
 
 (defmethod sync ((map mapping))
   (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
