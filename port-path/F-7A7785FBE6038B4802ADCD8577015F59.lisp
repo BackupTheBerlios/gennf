@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.15 2006/03/14 17:13:21 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.16 2006/03/15 18:08:00 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -525,7 +525,7 @@ Thus /a/b /c/d e/f/g/ h/i is turned into /a/b/c/d/e/f/g/h/i."
 		       (mapcar
 			#'(lambda (pathspec)
 			    (extract-directories pathspec
-						 #'pathname-to-file-form))
+						 #'pathname-to-directory-form))
 			       (butlast pathspecs)))
 	       (extract-directories (car (last pathspecs)))))
 	     (last (car (last pathspecs)))
