@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.15 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.16 2006/03/16 11:50:37 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -582,5 +582,5 @@ The directory is deleted after"
 			      branch-directory)))
 	;; Include access file into list.
 	(backend-commit module "merge-finish" access
-			(cons *access-file-name* Filesq-prefixed)))))
+			(cons *access-file-name* files-prefixed)))))
   (port-path:delete-directory-tree directory))
