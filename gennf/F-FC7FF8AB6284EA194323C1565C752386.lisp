@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.31 2006/03/15 19:15:08 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.32 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -57,6 +57,9 @@
   (apply (cdr(assoc command *subcommand-list* :test #'string=)) command-args))
 
 (defparameter *branch* nil)
+
+(defparameter *map-file* nil
+"Holds absolute file pahtname")
 
 (defmacro defsubcommand (subcommand-name (&rest args) &body forms)
   `(progn

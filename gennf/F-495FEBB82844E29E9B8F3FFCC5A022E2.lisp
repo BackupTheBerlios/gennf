@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.7 2006/03/13 16:22:55 florenz Exp $
+;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.8 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; This file contains routines to manipulate access entries.
 
@@ -64,12 +64,12 @@ a certain repository."))
       (call-next-method)
       (prin1 (convert-to-alist access) stream)))
 
-(defun read-access-file (&optional (file *access-file*))
+(defun read-access-file (&optional (file *access-file-name*))
   "Reads an access file and returns a sequence of
 accesss objects."
   (mapcar #'alist-to-access (read-file file)))
 
-(defun write-access-file (sequence &optional (file *access-file*))
+(defun write-access-file (sequence &optional (file *access-file-name*))
   "Writes the sequence of access objects to file."
   (prin1-file file sequence))
 

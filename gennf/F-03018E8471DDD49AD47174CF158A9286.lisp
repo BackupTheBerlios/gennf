@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.16 2006/03/13 16:22:55 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.17 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -65,7 +65,7 @@ as a list, this method passes if *print-radably* is T."
       (call-next-method)
       (prin1 (convert-to-alist change) stream)))
 
-(defun read-change-file (&optional (file *change-file*))
+(defun read-change-file (&optional (file *change-file-name*))
   "Reads file as a change file. Each entry is checked if
 it is a merge or a change and appropriate objects are created."
   (flet ((create-object (alist)
@@ -74,12 +74,12 @@ it is a merge or a change and appropriate objects are created."
 		 (t (error "Garbage in the change file.")))))
     (mapcar #'create-object (read-file file))))
 
-(defun write-change-file (changes &optional (file *change-file*))
+(defun write-change-file (changes &optional (file *change-file-name*))
   "Writes a list of changes into a change file, which is
-*change-file* by default."
+*change-file-name* by default."
   (prin1-file file changes))
 
-(defun create-new-change-file (&optional (file *change-file*))
+(defun create-new-change-file (&optional (file *change-file-name*))
   "Creates a new cange file containg an empty list."
   (write-change-file () file))
 
@@ -308,7 +308,7 @@ by extract-files-and-revisions."
 directly from the repository."
   (let ((changes ())
 	(change-file
-	 (merge-pathnames *change-file*
+	 (merge-pathnames *change-file-name*
 			  (branch-identifier-to-directory branch))))
     (port-path:in-temporary-directory (:temporary-pathname temporary-directory)
       (backend-get module access (list change-file) temporary-directory)

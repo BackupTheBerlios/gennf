@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.7 2006/02/18 16:18:42 florenz Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.8 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -63,16 +63,16 @@ NIL (see change.lisp for an explaination of this beheviour)."
 (defun read-branch-file ()
   "Reads a branch file and returns a list of branch objects."
   (mapcar #'(lambda (alist) (alist-to-branch alist))
-	  (read-file *branch-file*)))
+	  (read-file *branch-file-name*)))
 
 (defun write-branch-file (sequence)
   "Write the sequence of branches to the branch file."
-  (prin1-file *branch-file* sequence))
+  (prin1-file *branch-file-name* sequence))
   
 
 (defun create-new-branch-file ()
   "Write a branch file containing an empty list."
-  (prin1-file *branch-file* ()))
+  (prin1-file *branch-file-name* ()))
 
 (defgeneric add-branch (branch store)
   (:documentation "Add a branch object to some store."))
@@ -170,10 +170,10 @@ on a checked out sandbox."))
       (call-next-method)
       (prin1 (convert-to-alist sandbox) stream)))
 
-(defun read-sandbox-file (&optional (file *sandbox-file*))
+(defun read-sandbox-file (&optional (file *sandbox-file-name*))
   "Read the sandbox-file and return a sandbox object."
   (alist-to-sandbox (read-file file)))
 
-(defun write-sandbox-file (sandbox &optional (file *sandbox-file*))
+(defun write-sandbox-file (sandbox &optional (file *sandbox-file-name*))
   "Write sandbox object to file."
   (prin1-file file (convert-to-alist sandbox)))

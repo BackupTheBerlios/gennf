@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.14 2006/03/14 21:55:21 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.15 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -34,12 +34,12 @@ It returns the identifier of the branch created."
       (in-meta-directory
 	(let ((branch-directory (make-pathname)))
 	  (retry ((backend-outdated-error
-		   :cleanup (progn (delete-file *branch-file*)
+		   :cleanup (progn (delete-file *branch-file-name*)
 				   (port-path:delete-directory-tree
 				    branch-directory))))
 	    (backend-get module access
-			 (list *branch-file* *access-file*) *meta-directory*)
-	    (setf identifier (get-new-branch-identifier *branch-file*))
+			 (list *branch-file-name* *access-file-name*) *meta-directory*)
+	    (setf identifier (get-new-branch-identifier *branch-file-name*))
 	    (let* ((branch (make-instance 'branch
 					  :identifier identifier
 					  :symbolic-name symbolic-name
@@ -49,16 +49,16 @@ It returns the identifier of the branch created."
 	      (setf branch-directory
 		    (branch-identifier-to-directory identifier))
 	      (setf change-file
-		    (merge-pathnames branch-directory *change-file*))
+		    (merge-pathnames branch-directory *change-file-name*))
 	      (setf map-file
-		    (merge-pathnames branch-directory *map-file*))
-	      (add-branch branch *branch-file*)
+		    (merge-pathnames branch-directory *map-file-name*))
+	      (add-branch branch *branch-file-name*)
 	      (port-path:create-directory branch-directory)
 	      (create-new-change-file change-file)
 	      (create-new-map-file map-file) ; creates empty map file,
 					     ; containing only "NIL"
 	      (backend-commit module *log-empty-branch* access
-			      (list change-file *branch-file* map-file)))))
+			      (list change-file *branch-file-name* map-file)))))
 	(remove-meta-directory)))
     identifier))
 
@@ -70,7 +70,7 @@ signalled."
     (create-meta-directory)
     (in-meta-directory
       (create-new-branch-file)
-      (add-access access *access-file*)
+      (add-access access *access-file-name*)
       (backend-import module access))))
 
 (defun checkout (module access branch &optional change)
@@ -81,11 +81,11 @@ access file and the branch subdirectory with it's change file."
   (create-meta-directory)
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
-	   (change-file (merge-pathnames branch-directory *change-file*))
-	   (map-file (merge-pathnames branch-directory *map-file*)))
+	   (change-file (merge-pathnames branch-directory *change-file-name*))
+	   (map-file (merge-pathnames branch-directory *map-file-name*)))
       ;; Get change, branch, map and access file.
       (backend-get module access
-		   (list *access-file* *branch-file* change-file map-file)
+		   (list *access-file-name* *branch-file-name* change-file map-file)
 		   *meta-directory*)
       ;; If no change is given, take latest.
       (unless change
@@ -116,7 +116,7 @@ As update has to get the list of files to update it is not out of
 the box able to retrieve intermittently added files."
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
-	   (change-file (merge-pathnames branch-directory *change-file*))
+	   (change-file (merge-pathnames branch-directory *change-file-name*))
 	   (change-file-to-get change-file)
 	   (old-changes (read-change-file change-file))
 	   (sandbox (read-sandbox-file))
@@ -210,7 +210,7 @@ the changed files from the repository."
    (let* ((branch-directory (branch-identifier-to-directory branch))
 	  (change-file (port-path:append-pathnames *meta-directory*
 						  branch-directory
-						  *change-file*))
+						  *change-file-name*))
 	  (sandbox-changes (read-change-file change-file))
 	  (repository-changes
 	   (let ((latest-changes (retrieve-latest-changes module
@@ -304,7 +304,7 @@ This means, some other functions has to check which files go upstream
 before calling this routine."
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
-	   (change-file (merge-pathnames branch-directory *change-file*))
+	   (change-file (merge-pathnames branch-directory *change-file-name*))
 	   (old-changes (read-change-file change-file))
 	   (sandbox (read-sandbox-file)))
       (setf files (mapcar #'pathname files))
@@ -433,7 +433,7 @@ branching."
 	   (new-changes destination-changes)
 	   (destination-change-file (merge-pathnames
 				     destination-branch-directory
-				     *change-file*))
+				     *change-file-name*))
 	   ;; Common files have to be merged.
 	   ;; Can it be relied on that the elements from
 	   ;; intersection's first argument go to the result?
@@ -496,9 +496,9 @@ Origin files are in ~S."
 		(format t "Conflict merging file ~S." file))
 	      (list-to-file merged-file destination-file))))
 	;; Create merge entry.
-	(backend-get module access (list *access-file*)
+	(backend-get module access (list *access-file-name*)
 		     destination-directory)
-	(let ((access-file (merge-pathnames *access-file*
+	(let ((access-file (merge-pathnames *access-file-name*
 					    destination-directory)))
 	  (multiple-value-bind (new-access accesses)
 	      (include-access (make-instance 'access
@@ -516,7 +516,7 @@ Origin files are in ~S."
 				   :origin origin)))
 	      ;; Write out access file.
 	      (write-access-file accesses
-				 (merge-pathnames *access-file*
+				 (merge-pathnames *access-file-name*
 						  destination-directory))
 	      ;; Add merge to new change-sequence
 	      (setf new-changes (add-change merge new-changes)))))
@@ -526,7 +526,7 @@ Origin files are in ~S."
 	(dolist (file uncommon-files)
 	  (setf new-changes (add-file-to-changes file new-changes)))
 	(write-change-file new-changes
-			   (merge-pathnames *change-file*
+			   (merge-pathnames *change-file-name*
 					    destination-branch-absolute))
 	;; Finish the operation.
 	(if conflicts
@@ -558,7 +558,7 @@ Origin files are in ~S."
 				(append uncommon-files-prefixed
 					common-files-prefixed
 					(list destination-change-file
-					      *access-file*)))))))))
+					      *access-file-name*)))))))))
   ;; If the operation completes we return NIL for success
   ;; (because in the case of conflicts the temporary pathname is returned).
   nil)
@@ -578,9 +578,9 @@ The directory is deleted after"
       (let* ((branch-directory (branch-identifier-to-directory branch))
 	     ;; Include change file into list.
 	     (files-prefixed (branch-prefix-file-list
-			      (cons *change-file* files)
+			      (cons *change-file-name* files)
 			      branch-directory)))
 	;; Include access file into list.
 	(backend-commit module "merge-finish" access
-			(cons *access-file* files-prefixed)))))
+			(cons *access-file-name* Filesq-prefixed)))))
   (port-path:delete-directory-tree directory))

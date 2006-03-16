@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.35 2006/03/09 16:48:23 sigsegv Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.36 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -165,7 +165,7 @@ to ate copy(."
   "Returns if module is known at access. It is checked if
 a branch file is stored for that module. That means 
 that a 'normal' cvs repository is not recognized."
-  (let ((file (format nil "~A/~A" module (namestring *branch-file*)))
+  (let ((file (format nil "~A/~A" module (namestring *branch-file-name*)))
 	known)
     (port-path:in-temporary-directory ()
       (with-cvs-output ((list "-d" (root access)

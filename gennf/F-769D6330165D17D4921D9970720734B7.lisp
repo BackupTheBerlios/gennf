@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.10 2006/03/15 19:15:08 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.11 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -31,33 +31,44 @@
 (defparameter *meta-directory-name*
   (make-pathname :directory '(:relative "META"))
   "Name of the meta directory.")
+
 (defparameter *meta-directory* (merge-pathnames *meta-directory-name*)
   "Absolute path of the meta directory.")				
+
 (defparameter *merge-destination*
   (make-pathname :directory '(:relative "destination"))
   "Where files are merged on a merge.")
+
 (defparameter *merge-origin*
   (make-pathname :directory '(:relative "origin"))
   "Where files to be merged in a temporally stored.")
-(defparameter *branch-file* (make-pathname :name "BRANCH")
+
+(defparameter *branch-file-name* (make-pathname :name "BRANCH")
   "Name of file which lists branches.")
-(defparameter *access-file* (make-pathname :name "ACCESS")
+
+(defparameter *access-file-name* (make-pathname :name "ACCESS")
   "Name of file which lists accesses.")
-(defparameter *change-file* (make-pathname :name "CHANGE")
+
+(defparameter *change-file-name* (make-pathname :name "CHANGE")
   "Name of file containing the change sequence.")
-(defparameter *sandbox-file* (make-pathname :name "SANDBOX")
+
+(defparameter *sandbox-file-name* (make-pathname :name "SANDBOX")
   "The sandbox file indicates the checked out branch, change and root.")
-(defparameter *map-file* (make-pathname :name "MAP")
+
+(defparameter *map-file-name* (make-pathname :name "MAP" )
   "Name of map file.")
+
 (defparameter *update-special-meta-files*
-  (list *branch-file* *access-file* *change-file* *sandbox-file*)
+  (list *branch-file-name* *access-file-name* *change-file-name* *sandbox-file-name*)
   "List of all meta files which have special update handling.")
 
 ;; Log messages.
 (defparameter *log-empty-branch* "Creation of empty branch."
   "Log message stored when an empty branch is created.")
+
 (defparameter *backend-import-log-message*
   "Creation of a fresh gennf repository.")
 
 ;; Command line.
-(defparameter *subcommand-list* nil)
+(defparameter *subcommand-list* nil
+  "Holds subcommand-names an corresponding function calls")

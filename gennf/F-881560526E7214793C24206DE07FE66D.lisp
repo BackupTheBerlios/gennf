@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.16 2006/03/15 19:15:08 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.17 2006/03/16 11:44:57 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -133,11 +133,11 @@
     (otherwise (error "bad type keyword ~s in map." 
 		      (first alist)))))
 
-(defun read-map-file (&optional (file *map-file*))
+(defun read-map-file (&optional (file *map-file-name*))
   "Reads mcvs mapping-file and returns list of mapings."
   (mapcar #'alist-to-mapping (read-file file)))
 
-(defun write-map-file (map-list &optional (file *map-file*))
+(defun write-map-file (map-list &optional (file *map-file-name*))
   "Writes map-lists to file."
   (prin1-file file map-list))
 
@@ -147,7 +147,7 @@
             (call-next-method)
       (prin1 (convert-to-alist map) stream)))
 
-(defun create-new-map-file (&optional (file *map-file*))
+(defun create-new-map-file (&optional (file *map-file-name*))
   (write-map-file '() file))
 
 (defgeneric add-mapping (mapping store)
