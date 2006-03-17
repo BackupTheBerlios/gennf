@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.36 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.37 2006/03/17 14:08:47 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -72,7 +72,8 @@ which emits files on standard-output."
   "Signals an errorif exit-code is not 0. The
 exit-code is mentioned in the error message."
   (cond ((= exit-code 0) exit-code)
-	(t (error "cvs had exit code ~S." exit-code))))
+	(t (error 'backend-error :description "cvs had non 0 exit code."
+		  :code exit-code))))
 
 (defun invoke-cvs (&rest arguments)
   "Run cvs program with given arguments."

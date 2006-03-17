@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.17 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.18 2006/03/17 14:08:47 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -171,7 +171,12 @@ of the sequence nothing will change."))
   "Returns the new sequence of changes with file added
 to the latest change."
   (port-path:ensure-string-pathname file)
-  (let ((head (first sequence))
+  (let ((head (if (null sequence)
+		  (make-instance
+		   'change
+		   :identifier (get-new-change-identifier sequence)
+		   :file-map (create-new-file-map))
+		  (first sequence)))
 	(tail (rest sequence)))
     (if (lookup-in-file-map file (file-map head))
 	sequence
@@ -182,7 +187,8 @@ to the latest change."
 (defmethod add-file-to-changes (file (change-file pathname))
   "Writes a new change-file with file recorded in the
 latest change."
-  (write-change-file (add-file-to-changes file (read-file change-file))))
+  (write-change-file (add-file-to-changes file (read-file change-file))
+		     change-file))
 
 (defgeneric get-modified-files (older-changes newer-changes)
   (:documentation "Return a list of files, which

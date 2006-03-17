@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.17 2006/03/17 08:58:21 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.18 2006/03/17 14:08:47 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -38,7 +38,8 @@ It returns the identifier of the branch created."
 				   (port-path:delete-directory-tree
 				    branch-directory))))
 	    (backend-get module access
-			 (list *branch-file-name* *access-file-name*) *meta-directory*)
+			 (list *branch-file-name* *access-file-name*)
+			 *meta-directory*)
 	    (setf identifier (get-new-branch-identifier *branch-file-name*))
 	    (let* ((branch (make-instance 'branch
 					  :identifier identifier
@@ -55,10 +56,13 @@ It returns the identifier of the branch created."
 	      (add-branch branch *branch-file-name*)
 	      (port-path:create-directory branch-directory)
 	      (create-new-change-file change-file)
+	      (add-file-to-changes *map-file-name* change-file)
+	      (break)
 	      (create-new-map-file map-file) ; creates empty map file,
 					     ; containing only "NIL"
 	      (backend-commit module *log-empty-branch* access
-			      (list change-file *branch-file-name* map-file)))))
+			      (list change-file *branch-file-name*
+				    map-file)))))
 	(remove-meta-directory)))
     identifier))
 
@@ -85,7 +89,8 @@ access file and the branch subdirectory with it's change file."
 	   (map-file (merge-pathnames branch-directory *map-file-name*)))
       ;; Get change, branch, map and access file.
       (backend-get module access
-		   (list *access-file-name* *branch-file-name* change-file map-file)
+		   (list *access-file-name* *branch-file-name*
+			 change-file map-file)
 		   *meta-directory*)
       ;; If no change is given, take latest.
       (unless change
@@ -283,19 +288,22 @@ Rationale: The user may want to restrict update to certain files."
 				  updatable-files-absolute))
 		  (current-filename (nth file-number
 					 updatable-files)))
-	      (backend-get module access (list fresh-file)
-			   temporary-directory)
-	      (when
-		  (not-same-p aged-file
-			      (merge-pathnames fresh-file temporary-directory))
-		(progn
-		  (push current-filename changed-files)
-		  (debug
-		    (debug-format "Put file ~A into change list."
-				  current-filename)))))))
+	      (handler-case
+		  (progn
+		    (backend-get module access (list fresh-file)
+			       temporary-directory)
+		    (when
+			(not-same-p aged-file
+				    (merge-pathnames fresh-file
+						     temporary-directory))
+		      (push current-filename changed-files)
+		      (debug
+			(debug-format "Put file ~A into change list."
+				      current-filename))))
+		(backend-error () (push current-filename changed-files))))))
 	changed-files))))
 
-(defun commit (module message access branch files)
+(defun distribution-commit (module message access branch files)
   "Commit files to the checked out branch. An appropriate change
 record is stored. All files must have been changed. If not
 they get recorded in the commit but are not assigned a new revision

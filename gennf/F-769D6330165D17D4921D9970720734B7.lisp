@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.11 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.12 2006/03/17 14:08:49 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -65,9 +65,10 @@
 ;; Log messages.
 (defparameter *log-empty-branch* "Creation of empty branch."
   "Log message stored when an empty branch is created.")
-
 (defparameter *backend-import-log-message*
   "Creation of a fresh gennf repository.")
+(defparameter *log-file-name* (make-pathname :name "LOG_MESSAGE")
+  "Content of this file is taken as log message on commits.")
 
 ;; Command line.
 (defparameter *subcommand-list* nil

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.24 2006/03/06 15:52:46 florenz Exp $
+;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.25 2006/03/17 14:08:47 florenz Exp $
 
 ;; This file is gennf's backend abstraction layer.
 ;; All interaction with a backend will be by routines of this file.
@@ -60,6 +60,16 @@ filename, the latest revision will be fetched."
     (cond ((eql backend :cvs) (cvs-import module access))
 	  (t (error "Backend ~S not implemented." backend)))))
 
+(defun backend-known-file-p (access file)
+  "Returns if file is known to the backend. file has
+to be a pathname relative to the current working directory
+and in file form. The current working directory has to
+bes the result of backend-get."
+  (let ((backend (backend access)))
+    (cond ((eql backend :cvs)
+	   (cvs-known-file-p access file))
+	  (t (error "Backend ~S not implemented." backend)))))
+    
 (defun backend-commit (module message access files)
   "files are commited to the given repository.
 File pathnames have to be relative to the given working

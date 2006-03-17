@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.8 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.9 2006/03/17 14:08:47 florenz Exp $
 
 ;; This file contains routines to manipulate access entries.
 
@@ -129,11 +129,11 @@ a sequence of accesses."
 
 (defmethod get-access (identifier (file pathname))
   "Read the requested access from file."
-  (get-access identifier (read-file file)))
+  (get-access identifier (read-access-file file)))
 
 (defmethod get-access (identifier (sequence list))
   "Return the requested idenitifer from sequence."
-  (nth identifier sequence))
+  (find identifier sequence :key #'identifier))
 
 (defmethod log-message-format ((access access))
   "Return a string that containts root and the access method."

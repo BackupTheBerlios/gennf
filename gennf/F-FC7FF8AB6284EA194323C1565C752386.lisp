@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.33 2006/03/17 08:58:21 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.34 2006/03/17 14:08:49 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -36,15 +36,17 @@
 ;; End of development only section.
 
 
+
 (defparameter *branch* nil
   "Branch number of current branch.")
-
 (defparameter *map-file* nil
   "Absolute file pathname.")
-
+(defparameter *module* ""
+  "Current module name.")
+(defparameter *access* nil
+  "Current access.")
 
 ;; main function, called by shell script
-;; Should be put straight with main (see below).
 (defun gennf ()
   (format t "Starting GENNF~%")
   (let* ((args (rest (posix-arguments)))
@@ -70,7 +72,11 @@
 	 `(defun ,subcommand-name ,args
 	   (let ((*meta-directory* (find-meta-directory)))
 	     (in-meta-directory
-	       (let* ((*branch* (branch (read-sandbox-file)))
+	       (let* ((sandbox (read-sandbox-file))
+		      (*module* (module sandbox))
+		      (*branch* (branch sandbox))
+		      (*access* (get-access (access sandbox)
+					    *access-file-name*))
 		      (*map-file* (port-path:append-pathnames
 				   *meta-directory*
 				   (branch-identifier-to-directory *branch*)
@@ -109,7 +115,8 @@
   :in-meta-directory
   (let* ((mapping1 (get-mapping namestring1 *map-file*))
 	 (path (merge-pathnames (pathname namestring2) 
-				(port-path:get-parent-directory *meta-directory*)))
+				(port-path:get-parent-directory
+				 *meta-directory*)))
 	 (new-mapping (create-new-mapping :kind :file 
 					  :path path
 					  :id (id mapping1))))
@@ -122,23 +129,35 @@
   :in-meta-directory
   (mapcar #'sync (read-map-file *map-file*)))
 
-(defsubcommand checkout (module root branch &optional change)
+(defsubcommand checkout (module root &optional branch change)
   (let ((working-directory
 	 (merge-pathnames (make-pathname :directory (list :relative module))))
 	(access (make-instance 'access :root root)))
     (ensure-directories-exist working-directory)
-;;    (break)
     (port-path:in-directory working-directory
       (distribution-checkout module access
-			     (parse-integer branch)
+			     (if branch (parse-integer branch) 1)
 			     (if change (parse-integer change)))
 ;;       )))				
-      (resync))))			
-	
+      (resync))))
+
 (defsubcommand setup (module root &key symbolic-name description)
   (initialize-repository module root
 			 :symbolic-name symbolic-name
 			 :description description))
+
+(defsubcommand commit (&rest files)
+  :in-meta-directory
+  (let ((changed-files (sandbox-changed-files *module* *access*
+					      *branch* files)))
+    (break)
+    (debug
+      (debug-format "Changed files: ~A" changed-files))
+    (distribution-commit *module* "<empty>" *access* *branch*
+			 changed-files)))
+    
+					      
+			
 
 ;;;; defsubcommand
 ;;;; =============
