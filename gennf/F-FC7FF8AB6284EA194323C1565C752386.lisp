@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.32 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.33 2006/03/17 08:58:21 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -34,9 +34,14 @@
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (proclaim '(optimize (cl:debug 3))))
 ;; End of development only section.
+
 
-(define-condition interactive-error ()
-  ((text :initarg :text :reader text)))
+(defparameter *branch* nil
+  "Branch number of current branch.")
+
+(defparameter *map-file* nil
+  "Absolute file pathname.")
+
 
 ;; main function, called by shell script
 ;; Should be put straight with main (see below).
@@ -45,77 +50,60 @@
   (let* ((args (rest (posix-arguments)))
 	 (command (first args))
 	 (command-args (rest args)))
-    (format t "Command:~a~%Arguments:~a~%" command command-args)
+    (debug
+      (debug-format "Command:~a~%Arguments:~a~%" command command-args))
     (unless command
-      (error 'unknown-subcommand :text "Specify a subcommand!"))
+      (format *debug-io* "Specify a subcommand!~%")
+      (quit))
     (dispatch-subcommand command command-args)
-    ))
-    ;(quit)))				
+    ;;))
+    (quit)))
 
 ;;  FIXME: Use global Variable with subcommands and lambdas.
 (defun dispatch-subcommand (command command-args)
   (apply (cdr(assoc command *subcommand-list* :test #'string=)) command-args))
 
-(defparameter *branch* nil)
-
-(defparameter *map-file* nil
-"Holds absolute file pahtname")
-
 (defmacro defsubcommand (subcommand-name (&rest args) &body forms)
   `(progn
-     ,(if (and (symbolp (first forms))
-	       (eq (first forms) :in-meta-directory))
-	  `(defun ,subcommand-name ,args
-	     (let ((*meta-directory* (find-meta-directory)))
-	       (in-meta-directory
-		 (let* ((*branch* (branch (read-sandbox-file)))
-			(*map-file* (merge-pathnames
-				     (branch-identifier-to-directory *branch*) *map-file*)))
-		   ,@(rest forms)))))
-	  `(defun ,subcommand-name ,args
-	     `(,@forms)))
-     (pushnew (cons (format nil "~(~a~)" ',subcommand-name)
-		     #',subcommand-name)
-	       *subcommand-list* :key #'car :test #'string=)))
+    ,(if (and (symbolp (first forms))
+	      (eq (first forms) :in-meta-directory))
+	 `(defun ,subcommand-name ,args
+	   (let ((*meta-directory* (find-meta-directory)))
+	     (in-meta-directory
+	       (let* ((*branch* (branch (read-sandbox-file)))
+		      (*map-file* (port-path:append-pathnames
+				   *meta-directory*
+				   (branch-identifier-to-directory *branch*)
+				   *map-file-name*)))
+		 ,@(rest forms)))))
+	 `(defun ,subcommand-name ,args
+	   ,@forms))
+    (setf *subcommand-list*
+     (reassoc (format nil "~(~a~)" ',subcommand-name)
+      #',subcommand-name *subcommand-list* :test #'string=))))
 
-(defun initialize-repository (module root
-			      &key symbolic-name description)
-  "Initializes a new repository at location root for the named module.
-That means that the repository is created and an initial branch created."
-  (let ((access (make-instance 'access :root root)))
-    (create-empty-repository module access)
-    (create-empty-branch module access :symbolic-name symbolic-name
-			 :description description)))
+;;      (pushnew (cons (format nil "~(~a~)" ',subcommand-name)
+;; 		     #',subcommand-name)
+;; 	       *subcommand-list* :key #'car :test #'string=)))
 
-(defun branch-from-change (module access
-			   origin-access origin-branch &optional origin-change)
-  "Created a new branch for module at access from origin-access
-and origin-branch using origin-change if given or the latest.
-The identifier of the newly created branch is returned."
-  (let ((identifier (create-empty-branch module access)))
-    (merge module access identifier
-	   origin-access origin-branch origin-change)
-  identifier))
 
 ;; FIXME: multiple adds!
 (defsubcommand add (namestring)
   :in-meta-directory
-  ;; - find meta-dir
-  ;; - create new mapping
-  ;; - find mapfile
-  ;; - add mapping to file 
-  (let* ((id (format nil "META/~a/~a" *branch* (guid-gen)))
-	 (path (merge-pathnames (pathname namestring)
-				(port-path:get-parent-directory
-				 *meta-directory*)))
-	 (mapping (create-new-mapping :path path :id id)))
-    (add-mapping mapping *map-file*)))
+  (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
+    (let* ((id (format nil "META/~a/~a" *branch* (guid-gen)))
+	   (path (pathname namestring))
+	   (mapping (create-new-mapping :path path :id id)))
+      (add-mapping mapping *map-file*)
+      (resync)
+      )))
 
 (defsubcommand remove-file (namestring)
   :in-meta-directory
-  (let ((mapping (get-mapping namestring *map-file*)))
-    (remove-mapping mapping *map-file*)
-    (delete-file (path mapping))))
+  (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
+    (let ((mapping (get-mapping namestring *map-file*)))
+      (remove-mapping mapping *map-file*)
+      (delete-file (path mapping)))))
 
 (defsubcommand move (namestring1 namestring2)
   :in-meta-directory
@@ -129,6 +117,28 @@ The identifier of the newly created branch is returned."
     (add-mapping new-mapping *map-file*)
     (sync new-mapping)
     (delete-file (path mapping1))))
+
+(defsubcommand resync ()
+  :in-meta-directory
+  (mapcar #'sync (read-map-file *map-file*)))
+
+(defsubcommand checkout (module root branch &optional change)
+  (let ((working-directory
+	 (merge-pathnames (make-pathname :directory (list :relative module))))
+	(access (make-instance 'access :root root)))
+    (ensure-directories-exist working-directory)
+;;    (break)
+    (port-path:in-directory working-directory
+      (distribution-checkout module access
+			     (parse-integer branch)
+			     (if change (parse-integer change)))
+;;       )))				
+      (resync))))			
+	
+(defsubcommand setup (module root &key symbolic-name description)
+  (initialize-repository module root
+			 :symbolic-name symbolic-name
+			 :description description))
 
 ;;;; defsubcommand
 ;;;; =============
@@ -153,3 +163,22 @@ The identifier of the newly created branch is returned."
 
 ;; (defsubcommand test-subcommand2  (arg1 arg2 arg3) :in-meta-directory
 ;; 	       (format t "~a ~a ~a" arg1 arg2 arg3))
+
+(defun initialize-repository (module root
+			      &key symbolic-name description)
+  "Initializes a new repository at location root for the named module.
+That means that the repository is created and an initial branch created."
+  (let ((access (make-instance 'access :root root)))
+    (create-empty-repository module access)
+    (create-empty-branch module access :symbolic-name symbolic-name
+			 :description description)))
+
+(defun branch-from-change (module access
+			   origin-access origin-branch &optional origin-change)
+  "Created a new branch for module at access from origin-access
+and origin-branch using origin-change if given or the latest.
+The identifier of the newly created branch is returned."
+  (let ((identifier (create-empty-branch module access)))
+    (merge module access identifier
+	   origin-access origin-branch origin-change)
+  identifier))

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.16 2006/03/16 11:50:37 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.17 2006/03/17 08:58:21 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -73,7 +73,7 @@ signalled."
       (add-access access *access-file-name*)
       (backend-import module access))))
 
-(defun checkout (module access branch &optional change)
+(defun distribution-checkout (module access branch &optional change)
   "Checkout a change into a sandbox. If no change number is given,
 the latest change is checked out.
 The sandbox is called *meta-directory* and contains the branch and

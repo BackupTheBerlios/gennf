@@ -1,23 +1,33 @@
 TODO
 ====
 
+High priority
+-------------
 * A log message browser should be offered.
-  A repository browser in general would be nice.
-* For the merging: An equality predicate which disregards differences
-  in whitespace might be helpful.
-* commit should offer a restart to do an update if conflicts
-  occur. If the update is conflict-free, it should be offered the
-  possibility to proceed with the commit or the quit.
-  If the update has conflicts too, it should be quit.
-* The lock-problem (cf. e-mail from Florian) is not considered in
-  commit. It is assumed that the complete commit procedure
-  is not interrupted by some other commit.
-  The retry macro is somehow for this purpose but it is not
-  consequently used yet.
-* The retry macro should signal a condition if the maximum
-  number of retries is exceeded.
 * When merging, proper mark up functions, which inserts filenames
   and stuff, should be used.
+* List of all changes of a branch. This includes following links.
+* Diff between two changes (with restriction to certain files).
+* MAP file and merging. MAP files have to be treated special.
+  The merge function has to be cleaned up a little bit (should
+  be parametrized with the merge algorithm).
+
+Low priority
+------------
+* For the merging: An equality predicate which disregards differences
+  in whitespace might be helpful.
+* Error handling:
+  * commit should offer a restart to do an update if conflicts
+    occur. If the update is conflict-free, it should be offered the
+    possibility to proceed with the commit or the quit.
+    If the update has conflicts too, it should be quit.
+  * The lock-problem (cf. e-mail from Florian) is not considered in
+    commit. It is assumed that the complete commit procedure
+    is not interrupted by some other commit.
+    The retry macro is somehow for this purpose but it is not
+    consequently used yet.
+  * The retry macro should signal a condition if the maximum
+    number of retries is exceeded.
 
 
 ABANDONED
@@ -42,4 +52,9 @@ Those are the basic command line instructions.
 		       |
 * branch	       |
 * merge		       |
+* merge-finish         | 
 * new                  |
+                       |
+* diff                 |
+* changes              |
+* log                  |

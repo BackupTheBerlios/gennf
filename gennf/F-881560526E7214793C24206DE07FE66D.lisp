@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.17 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.18 2006/03/17 08:58:21 florenz Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from MCVS.
@@ -197,7 +197,7 @@ id and path"
     (remove-mapping map sequence)))
 
 (defmethod remove-mapping ((map mapping) (file pathname))
-    (remove-mapping map file))
+    (write-map-file (remove-mapping map (read-map-file file)) file))
 
 (defmethod remove-mapping ((identifier string) (file pathname))
   (let* ((sequence (read-map-file file))
@@ -383,10 +383,15 @@ Path1 and Path2 must be abolute."
 	(mapcar #'port-path:create-directory not-existing-pathes)
 	(ecase kind
 	  ;; Hardlinking
-	  (:FILE (make-hard-link absolute-path (merge-pathnames id)))
-	  ;; FIXME: Softlinking 
-	  (:SYMLINK 
-	   (error "SYMLINKS are NOT yet Implemented")))))))
+	  (:FILE
+	   (if  (and 
+		   (port-path:path-exists-p (merge-pathnames id))
+		   (port-path:path-exists-p absolute-path))
+		()			; FIXME: compare for inode#
+		(make-hard-link absolute-path (merge-pathnames id))))
+	   ;; FIXME: Softlinking 
+	   (:SYMLINK 
+	    (error "SYMLINKS are NOT yet Implemented")))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

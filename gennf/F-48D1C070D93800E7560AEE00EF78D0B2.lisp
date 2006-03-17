@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.18 2006/03/13 15:40:27 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.19 2006/03/17 08:58:21 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -68,18 +68,17 @@ the last string elements in the result respectively."
 ;; Functions for alists.
 ;;
 
-(defun extract (symbol symbol-alist)
-  "Lookup a an entry in a symbol alist (a symbol
-alist is an alist having symbols as keys)."
-  (cdr (assoc symbol symbol-alist)))
+(defun extract (key alist &key (test #'eql))
+  "Lookup a an entry in an alist."
+  (cdr (assoc key alist :test test)))
 
-(defun unassoc (symbol symbol-alist)
-  "Remove all entries having symbol from a symbol alist."
-  (remove-if (lambda (pair) (eql symbol (car pair))) symbol-alist))
+(defun unassoc (key alist &key (test #'eql))
+  "Remove all entries having key from an alist."
+  (remove-if (lambda (pair) (funcall test key (car pair))) alist))
 
-(defun reassoc (symbol data symbol-alist)
-  "Exchange the value associated with symbol by data in an alist."
-  (acons symbol data (unassoc symbol symbol-alist)))
+(defun reassoc (key data alist &key (test #'eql))
+  "Exchange the value associated with key by data in an alist."
+  (acons key data (unassoc key alist :test test)))
 
 (defun alist-union (alist1 alist2 &key (test #'eql))
   "Return the union of all pairs of alist1 and alist2.
