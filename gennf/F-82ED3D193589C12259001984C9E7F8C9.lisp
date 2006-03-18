@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,28 +16,21 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-82ED3D193589C12259001984C9E7F8C9.lisp,v 1.3 2006/03/05 18:48:15 florenz Exp $
+;; $Id: F-82ED3D193589C12259001984C9E7F8C9.lisp,v 1.4 2006/03/18 23:37:22 florenz Exp $
 
 ;; Simple support for debugging code.
 
 
 (in-package :gennf)
 
-(defparameter *debug-output-begin* "vvv DEBUG OUTPUT vvv"
-  "Precedes debug output.")
-
-(defparameter *debug-output-end* "^^^ DEBUG OUTPUT ^^^"
-  "Succeeds debug output.")
-
-(defun debug-print (&rest arguments)
-  "Passes all arguments to print and encloses them
-with two lines indicating debug-output.
-Output only in debug mode."
+(defun debug-print (string)
+  "Prints string to debug output. Each line in string is
+prefixed with *debug-output-prefix*."
   (when *debug-mode*
-    (write-line *debug-output-begin* *debug-io*)
-    (apply #'print arguments)
-    (fresh-line *debug-io*)
-    (write-line *debug-output-end* *debug-io*)))
+    (with-input-from-string (stream string)
+      (loop for line = (read-line stream nil)
+	    while line
+	    do (format *debug-io* "~A~A~%" *debug-output-prefix* line)))))
 
 (defun debug-format (&rest arguments)
   "Passes all arguments to format and encloses them
@@ -45,10 +38,7 @@ with two lines indicating debug-output. The stream argument
 to format is automatically inserted.
 Output only in debug mode."
   (when *debug-mode*
-    (write-line *debug-output-begin* *debug-io*)
-    (apply #'format (append (list *debug-io*) arguments))
-    (fresh-line *debug-io*)
-    (write-line *debug-output-end* *debug-io*)))
+    (debug-print (apply #'format (append (list nil) arguments)))))
        
 (defmacro debug (&body forms)
   "Executes forms only when in debug-mode. Debug mode is

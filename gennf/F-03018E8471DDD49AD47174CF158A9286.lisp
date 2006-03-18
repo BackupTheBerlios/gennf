@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.18 2006/03/17 14:08:47 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.19 2006/03/18 23:37:21 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -140,6 +140,17 @@ file-maps of all changes in sequence."
       (when (lookup-in-file-map file (file-map change))
 	(incf occurences)))
     occurences))
+
+(defgeneric take-older-changes (changes &optional n)
+  (:documentation "Takes the n oldest changes from the changes list."))
+
+(defmethod take-older-changes ((sequence list) &optional (n 1))
+  "Takes n last elements of the list."
+  (nthcdr (- (length sequence) n) sequence))
+
+(defmethod take-older-changes ((file pathname) &optional (n 1))
+  "Takes n last records from file."
+  (take-older-changes (read-change-file file) n))
 
 (defgeneric all-changed-files (change &optional identifier)
   (:documentation "Returns all files that were
@@ -272,7 +283,8 @@ If no change is given, the latest one is assumed.
 If the key argument files is supplied, only those files
 appear in the result that are mentioned in this file list."))
 
-(defmethod extract-files-and-revisions ((sequence list) &key identifier files)
+(defmethod extract-files-and-revisions ((sequence list) &key identifier
+					(files () files-supplied-p))
   "Extract the required list from the given sequence of changes."
   ;; Latest change is default.
   (unless identifier
@@ -287,22 +299,27 @@ appear in the result that are mentioned in this file list."))
     (dolist (change sequence)
       (setf file-revisions (alist-union (file-map change)
 					file-revisions :test #'string=)))
+
     ;; Translate filenames to pathnames.
     (setf file-revisions
 	  (mapcar #'(lambda (pair)
 		      (cons (pathname (car pair)) (cdr pair)))
 		  file-revisions))
     ;; If only certain files are demanded, all others are filtered out.
-    (if files
+    (if files-supplied-p
 	(remove-if-not #'(lambda (pair)
 			   (member (car pair) files :test #'equal))
 		       file-revisions)
 	file-revisions)))
 
-(defmethod extract-files-and-revisions ((file pathname) &key identifier files)
+(defmethod extract-files-and-revisions ((file pathname) &key identifier
+					(files () files-supplied-p))
   "Extract the required list from file."
-  (extract-files-and-revisions (read-change-file file)
-			       :identifier identifier :files files))
+  (if files-supplied-p
+      (extract-files-and-revisions (read-change-file file)
+				   :identifier identifier :files files)
+      (extract-files-and-revisions (read-change-file file)
+				   :identifier identifier)))
 
 (defun remove-revisions (alist)
   "Removes the revisions from a file-revision list as produced

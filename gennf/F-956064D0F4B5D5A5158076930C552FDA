@@ -1,4 +1,4 @@
-# Copyright 2005 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+# Copyright 2005 Florian Lorenzen, Fabian Otto
 #
 # This file is part of gennf.
 #
@@ -16,7 +16,7 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.2 2006/03/15 19:04:13 sigsegv Exp $
+# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.3 2006/03/18 23:37:22 florenz Exp $
 
 LISP = sbcl
 EVALOPT = --eval
@@ -36,8 +36,13 @@ gennf: $(SOURCES)
 		$(EVALOPT) "(asdf:operate 'asdf:load-op :$@)" \
 		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\" :executable t :toplevel #'gennf::gennf)"
 
+gennf.img: $(SOURCES)
+	$(LISP) $(EVALOPT) "(require :asdf)" \
+		$(EVALOPT) "(asdf:operate 'asdf:load-op :gennf)" \
+		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\")"
+
 clean:
 	rm $(FASLS)
 
 distclean: clean
-	rm $(IMAGES)
+	rm gennf gennf.img

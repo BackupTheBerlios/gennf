@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.18 2006/03/17 14:08:47 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.19 2006/03/18 23:37:22 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -57,7 +57,6 @@ It returns the identifier of the branch created."
 	      (port-path:create-directory branch-directory)
 	      (create-new-change-file change-file)
 	      (add-file-to-changes *map-file-name* change-file)
-	      (break)
 	      (create-new-map-file map-file) ; creates empty map file,
 					     ; containing only "NIL"
 	      (backend-commit module *log-empty-branch* access
@@ -85,12 +84,10 @@ access file and the branch subdirectory with it's change file."
   (create-meta-directory)
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
-	   (change-file (merge-pathnames branch-directory *change-file-name*))
-	   (map-file (merge-pathnames branch-directory *map-file-name*)))
+	   (change-file (merge-pathnames branch-directory *change-file-name*)))
       ;; Get change, branch, map and access file.
       (backend-get module access
-		   (list *access-file-name* *branch-file-name*
-			 change-file map-file)
+		   (list *access-file-name* *branch-file-name* change-file)
 		   *meta-directory*)
       ;; If no change is given, take latest.
       (unless change
@@ -112,7 +109,7 @@ access file and the branch subdirectory with it's change file."
 			:change change
 			:access (identifier access)))))))
 
-(defun update (module access branch files &optional change)
+(defun distribution-update (module access branch files &optional change)
   "Update files of a previously checked out change. A sandbox has to exist
 and *meta-directory* has to be set properly.
 Optionally a change can be passed. If so, files are updated to the
@@ -123,7 +120,6 @@ the box able to retrieve intermittently added files."
     (let* ((branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file-name*))
 	   (change-file-to-get change-file)
-	   (old-changes (read-change-file change-file))
 	   (sandbox (read-sandbox-file))
 	   (old-change-identifier (change sandbox)))
       (setf files (mapcar #'pathname files))
@@ -134,15 +130,21 @@ the box able to retrieve intermittently added files."
 	  (error "Can not update to a state in the past."))
 	(setf change-file-to-get (cons change-file change)))
       ;; Get changes done in the meantime.
+      ;; Old change file is deleted because sometimes backend
+      ;; does stupid merging.
+      (delete-file change-file)
       (backend-get module access
 		   (list change-file-to-get) *meta-directory*)
       (let* ((changes (read-change-file change-file))
+	     (old-changes (take-older-changes changes old-change-identifier))
 	     ;; Get the list of modified files with their
 	     ;; revisions and check, if any of them is to be updated
 	     ;; and prefix them with the branch-prefix.
 	     (modified-files (get-modified-files old-changes changes))
-	     (files-to-update (intersection modified-files
-					    files :test #'equal))
+	     (files-to-update (if files
+				  (intersection modified-files
+						files :test #'equal)
+				  modified-files))
 	     (files-to-update-and-revisions
 	      (extract-files-and-revisions changes :files files-to-update))
 	     (files-to-update-branch-prefixed
@@ -157,17 +159,24 @@ the box able to retrieve intermittently added files."
 	     (ancestor-files-and-revisions-branch-prefixed
 	      (branch-prefix-file-list ancestor-files-and-revisions
 				       branch-directory)))
+	;; Quit, if no files have to be updated.
+	(unless files-to-update
+	  (format t "No files have to be updated.~%")
+	  (return-from distribution-update))
 	;; If no particular change is required it can be set
 	;; from the freshly read changes file.
 	(unless change
 	  (setf change (length changes)))
 	(debug
-	  (debug-format "Update following files: ~S"
+	  (debug-format "Update following files:~%~A"
 			files-to-update-branch-prefixed))
 	;; Checkout the new revisions of the files to
 	;; a temporary directory.
 	(port-path:in-temporary-directory
 	    (:temporary-pathname temporary-directory)
+	  (debug
+	    (debug-format "Merging files in temporary directory: ~S~%"
+			  temporary-directory))
 	  ;; Create one directory for the new revisions of files
 	  ;; and one for the ancestor revisions. The latter are
 	  ;; necessary because they might be changed in the sandbox.
@@ -196,11 +205,18 @@ the box able to retrieve intermittently added files."
 					       new-directory))
 		    (old-file (merge-pathnames (car file)
 					       *meta-directory*)))
-		(multiple-value-bind (merged-file conflict)
-		    (three-way-merge ancestor-file new-file old-file)
-		  (when conflict
-		    (format t "Conflicts updating file ~S." (car file)))
-		  (list-to-file merged-file old-file))))))
+		;; If file is a new file, copying to the sandbox
+		;; is sufficient. If it is not new, changes have to be
+		;; merged in.
+		(debug
+		  (debug-format "Processing file: ~A~%" file))
+		(if (port-path:path-exists-p old-file)
+		    (multiple-value-bind (merged-file conflict)
+			(three-way-merge ancestor-file new-file old-file)
+		      (when conflict
+			(format t "Conflicts updating file ~A.~%" (car file)))
+		      (list-to-file merged-file old-file))
+		    (port-path:copy-file new-file old-file))))))
 	;; Write updated sandbox file.
 	(setf (change sandbox) change)
 	(write-sandbox-file sandbox)))))
@@ -214,8 +230,8 @@ the changed files from the repository."
   (in-meta-directory
    (let* ((branch-directory (branch-identifier-to-directory branch))
 	  (change-file (port-path:append-pathnames *meta-directory*
-						  branch-directory
-						  *change-file-name*))
+						   branch-directory
+						   *change-file-name*))
 	  (sandbox-changes (read-change-file change-file))
 	  (repository-changes
 	   (let ((latest-changes (retrieve-latest-changes module
@@ -288,19 +304,21 @@ Rationale: The user may want to restrict update to certain files."
 				  updatable-files-absolute))
 		  (current-filename (nth file-number
 					 updatable-files)))
-	      (handler-case
-		  (progn
-		    (backend-get module access (list fresh-file)
-			       temporary-directory)
-		    (when
-			(not-same-p aged-file
-				    (merge-pathnames fresh-file
-						     temporary-directory))
-		      (push current-filename changed-files)
-		      (debug
-			(debug-format "Put file ~A into change list."
-				      current-filename))))
-		(backend-error () (push current-filename changed-files))))))
+	      (flet ((push-file (file)
+		       (push file changed-files)
+		       (debug
+			 (debug-format "Put file ~A into change list."
+				       current-filename))))
+		(if (backend-known-file-p module access fresh-file)
+		    (progn
+		      (backend-get module access (list fresh-file)
+				   temporary-directory)
+		      (when
+			  (not-same-p aged-file
+				      (merge-pathnames fresh-file
+						       temporary-directory))
+			(push-file current-filename)))
+		    (push-file current-filename))))))
 	changed-files))))
 
 (defun distribution-commit (module message access branch files)
@@ -313,10 +331,10 @@ before calling this routine."
   (in-meta-directory
     (let* ((branch-directory (branch-identifier-to-directory branch))
 	   (change-file (merge-pathnames branch-directory *change-file-name*))
-	   (old-changes (read-change-file change-file))
 	   (sandbox (read-sandbox-file)))
       (setf files (mapcar #'pathname files))
       (let* ((changes (retrieve-latest-changes module access branch))
+	     (old-changes (take-older-changes changes (change sandbox)))
 	     (identifier (get-new-change-identifier changes))
 	     (change (make-instance 'change
 				    :identifier identifier
@@ -330,7 +348,7 @@ before calling this routine."
 					   :test #'equal)))
 	(if conflicting-files
 	    ;; Signal an error, if files conflict.
-	    (error "The following files conflict: ~S" conflicting-files)
+	    (error "The following files conflict:~%~S" conflicting-files)
 	    ;; No conflicts.
 	    (let ((branch-prefixed-existing-files (branch-prefix-file-list
 						   existing-files
@@ -384,8 +402,8 @@ before calling this routine."
 	      (setf (change sandbox) identifier)
 	      (write-sandbox-file sandbox)))))))
 
-(defun merge (module access branch
-	      origin-access origin-branch &optional origin-change)
+(defun distribution-merge (module access branch
+			   origin-access origin-branch &optional origin-change)
   "Merge is a repository only operation.
 origin-* indicate the change to merge in. A record to the access file
 is made if necessary.
@@ -464,14 +482,14 @@ branching."
       (unless origin-change
 	(setf origin-change (length origin-changes)))
       (debug
-        (debug-format "Destination files are in ~S.
-Origin files are in ~S."
+        (debug-format "Destination files are in ~A.
+Origin files are in ~A.~%"
 		      destination-directory origin-directory))
       (port-path:create-directory destination-directory
 				  :require-fresh-directory t)
       (port-path:create-directory origin-directory :require-fresh-directory t)
       (debug 
-        (debug-format "DESTINATION CHANGES ~S" destination-changes))
+        (debug-format "Destination changes: ~A~%" destination-changes))
       ;; Only the common files have to be fetched from the destination
       ;; branch because only those have to be merged. The other
       ;; files can just be added.
@@ -496,13 +514,19 @@ Origin files are in ~S."
 					      origin-branch-absolute))
 		(destination-file (merge-pathnames
 				   file
-				   destination-branch-absolute)))
-	    (multiple-value-bind (merged-file conflict)
-		(two-way-merge origin-file destination-file :conflicting t)
-	      (when conflict
-		(setf conflicts t)
-		(format t "Conflict merging file ~S." file))
-	      (list-to-file merged-file destination-file))))
+				   destination-branch-absolute))
+		(origin-info (format nil "branch: ~A / root: ~A (origin)"
+				     origin-branch (root origin-access)))
+		(destination-info
+		 (format nil "branch: ~A / root: ~A (destination)"
+			 branch (root access))))
+	    (format t "Doing file ~A~%" file)
+	    (appropriate-two-way-merge origin-file destination-file
+					   origin-info destination-info)
+	    (when (appropriate-two-way-merge origin-file destination-file
+					     origin-info destination-info)
+	      (setf conflicts t)
+	      (format t "Conflict merging file ~A.~%" file))))
 	;; Create merge entry.
 	(backend-get module access (list *access-file-name*)
 		     destination-directory)
@@ -547,10 +571,10 @@ Origin files are in ~S."
 	    ;; (cf. always-cleanup option).
 	    (progn
 	      (port-path:delete-directory-tree origin-directory)
-	      (format t "There were conflicts which have to be resolved.")
-	      (format t "The conflicting files are in ~S."
+	      (format t "There were conflicts which have to be resolved.~%")
+	      (format t "The conflicting files are in ~A.~%"
 		      (namestring destination-directory))
-	      (return-from merge
+	      (return-from distribution-merge
 		(values temporary-directory
 			(union common-files uncommon-files :test #'equal))))
 	    (let ((uncommon-files-prefixed (branch-prefix-file-list

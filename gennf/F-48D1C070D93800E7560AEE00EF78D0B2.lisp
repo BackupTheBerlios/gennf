@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.19 2006/03/17 08:58:21 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.20 2006/03/18 23:37:21 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.

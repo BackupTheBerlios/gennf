@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.25 2006/03/17 14:08:47 florenz Exp $
+;; $Id: F-251FB522127FF9A2E037DC904E011C8D.lisp,v 1.26 2006/03/18 23:37:21 florenz Exp $
 
 ;; This file is gennf's backend abstraction layer.
 ;; All interaction with a backend will be by routines of this file.
@@ -60,14 +60,18 @@ filename, the latest revision will be fetched."
     (cond ((eql backend :cvs) (cvs-import module access))
 	  (t (error "Backend ~S not implemented." backend)))))
 
-(defun backend-known-file-p (access file)
-  "Returns if file is known to the backend. file has
-to be a pathname relative to the current working directory
-and in file form. The current working directory has to
-bes the result of backend-get."
+(defun backend-known-file-p (module access file)
+  "Returns if file is known to the backend."
   (let ((backend (backend access)))
     (cond ((eql backend :cvs)
-	   (cvs-known-file-p access file))
+	   (cvs-known-file-p module access file))
+	  (t (error "Backend ~S not implemented." backend)))))
+
+(defun backend-known-module-p (module access)
+  "Returns if module is known to the backend."
+  (let ((backend (backend access)))
+    (cond ((eql backend :cvs)
+	   (cvs-known-module-p access module))
 	  (t (error "Backend ~S not implemented." backend)))))
     
 (defun backend-commit (module message access files)

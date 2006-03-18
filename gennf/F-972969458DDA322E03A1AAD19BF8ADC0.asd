@@ -1,4 +1,4 @@
-;; 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.15 2006/03/17 08:58:21 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.16 2006/03/18 23:37:22 florenz Exp $
 
 ;; ASDF system defintion in ASDF-INSTALL style.
 
@@ -37,11 +37,11 @@
   :components
   ((:file "packages")
    (:file "gennf"
-	  :depends-on ("packages" "distribution" "mapping"))
+	  :depends-on ("packages" "distribution" "mapping" "configuration"))
    (:file "distribution"
 	  :depends-on ("packages" "directories" "configuration" "access"
-				  "backend" "branch" "change"
-				  "error" "debug"))
+				  "backend" "branch" "change" "mapping"
+				  "error" "debug" "merging"))
    (:file "access"
 	  :depends-on ("packages" "configuration" "files"))
    (:file "backend"
@@ -54,9 +54,11 @@
    (:file "merging"
 	  :depends-on ("packages" "miscellaneous" "files"))
    (:file "branch"
-	  :depends-on ("packages" "miscellaneous" "files" "configuration"))
+	  :depends-on ("packages" "miscellaneous"
+				  "files" "configuration"))
    (:file "change"
-	  :depends-on ("packages" "miscellaneous" "files" "configuration"))
+	  :depends-on ("packages" "miscellaneous" "backend" "branch"
+				  "files" "configuration"))
    (:file "configuration"
 	  :depends-on ("packages"))
    (:file "directories"

@@ -1,4 +1,4 @@
-;; 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.9 2006/03/14 17:36:31 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.10 2006/03/18 23:37:22 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -91,6 +91,45 @@ conflicts."
 		      (or (eql (difflib:opcode-tag element) :replace)
 			  (eql (difflib:opcode-tag element) :delete)))
 		  differences)))
+
+(defun appropriate-two-way-merge (file1 file2 info1 info2)
+  "Depending on the given files an appropriate merging
+routine is executed.
+The output is suitable for prin1-file.
+info1 an info2 have to be string describing file1 and file2.
+They are used to put in conflict information"
+  (port-path:with-pathname ((path1 file1) (path2 file2))
+    (flet ((delete-markup (chunk)
+	     (append
+	      (list (format nil "vvv Deleted in ~A, ~A vvv" file1 info1))
+	      chunk
+	      (list (format nil "^^^ Deleted in ~A, ~A ^^^" file1 info1))))
+	   (replace-markup (chunk1 chunk2)
+	     (append
+	      (list (format nil "vvv Conflict from ~A, ~A vvv" file1 info1))
+	      chunk1
+	      (list (format nil "^^^ Conflict from ~A, ~A ^^^" file1 info1))
+	      (list (format nil "vvv Conflict from ~A, ~A vvv" file2 info2))
+	      chunk2
+	      (list (format nil "^^^ Conflict from ~A, ~A ^^^" file2 info2)))))
+      (cond
+	((equal (pathname-name path1) (pathname-name *map-file-name*))
+	  (let ((mappings1 (read-file path1))
+	       (mappings2 (read-file path2)))
+	    (multiple-value-bind (merged-file conflict)
+		(two-way-merge mappings1 mappings2
+			       :equality #'equal
+			       :conflicting t
+			       :delete-markup-function #'delete-markup
+			       :replace-markup-function #'replace-markup)
+	      (prin1-file path1 merged-file)
+	      conflict)))
+	(t (multiple-value-bind (merged-file conflict)
+	       (two-way-merge path1 path2 :conflicting t
+			      :delete-markup-function #'delete-markup
+			      :replace-markup-function #'replace-markup)
+	     (list-to-file merged-file path2)
+	     conflict))))))
 
 (defgeneric two-way-merge (sequence1 sequence2
                                      &key equality conflicting
@@ -203,11 +242,13 @@ opcode is an elements of a differences list."
     (:delete (delete-sublist list2
 			     (difflib:opcode-i1 opcode)
 			     (difflib:opcode-i2 opcode)))
-    (:replace (replace-sublist list2
-			       (subseq list1
-				       (difflib:opcode-j1 opcode)
-				       (difflib:opcode-j2 opcode))
-			       (difflib:opcode-i1 opcode)))
+    (:replace (insert-list (delete-sublist list2
+					   (difflib:opcode-i1 opcode)
+					   (difflib:opcode-i2 opcode))
+			   (subseq list1
+				   (difflib:opcode-j1 opcode)
+				   (difflib:opcode-j2 opcode))
+			   (difflib:opcode-i1 opcode)))
     (:insert (insert-list list2
 			  (subseq list1
 				  (difflib:opcode-j1 opcode)
@@ -222,12 +263,16 @@ opcode is an elements of a differences list."
 start to end. get-start and get-end are used to extract
 ranges from each difference."
     (loop for difference in differences
-	  when (or (and (<= (funcall get-start difference) start)
-			(< start (funcall get-end difference)))
-		   (and (> (funcall get-start difference) start)
-			(< (funcall get-end difference) end))
-		   (and (< (funcall get-start difference) end)
-			(<= end (funcall get-end difference))))
+	  when (or (and (<= start (funcall get-start difference))
+			(< (funcall get-start difference) end))
+		   (and (<= start (funcall get-end difference))
+			(< (funcall get-end difference) end)))
+;; 	  when (or (and (<= (funcall get-start difference) start)
+;; 			(< start (funcall get-end difference)))
+;; 		   (and (>= (funcall get-start difference) start)
+;; 			(<= (funcall get-end difference) end))
+;; 		   (and (< (funcall get-start difference) end)
+;; 			(<= end (funcall get-end difference))))
 	  collect difference
 	  until (> (funcall get-start difference) end)))
 

@@ -486,6 +486,25 @@ Otto, to be enriched by directory structure and a user interface.
 }
 
 
+\subsection{Dropped features}
+
+Due to time constraints and the technical difficulties described in
+previous sections quite a huge number of features are not
+implemented in the prototype. Unfortunately, some very fundamental
+operations are among them.
+
+Functionality which is not implemented includes:
+
+\begin{itemize}
+\item Recording and browsing of log comments.
+\item Generating change sets (lots of changes bundled together) to
+  efficiently merge them into another branch.
+\item Calculation and browsing of differencs between any two changes
+  of a branch, either for all files or some restricted set.
+\item Replication as described in section \ref{distrib}.
+\end{itemize}
+
+
 \section{Review}
 
 Several critical issues arised during development, and some of them
@@ -524,30 +543,29 @@ section and are summarized below:
 
 \begin{itemize}
 \item Extending \textsc{metacvs} was more difficult than expected
-because the code is tightly written around \textsc{cvs} and has
-no real internal interface we could set our distribution atop.
-The port to \textsc{sbcl}/\textsc{osicat} was superfluous as we decided
-to start from scratch.
-\item Using \textsc{cvs} as storage backend with distinct small functionality
-routines which have precisely defined effects reulted in massive network
-bandwidth (at least for remote repositories) and heay usage of temporary
-hard disk space and copying of files.
+  because the code is tightly written around \textsc{cvs} and has no
+  real internal interface we could set our distribution atop.  The
+  port to \textsc{sbcl}/\textsc{osicat} was superfluous as we decided
+  to start from scratch.
+\item Using \textsc{cvs} as storage backend with distinct small
+  functionality routines which have precisely defined effects reulted
+  in massive network bandwidth (at least for remote repositories) and
+  heay usage of temporary hard disk space and copying of files.
 \item One of our design goals was to avoid the necessity to store
-complete repositories in the user's workspace. This again results in
-heavy use of network bandwidth. Systems like \textsc{darcs} or
-\textsc{gnu arch} avoid this high network load by strong usage of
-cacheing. The motivation is to replace (expensive) network bandwidth
-by (cheap) hard disk storage. We have to admit that this statement
-can not be discarded.
+  complete repositories in the user's workspace. This again results in
+  heavy use of network bandwidth. Systems like \textsc{darcs} or
+  \textsc{gnu arch} avoid this high network load by strong usage of
+  cacheing. The motivation is to replace (expensive) network bandwidth
+  by (cheap) hard disk storage. We have to admit that this statement
+  can not be discarded.
 \item \GENNF{} has to merge revisions of files very often. We could
-not use the \textsc{cvs} merge capabilities in all cases and had to
-replace them by self-written routines. Implementing those routines
-consumed a considerable amount of time.
-Furthermore, we implemented only a two-way merge when performing
-a merge of branches because the coimputation of the common ancestor
-for the general case is quite a complex issue.
-As a result, \GENNF{} is quite bad at merging which is very undesireable
-because it is a very central operation.
+  not use the \textsc{cvs} merge capabilities in all cases and had to
+  replace them by self-written routines. Implementing those routines
+  consumed a considerable amount of time.  Furthermore, we implemented
+  only a two-way merge when performing a merge of branches because the
+  coimputation of the common ancestor for the general case is quite a
+  complex issue.  As a result, \GENNF{} is quite bad at merging which
+  is very undesireable because it is a very central operation.
 \end{itemize}
 
 

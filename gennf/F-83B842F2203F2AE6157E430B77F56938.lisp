@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.8 2006/03/14 17:36:31 florenz Exp $
+;; $Id: F-83B842F2203F2AE6157E430B77F56938.lisp,v 1.9 2006/03/18 23:37:22 florenz Exp $
 
 ;; This file provides functions to manipulate meta files
 ;; that contain sequences of alists.

@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,11 +16,15 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-DA9E90AB46860DC75ED36F2D7CAFE3BF.lisp,v 1.1 2006/03/05 19:00:10 florenz Exp $
+;; $Id: F-DA9E90AB46860DC75ED36F2D7CAFE3BF.lisp,v 1.2 2006/03/18 23:37:22 florenz Exp $
 
 ;; Code for error handling.
 
 (in-package :gennf)
+
+(defun error-output (&rest rest)
+  "Prints output on error output, like format."
+  (apply #'format *error-output* rest))
 
 (defmacro retry-while-condition ((condition variable &rest cleanup-forms)
 				 &body body)

@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,24 +16,58 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.12 2006/03/17 14:08:49 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.13 2006/03/18 23:37:22 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
 
 (in-package :gennf)
 
+;;
 ;; Debugging.
+;;
+
 (defparameter *debug-mode* t
   "Switches on debug mode.")
 
+(defparameter *debug-output-prefix* "DEBUG: "
+  "Each line of debug output is prefixed with this string.")
+
+
+;;
+;; Global variables concering the current context.
+;; 
+
+(defparameter *meta-directory* nil
+  "Absolute path of current meta directory.")				
+
+(defparameter *sandbox-directory* nil
+  "This is the parent-directory of the meta directory. Relative
+paths provided by the user are resolved against this directory.")
+
+(defparameter *startup-directory* nil
+  "Directory, gennf was started in.")
+
+(defparameter *branch* nil
+  "Branch number of current branch.")
+
+(defparameter *map-file* nil
+  "Absolute file pathname of the current map file.")
+
+(defparameter *module* ""
+  "Current module name.")
+
+(defparameter *access* nil
+  "Current access.")
+
+
+;;
 ;; Directories and meta files.
+;;
+
 (defparameter *meta-directory-name*
   (make-pathname :directory '(:relative "META"))
   "Name of the meta directory.")
-
-(defparameter *meta-directory* (merge-pathnames *meta-directory-name*)
-  "Absolute path of the meta directory.")				
 
 (defparameter *merge-destination*
   (make-pathname :directory '(:relative "destination"))
@@ -59,17 +93,28 @@
   "Name of map file.")
 
 (defparameter *update-special-meta-files*
-  (list *branch-file-name* *access-file-name* *change-file-name* *sandbox-file-name*)
+  (list *branch-file-name* *access-file-name*
+	*change-file-name* *sandbox-file-name*)
   "List of all meta files which have special update handling.")
 
+
+;;
 ;; Log messages.
+;;
+
 (defparameter *log-empty-branch* "Creation of empty branch."
   "Log message stored when an empty branch is created.")
+
 (defparameter *backend-import-log-message*
   "Creation of a fresh gennf repository.")
+
 (defparameter *log-file-name* (make-pathname :name "LOG_MESSAGE")
   "Content of this file is taken as log message on commits.")
 
+
+;;
 ;; Command line.
+;;
+
 (defparameter *subcommand-list* nil
   "Holds subcommand-names an corresponding function calls")

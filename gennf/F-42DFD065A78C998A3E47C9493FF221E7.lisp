@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,13 +16,13 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-42DFD065A78C998A3E47C9493FF221E7.lisp,v 1.5 2006/02/17 22:38:59 florenz Exp $
+;; $Id: F-42DFD065A78C998A3E47C9493FF221E7.lisp,v 1.6 2006/03/18 23:37:21 florenz Exp $
 
 ;; Definition of gennf-package (this is ASDF-INSTALL style).
 
 (defpackage :gennf
     (:use :cl)
-    (:shadow :merge :debug)
+    (:shadow :merge :debug :delete)
     (:documentation "All functions of gennf are in package gennf.
 At a later point, this package may well be splitted into
 several ones with distinct functionality."))

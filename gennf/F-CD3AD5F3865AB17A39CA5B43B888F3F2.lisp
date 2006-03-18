@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.13 2006/03/13 14:52:06 florenz Exp $
+;; $Id: F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp,v 1.14 2006/03/18 23:37:22 florenz Exp $
 
 ;; All directory related functions and macros live in this file.
 
@@ -49,7 +49,13 @@ and files."
     (port-path:delete-directory-tree *meta-directory*)))
 
 (defun find-meta-directory ()
-"Finds from current directory ongoing the higher \"META\" directory."
-  (first
-   (port-path:search-directory-in-directories
-    "META" (port-path:parent-dirs *default-pathname-defaults*))))
+  "Finds from current directory ongoing the higher meta directory."
+  (let ((meta-directory
+	 (first
+	  (port-path:search-directory-in-directories
+	   *meta-directory-name*
+	   (port-path:parent-dirs *default-pathname-defaults*)))))
+    (if meta-directory
+	meta-directory
+	(error "No meta directory found. The current working directory is no sandbox."))))
+	

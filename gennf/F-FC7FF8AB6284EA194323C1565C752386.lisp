@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.34 2006/03/17 14:08:49 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.35 2006/03/18 23:37:22 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -24,112 +24,122 @@
 
 ;; For development purposes only.
 (defparameter *devel-root2*
-  "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk2")
+;  "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk2")
+  "/home/florian/gennf-junk2")
 (defparameter *devel-access2*
   (make-instance 'access :root *devel-root2*))
 (defparameter *devel-root*
-  "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk")
+;  "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk")
+  "/home/florian/gennf-junk")
 (defparameter *devel-access*
   (make-instance 'access :root *devel-root*))
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (proclaim '(optimize (cl:debug 3))))
 ;; End of development only section.
-
 
 
-(defparameter *branch* nil
-  "Branch number of current branch.")
-(defparameter *map-file* nil
-  "Absolute file pathname.")
-(defparameter *module* ""
-  "Current module name.")
-(defparameter *access* nil
-  "Current access.")
+;;
+;; Dispatch.
+;; 
 
-;; main function, called by shell script
 (defun gennf ()
-  (format t "Starting GENNF~%")
-  (let* ((args (rest (posix-arguments)))
-	 (command (first args))
-	 (command-args (rest args)))
-    (debug
-      (debug-format "Command:~a~%Arguments:~a~%" command command-args))
-    (unless command
-      (format *debug-io* "Specify a subcommand!~%")
-      (quit))
-    (dispatch-subcommand command command-args)
-    ;;))
-    (quit)))
+  "Startup function."
+  (handler-case
+      (let* ((arguments (rest (posix-arguments)))
+	     (command (first arguments))
+	     (command-arguments (rest arguments)))
+	(debug
+	  (debug-format "Command: ~a~%Arguments: ~a~%" command
+			command-arguments))
+	(unless command
+	  (error "Specify a subcommand!~%"))
+	(dispatch-subcommand command command-arguments)
+	(quit))
+    (error (condition)
+      (progn
+	(error-output "~%~A~%~%" condition)
+	(quit)))))
 
-;;  FIXME: Use global Variable with subcommands and lambdas.
 (defun dispatch-subcommand (command command-args)
-  (apply (cdr(assoc command *subcommand-list* :test #'string=)) command-args))
-
-(defmacro defsubcommand (subcommand-name (&rest args) &body forms)
-  `(progn
-    ,(if (and (symbolp (first forms))
-	      (eq (first forms) :in-meta-directory))
-	 `(defun ,subcommand-name ,args
-	   (let ((*meta-directory* (find-meta-directory)))
-	     (in-meta-directory
-	       (let* ((sandbox (read-sandbox-file))
-		      (*module* (module sandbox))
-		      (*branch* (branch sandbox))
-		      (*access* (get-access (access sandbox)
-					    *access-file-name*))
-		      (*map-file* (port-path:append-pathnames
-				   *meta-directory*
-				   (branch-identifier-to-directory *branch*)
-				   *map-file-name*)))
-		 ,@(rest forms)))))
-	 `(defun ,subcommand-name ,args
-	   ,@forms))
-    (setf *subcommand-list*
-     (reassoc (format nil "~(~a~)" ',subcommand-name)
-      #',subcommand-name *subcommand-list* :test #'string=))))
-
-;;      (pushnew (cons (format nil "~(~a~)" ',subcommand-name)
-;; 		     #',subcommand-name)
-;; 	       *subcommand-list* :key #'car :test #'string=)))
+  (apply (extract command *subcommand-list* :test #'string=) command-args))
 
 
-;; FIXME: multiple adds!
-(defsubcommand add (namestring)
+;;
+;; Subcommands.
+;; 
+
+(defmacro defsubcommand (subcommand-name function-name
+			 (&rest args) &body forms)
+    `(progn
+      (let ((*startup-directory* (port-path:current-directory)))
+	,(if (and (symbolp (first forms))
+		  (eq (first forms) :in-meta-directory))
+	     `(defun ,function-name ,args
+	       (let* ((*meta-directory* (find-meta-directory))
+		      (*sandbox-directory* (port-path:get-parent-directory
+					    *meta-directory*)))
+		 (in-meta-directory
+		   (let* ((sandbox (read-sandbox-file))
+			  (*module* (module sandbox))
+			  (*branch* (branch sandbox))
+			  (*access* (get-access (access sandbox)
+						*access-file-name*))
+			  (*map-file*
+			   (port-path:append-pathnames
+			    *meta-directory*
+			    (branch-identifier-to-directory *branch*)
+			    *map-file-name*)))
+		     ,@(rest forms)))))
+	     `(defun ,function-name ,args
+	       ,@forms))
+	(setf *subcommand-list*
+	      (reassoc (format nil "~(~a~)" ',subcommand-name)
+		       #',function-name *subcommand-list* :test #'string=)))))
+
+(defsubcommand resync subcommand-resync ()
+  ;; FIXME: iles are not properly renamed.
   :in-meta-directory
-  (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
-    (let* ((id (format nil "META/~a/~a" *branch* (guid-gen)))
-	   (path (pathname namestring))
-	   (mapping (create-new-mapping :path path :id id)))
-      (add-mapping mapping *map-file*)
-      (resync)
-      )))
+  (mapcar #'(lambda (mapping)
+	      (sync mapping (branch-identifier-to-directory *branch*)))
+	  (read-map-file *map-file*)))
 
-(defsubcommand remove-file (namestring)
+(defsubcommand add subcommand-add (&rest namestrings)
   :in-meta-directory
-  (port-path:in-directory (port-path:get-parent-directory *meta-directory*)
-    (let ((mapping (get-mapping namestring *map-file*)))
-      (remove-mapping mapping *map-file*)
-      (delete-file (path mapping)))))
+  ;; FIXME: multiple adds!
+  (port-path:in-directory *sandbox-directory*
+    (dolist (namestring namestrings)
+      (let* ((id (format nil "~A" (guid-gen)))
+	     (path (pathname namestring))
+	     (mapping (create-new-mapping :path path :id id)))
+	(add-mapping mapping *map-file*)
+	(subcommand-resync)))))
 
-(defsubcommand move (namestring1 namestring2)
+(defsubcommand delete subcommand-delete (&rest namestrings)
   :in-meta-directory
-  (let* ((mapping1 (get-mapping namestring1 *map-file*))
-	 (path (merge-pathnames (pathname namestring2) 
-				(port-path:get-parent-directory
-				 *meta-directory*)))
+  (port-path:in-directory *sandbox-directory*
+    (dolist (namestring namestrings)
+      (let ((mapping (get-mapping namestring *map-file*)))
+	(remove-mapping mapping *map-file*)
+	(delete-file (path mapping))))))
+
+(defsubcommand move subcommand-move (namestring1 namestring2)
+  ;; namestring1 and namestring2 have to be relative to the sandbox.
+  :in-meta-directory
+  (let* ((old-file-relative (pathname namestring1))
+	 (new-file-relative (pathname namestring2))
+	 (old-file-absolute (merge-pathnames old-file-relative
+					     *sandbox-directory*))
+	 (old-mapping (get-mapping old-file-relative *map-file*))
 	 (new-mapping (create-new-mapping :kind :file 
-					  :path path
-					  :id (id mapping1))))
-    (remove-mapping mapping1 *map-file*)
+					  :path new-file-relative
+					  :id (id old-mapping))))
+    (remove-mapping old-mapping *map-file*)
     (add-mapping new-mapping *map-file*)
-    (sync new-mapping)
-    (delete-file (path mapping1))))
+    (sync new-mapping (branch-identifier-to-directory *branch*))
+    (delete-file old-file-absolute)))
 
-(defsubcommand resync ()
-  :in-meta-directory
-  (mapcar #'sync (read-map-file *map-file*)))
-
-(defsubcommand checkout (module root &optional branch change)
+(defsubcommand checkout subcommand-checkout (module root
+					     &optional branch change)
   (let ((working-directory
 	 (merge-pathnames (make-pathname :directory (list :relative module))))
 	(access (make-instance 'access :root root)))
@@ -138,66 +148,55 @@
       (distribution-checkout module access
 			     (if branch (parse-integer branch) 1)
 			     (if change (parse-integer change)))
-;;       )))				
-      (resync))))
+      (subcommand-resync))))
 
-(defsubcommand setup (module root &key symbolic-name description)
-  (initialize-repository module root
-			 :symbolic-name symbolic-name
-			 :description description))
-
-(defsubcommand commit (&rest files)
-  :in-meta-directory
-  (let ((changed-files (sandbox-changed-files *module* *access*
-					      *branch* files)))
-    (break)
-    (debug
-      (debug-format "Changed files: ~A" changed-files))
-    (distribution-commit *module* "<empty>" *access* *branch*
-			 changed-files)))
-    
-					      
-			
-
-;;;; defsubcommand
-;;;; =============
-;;;; In configuration.lisp werden die globalen Variablen *xxx-file*
-;;;; als pathspecs definiert. Sie enthalten aber nur die
-;;;; Namenskomponente und sind keine absoluten Pfadangaben und können
-;;;; deswegen auch nicht direkt zum öffnen von Dateien verwendet
-;;;; werden.
-
-;;;; Fuer die einheitliche Erzeugung von subcommands wäre es von
-;;;; Vorteil, wenn es globale Variablen in Namesstyle von *xxx-file*
-;;;; gibt. Diese Variablen können dann von dem makro dynamisch
-;;;; gesetzt werden.  Mittels dieser File-Variablen wird ein einheitliches
-;;;; Interface geschaffen.
-
-;;;; Allerdings ist dafür Voraussetzung, daß die jetzigen Variablen
-;;;; in *xxx-file-name* umbenannt werden, um eine
-;;;; Namensunabhaengigkeit von GENNF zu erhalten. Diese neuerzeugten
-;;;; Variablen koennen dann von den globalen File-Variablen benutzt
-;;;; werden.
-
-
-;; (defsubcommand test-subcommand2  (arg1 arg2 arg3) :in-meta-directory
-;; 	       (format t "~a ~a ~a" arg1 arg2 arg3))
-
-(defun initialize-repository (module root
-			      &key symbolic-name description)
-  "Initializes a new repository at location root for the named module.
-That means that the repository is created and an initial branch created."
+(defsubcommand setup subcommand-setup (module root
+				       &key symbolic-name description)
   (let ((access (make-instance 'access :root root)))
     (create-empty-repository module access)
     (create-empty-branch module access :symbolic-name symbolic-name
-			 :description description)))
+			 :description description)
+    (format t "The new module can be checked out with:~%")
+    (format t "$ gennf checkout ~A ~A~%" module root)))
 
-(defun branch-from-change (module access
-			   origin-access origin-branch &optional origin-change)
-  "Created a new branch for module at access from origin-access
-and origin-branch using origin-change if given or the latest.
-The identifier of the newly created branch is returned."
-  (let ((identifier (create-empty-branch module access)))
-    (merge module access identifier
-	   origin-access origin-branch origin-change)
-  identifier))
+(defsubcommand commit subcommand-commit (&rest files)
+  :in-meta-directory
+  (let* ((f-files (translate-to-f-files files *map-file*))
+	 (changed-files (sandbox-changed-files *module* *access*
+					       *branch* f-files)))
+    (debug
+      (debug-format "Changed files: ~A" changed-files))
+    (if changed-files
+	(distribution-commit *module* "<empty>" *access* *branch*
+			     changed-files)
+	(format t "No files changed. Nothing committed.~%"))))
+
+(defsubcommand update subcommand-update (&rest files)
+  :in-meta-directory
+  (let ((f-files (translate-to-f-files files *map-file*)))
+    (distribution-update *module* *access* *branch* f-files)
+    (subcommand-resync)))
+
+(defsubcommand branch subcommand-branch (module root1 root2 branch
+					 &optional change)
+  (let* ((access1 (make-instance 'access :root root1))
+	 (access2 (make-instance 'access :root root2)))
+    (unless (backend-known-module-p module access1)
+      (format t "Creating new module ~A at ~A.~%" module root1)
+      (create-empty-repository module access1))
+    (let ((identifier (create-empty-branch module access1)))
+      (distribution-merge module access1 identifier
+			  access2 (parse-integer branch)
+			  (if change (parse-integer change)))
+      (format t "Created branch number ~A.~%" identifier)
+      (format t "The branch can be checked out with:~%")
+      (format t "$ gennf checkout ~A ~A ~A~%" module root1 identifier))))
+
+(defsubcommand merge subcommand-merge (module root1 branch1
+				       root2 branch2 &optional change)
+  (let* ((access1 (make-instance 'access :root root1))
+	 (access2 (make-instance 'access :root root2)))
+    (distribution-merge module access1 branch1 access2 branch2 change)))
+
+;;(defsubcommand merge-finish subcommand-merge-finish ()
+  

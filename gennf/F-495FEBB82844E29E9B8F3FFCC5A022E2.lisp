@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.9 2006/03/17 14:08:47 florenz Exp $
+;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.10 2006/03/18 23:37:21 florenz Exp $
 
 ;; This file contains routines to manipulate access entries.
 

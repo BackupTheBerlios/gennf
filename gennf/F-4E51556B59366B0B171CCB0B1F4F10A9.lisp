@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.37 2006/03/17 14:08:47 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.38 2006/03/18 23:37:21 florenz Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -78,7 +78,7 @@ exit-code is mentioned in the error message."
 (defun invoke-cvs (&rest arguments)
   "Run cvs program with given arguments."
   (debug
-    (debug-format "cvs invoked with following arguments: ~S"
+    (debug-format "cvs invoked with following arguments:~%~A"
 		  arguments))
   (invoke-program *cvs-command-name* arguments))
 
@@ -154,8 +154,17 @@ to ate copy(."
 		(char/= (aref output 0) #\A)
 		(char/= (aref output 0) #\?))))))
 	  
-(defun cvs-known-file-p (access file)
-  "Returns if file is known by cvs (if it is already added)."
+(defun cvs-known-file-p (module access file)
+  "Returns if file is known by cvs (if it was already commited)."
+    (port-path:in-temporary-directory
+	(:temporary-pathname temporary-directory)
+      (handler-case
+	  (cvs-get module access (list file) temporary-directory)
+	(backend-error () (return-from cvs-known-file-p nil))))
+    t)
+
+(defun cvs-file-added-p (access file)
+  "Checks if file was already added."
   (port-path:ensure-string-pathname file)
   (with-cvs-output ((list "-d" (root access)
 			  "log" file)
@@ -259,7 +268,7 @@ is signalled, containing a list of outdated files. In this
 case no files are committed at all."
   (let (argument-list)
     (dolist (file files)
-      (unless (cvs-known-file-p access file)
+      (unless (cvs-file-added-p access file)
 	(debug
 	  (debug-format "Checking if file ~S is known to cvs." file))
 	(cvs-add access (list file))))

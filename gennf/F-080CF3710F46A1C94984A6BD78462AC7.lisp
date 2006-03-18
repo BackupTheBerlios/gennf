@@ -1,4 +1,4 @@
-;; Copyright 2006 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2006 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of gennf.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.8 2006/03/16 11:44:57 sigsegv Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.9 2006/03/18 23:37:21 florenz Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -114,7 +114,7 @@ indicated item from sequence."
 (defun branch-identifier-to-directory (identifier)
   "Returns the relative pathname object associated with
 the given identifier."
-  (make-pathname :directory (list :relative (format nil "~S" identifier))))
+  (make-pathname :directory (list :relative (format nil "~A" identifier))))
 
 (defun branch-prefix-file-list (file-list branch)
   "Put the branch prefix in front of the files in list.
