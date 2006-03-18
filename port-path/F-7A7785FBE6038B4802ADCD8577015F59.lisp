@@ -1,4 +1,4 @@
-;; Copyright 2005 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2005 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of port-path.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.16 2006/03/15 18:08:00 florenz Exp $
+;; $Id: F-7A7785FBE6038B4802ADCD8577015F59.lisp,v 1.17 2006/03/18 23:31:23 florenz Exp $
 
 ;; Implements all the main functionality of port-path
 ;; and some required helper functions.
@@ -32,6 +32,10 @@ a macro. Taken from Peter Seibel's book, chapter 8."
 (uffi:def-function ("port_path_tempnam" c-tempnam) ()
   :module "port-path"
   :returning (* :char))
+
+(uffi:def-function "link" ((from :cstring) (to :cstring))
+  :module "port-path"
+  :returning :int)
 
 (defmacro with-directory-form (variable-pathspec-pairs &body forms)
   "Assigns each variable the pathname in directory form denoted
@@ -499,15 +503,15 @@ elements if tested by using test-function."
      collect x
      until (root-p x)))
 
-(defun search-directory-in-directories (name path-list)
-  "Searches for directory name in path-list.
-returns a list of found directories."
-  (let ((search-dir (make-pathname :directory `(:relative ,name))))
-    (remove-if-not #'(lambda (p) (path-exists-p p))
-		   (mapcar #'(lambda (p) (merge-pathnames search-dir p))
-			   path-list))))
+(defun search-directory-in-directories (directory path-list)
+  "Searches for directory in path-list. It has to be a single
+directory, without any other pathname components.
+Returns a list of found directories."
+  (remove-if-not #'(lambda (p) (path-exists-p p))
+		 (mapcar #'(lambda (p) (merge-pathnames directory p))
+			 path-list)))
 
-(defun append-pathnames (&rest pathspecs)
+ (defun append-pathnames (&rest pathspecs)
   "Appends all given pathspecs to a single pathspec. All but the
 last argument are converted to directory-form, the last one is
 used as directory-form if and only if it is in directory-form.
@@ -537,3 +541,14 @@ Thus /a/b /c/d e/f/g/ h/i is turned into /a/b/c/d/e/f/g/h/i."
 	    (make-pathname :directory directory-component
 			   :name (pathname-name last)
 			   :type (pathname-type last)))))))
+
+(defun hard-link (from to)
+  "Creates a hard-link from -> to. Both pathnames are
+intereted as file forms."
+  (with-file-form ((from-file from) (to-file to))
+    (if (or (wild-pathname-p from-file)
+	    (wild-pathname-p to-file))
+	(error "Wild pathnames are not allowed for hard linking.")
+	(uffi:with-cstrings ((from-string (namestring from-file))
+			     (to-string (namestring to-file)))
+	  (link from-string to-string)))))

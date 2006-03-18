@@ -1,4 +1,4 @@
-;; Copyright 2005 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2005 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of port-path.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.14 2006/03/14 16:27:51 florenz Exp $
+;; $Id: F-E4E8137ED6A2987D581A8AB6A46FB7DA.lisp,v 1.15 2006/03/18 23:31:23 florenz Exp $
 
 ;; Defines the exported function of port-path.
 
@@ -38,6 +38,7 @@
    :ensure-string-pathname
    :find-all-files
    :get-parent-directory
+   :hard-link
    :in-directory
    :in-temporary-directory
    :move-directory-tree

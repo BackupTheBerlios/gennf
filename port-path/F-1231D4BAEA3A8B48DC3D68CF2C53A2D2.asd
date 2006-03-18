@@ -1,4 +1,4 @@
-;; Copyright 2005 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+;; Copyright 2005 Florian Lorenzen, Fabian Otto
 ;;
 ;; This file is part of port-path.
 ;;
@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-1231D4BAEA3A8B48DC3D68CF2C53A2D2.asd,v 1.3 2006/03/05 18:46:40 florenz Exp $
+;; $Id: F-1231D4BAEA3A8B48DC3D68CF2C53A2D2.asd,v 1.4 2006/03/18 23:31:22 florenz Exp $
 
 ;; ASDF definition for port-path.
 
@@ -56,7 +56,7 @@ FIXME: This should be done more portable.")
   
 (defsystem :port-path
   :name "port-path"
-  :author "Hannes Mehnert, Florian Lorenzen, Fabian Otto"
+  :author "Florian Lorenzen, Fabian Otto"
   :version "0.1"
   :maintainer "Florian Lorenzen <florenz@berlios.de>"
   :licence "GPL"

@@ -1,4 +1,4 @@
-/* Copyright 2005 Hannes Mehnert, Florian Lorenzen, Fabian Otto
+/* Copyright 2005 Florian Lorenzen, Fabian Otto
  *
  * This file is part of port-path.
  *
@@ -16,12 +16,13 @@
  * along with gennf; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * $Id: F-227078CBBBB1203509886A2603541423.c,v 1.1 2006/02/13 17:21:07 florenz Exp $
+ * $Id: F-227078CBBBB1203509886A2603541423.c,v 1.2 2006/03/18 23:31:23 florenz Exp $
  */
 
 /* Glue code to call some POSIX functions from Lisp. */
 
 #include <stdio.h>
+#include <unistd.h>
 
 char *port_path_tempnam() {
   return tempnam((void *)0, (void *)0);
