@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.13 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.14 2006/03/19 23:24:26 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -113,8 +113,11 @@ paths provided by the user are resolved against this directory.")
 
 
 ;;
-;; Command line.
+;; User interface.
 ;;
 
 (defparameter *subcommand-list* nil
-  "Holds subcommand-names an corresponding function calls")
+  "Holds subcommand-names and corresponding functions.")
+
+(defparameter *subcommand-help* nil
+  "For each subcommand a description is stored.")

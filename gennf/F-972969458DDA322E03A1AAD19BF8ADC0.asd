@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.16 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.17 2006/03/19 23:24:26 florenz Exp $
 
 ;; ASDF system defintion in ASDF-INSTALL style.
 
@@ -74,4 +74,6 @@
    (:file "error"
 	  :depends-on ("packages" "miscellaneous"))
    (:file "debug"
-	  :depends-on ("packages" "configuration"))))
+	  :depends-on ("packages" "configuration"))
+   (:file "command-line"
+	  :depends-on ("packages" "configuration" "miscellaneous"))))

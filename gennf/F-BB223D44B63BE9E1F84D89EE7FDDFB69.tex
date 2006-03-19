@@ -504,6 +504,19 @@ Functionality which is not implemented includes:
 \item Replication as described in section \ref{distrib}.
 \end{itemize}
 
+In addition to these not implemented features the code leaks some
+important capabilities:
+
+Error handling is very rudimentary. In most cases the code just stops
+with some more or less useful error message and nor recovery is
+offered.
+
+Concurrency issues like race conditions concerning the repository as a
+critical section are not handled. It is assumed that no other process
+writes to the repository. The problem is that \textsc{cvs} imposes
+some (though weak) kind of locking but one repository action of
+\GENNF{} usually results in several calls to \textsc{cvs}.
+
 
 \section{Review}
 

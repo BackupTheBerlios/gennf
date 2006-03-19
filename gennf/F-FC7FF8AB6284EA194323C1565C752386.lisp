@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.35 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.36 2006/03/19 23:24:26 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -68,33 +68,29 @@
 ;; Subcommands.
 ;; 
 
-(defmacro defsubcommand (subcommand-name function-name
-			 (&rest args) &body forms)
-    `(progn
-      (let ((*startup-directory* (port-path:current-directory)))
-	,(if (and (symbolp (first forms))
-		  (eq (first forms) :in-meta-directory))
-	     `(defun ,function-name ,args
-	       (let* ((*meta-directory* (find-meta-directory))
-		      (*sandbox-directory* (port-path:get-parent-directory
-					    *meta-directory*)))
-		 (in-meta-directory
-		   (let* ((sandbox (read-sandbox-file))
-			  (*module* (module sandbox))
-			  (*branch* (branch sandbox))
-			  (*access* (get-access (access sandbox)
-						*access-file-name*))
-			  (*map-file*
-			   (port-path:append-pathnames
-			    *meta-directory*
-			    (branch-identifier-to-directory *branch*)
-			    *map-file-name*)))
-		     ,@(rest forms)))))
-	     `(defun ,function-name ,args
-	       ,@forms))
-	(setf *subcommand-list*
-	      (reassoc (format nil "~(~a~)" ',subcommand-name)
-		       #',function-name *subcommand-list* :test #'string=)))))
+
+
+
+(define-subcommand (foo f fo) subcommand-foo
+    (module &key (root r) (branch b) change &rest files)
+  (format t "this is foo. ~A ~%" root))
+
+
+(define-subcommand (bar b ba) subcommand-bar
+    (&key (root-destination d) (root-origin o) (change c))
+;  :in-meta-directory
+  "foo bar command"
+  (format t "this is bar. args are ~A.~%" (list root-destination
+						root-origin
+						change)))
+
+
+
+
+
+
+
+		   
 
 (defsubcommand resync subcommand-resync ()
   ;; FIXME: iles are not properly renamed.
@@ -138,8 +134,9 @@
     (sync new-mapping (branch-identifier-to-directory *branch*))
     (delete-file old-file-absolute)))
 
-(defsubcommand checkout subcommand-checkout (module root
-					     &optional branch change)
+(defsubcommand checkout subcommand-checkout (module
+					     &key (root r) (branch b)
+					     (change c))
   (let ((working-directory
 	 (merge-pathnames (make-pathname :directory (list :relative module))))
 	(access (make-instance 'access :root root)))
