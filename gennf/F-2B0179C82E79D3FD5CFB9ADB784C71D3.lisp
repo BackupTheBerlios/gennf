@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp,v 1.1 2006/03/19 23:24:26 florenz Exp $
+;; $Id: F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp,v 1.2 2006/03/20 00:29:58 florenz Exp $
 
 ;; Handling of command line arguments.
 
@@ -65,7 +65,7 @@ context is set and the process put into the meta directory.
 The second element of the body may be a docstring, which is
 included into the command help string. Also included in the help
 string are the command arguments."
-  (with-gensyms (arguments parsed-arguments)
+  (with-gensyms (arguments parsed-arguments parser)
     (let* ((command-name (format nil "~(~a~)"
 				 (if (consp subcommand-names)
 				     (first subcommand-names)
@@ -83,20 +83,24 @@ string are the command arguments."
 		       (rest forms1)
 		       forms1))
 	   ;; Generate the standard-body.
-	   (body `(let* ((,parsed-arguments
-			  (funcall ,(generate-argument-parser parameter-list)
-				   ,arguments))
-			 ,@(mapcar
-			    #'(lambda (variable)
-				`(,(second variable) 
-				  (extract ',(second variable)
-				   ,parsed-arguments)))
-			    parameter-list))
-		   ,@forms2)))
+	   (body (if parameter-list
+		     `(let* ((,parser
+			      ,(generate-argument-parser parameter-list))
+			     (,parsed-arguments
+			      (funcall ,parser ,arguments))
+			     ,@(mapcar
+				#'(lambda (variable)
+				    `(,(second variable) 
+				      (extract ',(second variable)
+				       ,parsed-arguments)))
+				parameter-list))
+		       ,@forms2)
+		     `(progn ,@forms2)))
+	     (lambda-list (if command-arguments `(&rest ,arguments) ())))
       `(progn
 	;; Generate function defintion, depends on the :in-meta-directory flag.
 	,(if (eql (first forms) :in-meta-directory)
-	     `(defun ,function-name (&rest ,arguments)
+	     `(defun ,function-name ,lambda-list
 	       (let* ((*startup-directory* (port-path:current-directory))
 		      (*meta-directory* (find-meta-directory))
 		      (*sandbox-directory* (port-path:get-parent-directory
@@ -113,7 +117,7 @@ string are the command arguments."
 			    (branch-identifier-to-directory *branch*)
 			    *map-file-name*)))
 		     ,body))))
-	     `(defun ,function-name (&rest ,arguments)
+	     `(defun ,function-name ,lambda-list
 	       ,body))
 	;; Register description of subcommand in *subcommand-help*.
 	(setf *subcommand-help*
@@ -202,13 +206,10 @@ input must be from parse-argument-list."
 	      (append absy (parse-keys token-list)))))
 	 (parse-keys
 	  `(parse-keys (token-list)
-	    (let ((token (first token-list))
-		  (tokens (rest token-list)))
-	      (cond
-		,@(reduce #'append
-			  (mapcar #'generate-key-parser-case
-				  key-arguments))
-		(t (parse-rest token-list))))))
+	    (cond
+	      ,@(reduce #'append
+			(mapcar #'generate-key-parser-case key-arguments))
+		(t (parse-rest token-list)))))
 	 (parse-rest
 	  `(parse-rest (token-list)
 	    ,(if rest-arguments
@@ -216,9 +217,9 @@ input must be from parse-argument-list."
 		   (list token-list) ())
 		 `(when token-list
 		   (error "Unknown arguments ~A." token-list))))))
-    (eval `(lambda (token-list)
-	    (labels (,parse-plain ,parse-keys ,parse-rest)
-	      (parse-plain token-list))))))
+    `#'(lambda (token-list)
+	 (labels (,parse-plain ,parse-keys ,parse-rest)
+	   (parse-plain token-list)))))
 
 (defun generate-plain-parser-sequence (abstract-syntax)
   "Generate code to parse a certain plain parameter."
@@ -234,13 +235,13 @@ input must be from parse-argument-list."
 (defun generate-key-parser-case (abstract-syntax)
   "Generate code to parse a certain key parameter."
   (flet ((generate-case (symbol value &optional (long t))
-p	   (let ((option-string (if long
+	   (let ((option-string (if long
 				    (long-argument-string value)
 				    (short-argument-string value))))
-	   `((string= token ,option-string)
-	     (if (first tokens)
-		 (append (acons ',symbol (first tokens) ())
-			 (parse-keys (rest tokens)))
+	   `((string= (first token-list) ,option-string)
+	     (if (second token-list)
+		 (append (acons ',symbol (second token-list) ())
+			 (parse-keys (nthcdr 2 token-list)))
 		 (error "Argument to ~A expected." ,option-string))))))
     (let ((symbol (second abstract-syntax)))
 	 (cons (generate-case symbol symbol)

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.36 2006/03/19 23:24:26 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.37 2006/03/20 00:29:58 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -68,61 +68,44 @@
 ;; Subcommands.
 ;; 
 
-
-
-
-(define-subcommand (foo f fo) subcommand-foo
-    (module &key (root r) (branch b) change &rest files)
-  (format t "this is foo. ~A ~%" root))
-
-
-(define-subcommand (bar b ba) subcommand-bar
-    (&key (root-destination d) (root-origin o) (change c))
-;  :in-meta-directory
-  "foo bar command"
-  (format t "this is bar. args are ~A.~%" (list root-destination
-						root-origin
-						change)))
-
-
-
-
-
-
-
-		   
-
-(defsubcommand resync subcommand-resync ()
-  ;; FIXME: iles are not properly renamed.
+(define-subcommand resync subcommand-resync ()
+  ;; FIXME: files are not properly renamed.
   :in-meta-directory
+  "Resynchronizes the map file and the sandbox."
   (mapcar #'(lambda (mapping)
 	      (sync mapping (branch-identifier-to-directory *branch*)))
 	  (read-map-file *map-file*)))
 
-(defsubcommand add subcommand-add (&rest namestrings)
-  :in-meta-directory
+(define-subcommand add subcommand-add (&rest files)
   ;; FIXME: multiple adds!
+  :in-meta-directory
+  "Add files to versioned files."
   (port-path:in-directory *sandbox-directory*
-    (dolist (namestring namestrings)
+    (dolist (namestring files)
       (let* ((id (format nil "~A" (guid-gen)))
 	     (path (pathname namestring))
 	     (mapping (create-new-mapping :path path :id id)))
 	(add-mapping mapping *map-file*)
 	(subcommand-resync)))))
 
-(defsubcommand delete subcommand-delete (&rest namestrings)
+(define-subcommand (delete del rm) subcommand-delete (&rest files)
   :in-meta-directory
+  "Exclude files from version control. They are also deleted in
+the sandbox."
   (port-path:in-directory *sandbox-directory*
-    (dolist (namestring namestrings)
+    (dolist (namestring files)
       (let ((mapping (get-mapping namestring *map-file*)))
 	(remove-mapping mapping *map-file*)
 	(delete-file (path mapping))))))
 
-(defsubcommand move subcommand-move (namestring1 namestring2)
-  ;; namestring1 and namestring2 have to be relative to the sandbox.
+(define-subcommand (move mv) subcommand-move (old new)
+  ;; FIXME: old and new have to be relative to the sandbox,
+  ;; this should be changed, relative and absolute filenames should
+  ;; be handled correctly.
   :in-meta-directory
-  (let* ((old-file-relative (pathname namestring1))
-	 (new-file-relative (pathname namestring2))
+  "Move a file. Also for renaming."
+  (let* ((old-file-relative (pathname old))
+	 (new-file-relative (pathname new))
 	 (old-file-absolute (merge-pathnames old-file-relative
 					     *sandbox-directory*))
 	 (old-mapping (get-mapping old-file-relative *map-file*))
@@ -134,9 +117,9 @@
     (sync new-mapping (branch-identifier-to-directory *branch*))
     (delete-file old-file-absolute)))
 
-(defsubcommand checkout subcommand-checkout (module
-					     &key (root r) (branch b)
-					     (change c))
+(define-subcommand (checkout co) subcommand-checkout
+    (module &key (root r) (branch b) (change c))
+  "Check out the indicated branch. If no branch is given 1 is taken."
   (let ((working-directory
 	 (merge-pathnames (make-pathname :directory (list :relative module))))
 	(access (make-instance 'access :root root)))
@@ -147,8 +130,9 @@
 			     (if change (parse-integer change)))
       (subcommand-resync))))
 
-(defsubcommand setup subcommand-setup (module root
-				       &key symbolic-name description)
+(define-subcommand setup subcommand-setup
+    (module &key (root r) (symbolic-name n) (description d))
+  "Setup a new module."
   (let ((access (make-instance 'access :root root)))
     (create-empty-repository module access)
     (create-empty-branch module access :symbolic-name symbolic-name
@@ -156,8 +140,10 @@
     (format t "The new module can be checked out with:~%")
     (format t "$ gennf checkout ~A ~A~%" module root)))
 
-(defsubcommand commit subcommand-commit (&rest files)
+(define-subcommand (commit ci) subcommand-commit (&rest files)
   :in-meta-directory
+  "Commit the given files. If no files are given, all changed
+files are committed."
   (let* ((f-files (translate-to-f-files files *map-file*))
 	 (changed-files (sandbox-changed-files *module* *access*
 					       *branch* f-files)))
@@ -168,18 +154,19 @@
 			     changed-files)
 	(format t "No files changed. Nothing committed.~%"))))
 
-(defsubcommand update subcommand-update (&rest files)
+(define-subcommand (update up) subcommand-update (&key (change c) &rest files)
   :in-meta-directory
+  "Bring files to latest change or to the indicated change."
   (let ((f-files (translate-to-f-files files *map-file*)))
-    (distribution-update *module* *access* *branch* f-files)
+    (distribution-update *module* *access* *branch* f-files change)
     (subcommand-resync)))
 
-(defsubcommand branch subcommand-branch (module root1 root2 branch
-					 &optional change)
-  (let* ((access1 (make-instance 'access :root root1))
-	 (access2 (make-instance 'access :root root2)))
+(define-subcommand (branch br) subcommand-branch
+    (module &key (root-from f) (root-to t) (branch b) (change c))
+  (let* ((access1 (make-instance 'access :root root-from))
+	 (access2 (make-instance 'access :root root-to)))
     (unless (backend-known-module-p module access1)
-      (format t "Creating new module ~A at ~A.~%" module root1)
+      (format t "Creating new module ~A at ~A.~%" module root-from)
       (create-empty-repository module access1))
     (let ((identifier (create-empty-branch module access1)))
       (distribution-merge module access1 identifier
@@ -187,13 +174,14 @@
 			  (if change (parse-integer change)))
       (format t "Created branch number ~A.~%" identifier)
       (format t "The branch can be checked out with:~%")
-      (format t "$ gennf checkout ~A ~A ~A~%" module root1 identifier))))
+      (format t "$ gennf checkout ~A ~A ~A~%" module root-from identifier))))
 
-(defsubcommand merge subcommand-merge (module root1 branch1
-				       root2 branch2 &optional change)
-  (let* ((access1 (make-instance 'access :root root1))
-	 (access2 (make-instance 'access :root root2)))
-    (distribution-merge module access1 branch1 access2 branch2 change)))
+(define-subcommand (merge mg) subcommand-merge
+    (module &key (root-from f) (branch-from b) (root-to t) (branch-to d)
+	    (change c))
+  "Merge branch-from into branch-to."
+  (let* ((access1 (make-instance 'access :root root-to))
+	 (access2 (make-instance 'access :root root-from)))
+    (distribution-merge module access1 branch-from access2 branch-to change)))
 
 ;;(defsubcommand merge-finish subcommand-merge-finish ()
-  

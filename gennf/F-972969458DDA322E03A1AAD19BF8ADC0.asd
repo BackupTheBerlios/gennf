@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.17 2006/03/19 23:24:26 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.18 2006/03/20 00:29:58 florenz Exp $
 
 ;; ASDF system defintion in ASDF-INSTALL style.
 
@@ -37,7 +37,8 @@
   :components
   ((:file "packages")
    (:file "gennf"
-	  :depends-on ("packages" "distribution" "mapping" "configuration"))
+	  :depends-on ("packages" "distribution" "mapping" "configuration"
+				  "command-line"))
    (:file "distribution"
 	  :depends-on ("packages" "directories" "configuration" "access"
 				  "backend" "branch" "change" "mapping"
