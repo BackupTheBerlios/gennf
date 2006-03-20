@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.14 2006/03/19 23:24:26 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.15 2006/03/20 01:01:03 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -121,3 +121,6 @@ paths provided by the user are resolved against this directory.")
 
 (defparameter *subcommand-help* nil
   "For each subcommand a description is stored.")
+
+(defparameter *subcommand-full-names* nil
+  "Overview list of all subcommands with full name.")

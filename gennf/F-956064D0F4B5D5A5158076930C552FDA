@@ -16,7 +16,7 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.3 2006/03/18 23:37:22 florenz Exp $
+# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.4 2006/03/20 01:01:03 florenz Exp $
 
 LISP = sbcl
 EVALOPT = --eval
@@ -24,12 +24,12 @@ SOURCES = access.lisp backend-cvs.lisp backend.lisp branch.lisp \
 	change.lisp configuration.lisp debug.lisp directories.lisp \
 	distribution.lisp error.lisp files.lisp gennf.lisp \
 	mapping.lisp merge.lisp merging.lisp miscellaneous.lisp \
-	packages.lisp sbcl.lisp gennf.asd
+	packages.lisp sbcl.lisp gennf.asd command-line.lisp
 FASLS = access.fasl backend-cvs.fasl backend.fasl branch.fasl \
 	change.fasl configuration.fasl debug.fasl directories.fasl \
 	distribution.fasl error.fasl files.fasl gennf.fasl \
 	mapping.fasl merge.fasl merging.fasl miscellaneous.fasl \
-	packages.fasl sbcl.fasl
+	packages.fasl sbcl.fasl command-line.fasl
 
 gennf: $(SOURCES)
 	$(LISP) $(EVALOPT) "(require :asdf)" \

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp,v 1.2 2006/03/20 00:29:58 florenz Exp $
+;; $Id: F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp,v 1.3 2006/03/20 01:01:03 florenz Exp $
 
 ;; Handling of command line arguments.
 
@@ -122,15 +122,17 @@ string are the command arguments."
 	;; Register description of subcommand in *subcommand-help*.
 	(setf *subcommand-help*
 	 (reassoc ,command-name
-	  ,(format nil "~A~%~A~%"
+	  ,(format nil "~A~%~%~A~%"
 		   (generate-command-syntax command-name parameter-list)
 		   description)
 	  *subcommand-help* :test #'string=))
+	;; Register subcommand in *subcommand-full-name*.
+	(pushnew ,command-name *subcommand-full-names* :test #'string=)
 	;; Register subcommand in *subcommand-list*.
 	(mapcar
 	 #'(lambda (name)
 	     (setf *subcommand-list*
-		   (reassoc name
+		   (reassoc (format nil "~(~A~)" name)
 			    #',function-name *subcommand-list*
 			    :test #'string=)))
 	 (if (listp ',subcommand-names)
@@ -214,7 +216,7 @@ input must be from parse-argument-list."
 	  `(parse-rest (token-list)
 	    ,(if rest-arguments
 		 `(acons ',(second (first rest-arguments))
-		   (list token-list) ())
+		   token-list ())
 		 `(when token-list
 		   (error "Unknown arguments ~A." token-list))))))
     `#'(lambda (token-list)

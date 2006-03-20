@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.37 2006/03/20 00:29:58 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.38 2006/03/20 01:01:03 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -60,13 +60,24 @@
 	(error-output "~%~A~%~%" condition)
 	(quit)))))
 
-(defun dispatch-subcommand (command command-args)
-  (apply (extract command *subcommand-list* :test #'string=) command-args))
-
+(defun dispatch-subcommand (command command-arguments)
+  (apply (extract command *subcommand-list* :test #'string=)
+	 command-arguments))
 
 ;;
 ;; Subcommands.
 ;; 
+
+(define-subcommand help subcommand-help (&rest command)
+  "Show some help messages or, if command is given, help about that
+command."
+  (if command
+      (format t "~A~%"
+	      (extract (first command) *subcommand-help* :test #'string=))
+      (progn
+	(format t "The following commands are available:~%")
+	(dolist (subcommand *subcommand-full-names*)
+	  (format t "~A~%" subcommand)))))
 
 (define-subcommand resync subcommand-resync ()
   ;; FIXME: files are not properly renamed.
@@ -80,6 +91,7 @@
   ;; FIXME: multiple adds!
   :in-meta-directory
   "Add files to versioned files."
+  (prin1 files)
   (port-path:in-directory *sandbox-directory*
     (dolist (namestring files)
       (let* ((id (format nil "~A" (guid-gen)))
