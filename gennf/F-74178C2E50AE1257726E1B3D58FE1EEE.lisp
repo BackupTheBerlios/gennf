@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.19 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.20 2006/03/21 12:12:56 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -509,6 +509,7 @@ Origin files are in ~A.~%"
 	    (port-path:copy-file complete-filename
 				 destination-branch-absolute)))
 	;; Merge common files.
+	(break)
 	(dolist (file common-files)
 	  (let ((origin-file (merge-pathnames file
 					      origin-branch-absolute))
@@ -521,8 +522,6 @@ Origin files are in ~A.~%"
 		 (format nil "branch: ~A / root: ~A (destination)"
 			 branch (root access))))
 	    (format t "Doing file ~A~%" file)
-	    (appropriate-two-way-merge origin-file destination-file
-					   origin-info destination-info)
 	    (when (appropriate-two-way-merge origin-file destination-file
 					     origin-info destination-info)
 	      (setf conflicts t)

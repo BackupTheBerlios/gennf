@@ -18,7 +18,7 @@ Low priority
   in whitespace might be helpful.
 * Error handling:
   * commit should offer a restart to do an update if conflicts
-    occur. If the update is conflict-free, it should be offered the
+     occur. If the update is conflict-free, it should be offered the
     possibility to proceed with the commit or the quit.
     If the update has conflicts too, it should be quit.
   * The lock-problem (cf. e-mail from Florian) is not considered in

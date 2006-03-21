@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.38 2006/03/20 01:01:03 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.39 2006/03/21 12:12:57 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -177,6 +177,7 @@ files are committed."
     (module &key (root-from f) (root-to t) (branch b) (change c))
   (let* ((access1 (make-instance 'access :root root-from))
 	 (access2 (make-instance 'access :root root-to)))
+    ;; FIXME: check the correct access
     (unless (backend-known-module-p module access1)
       (format t "Creating new module ~A at ~A.~%" module root-from)
       (create-empty-repository module access1))

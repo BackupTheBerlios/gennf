@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.19 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.20 2006/03/21 12:12:57 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from Meta-CVS.
@@ -404,7 +404,7 @@ path1 and path2 must be abolute."
 	   (if (and
 		(port-path:path-exists-p f-file)
 		(port-path:path-exists-p absolute-path))
-	       ()			; FIXME: compare for inode#.
+	       ()			;; FIXME: compare for inode#.
 	       (make-hard-link absolute-path f-file)))
 	  ;; FIXME: Softlinking 
 	  (:symlink 

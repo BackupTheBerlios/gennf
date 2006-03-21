@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.10 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.11 2006/03/21 12:12:57 sigsegv Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -92,43 +92,45 @@ conflicts."
 			  (eql (difflib:opcode-tag element) :delete)))
 		  differences)))
 
-(defun appropriate-two-way-merge (file1 file2 info1 info2)
+(defun appropriate-two-way-merge (origin-file-name destination-file-name info1 info2)
   "Depending on the given files an appropriate merging
 routine is executed.
 The output is suitable for prin1-file.
-info1 an info2 have to be string describing file1 and file2.
+info1 an info2 have to be string describing origin-file-name and file2.
 They are used to put in conflict information"
-  (port-path:with-pathname ((path1 file1) (path2 file2))
+  (port-path:with-pathname ((origin-file origin-file-name) (destination-file destination-file-name))
     (flet ((delete-markup (chunk)
 	     (append
-	      (list (format nil "vvv Deleted in ~A, ~A vvv" file1 info1))
+	      (list (format nil "vvv Deleted in ~A, ~A vvv" origin-file-name info1))
 	      chunk
-	      (list (format nil "^^^ Deleted in ~A, ~A ^^^" file1 info1))))
+	      (list (format nil "^^^ Deleted in ~A, ~A ^^^" origin-file-name info1))))
 	   (replace-markup (chunk1 chunk2)
 	     (append
-	      (list (format nil "vvv Conflict from ~A, ~A vvv" file1 info1))
+	      (list (format nil "vvv Conflict from ~A, ~A vvv" origin-file-name info1))
 	      chunk1
-	      (list (format nil "^^^ Conflict from ~A, ~A ^^^" file1 info1))
-	      (list (format nil "vvv Conflict from ~A, ~A vvv" file2 info2))
+	      (list (format nil "^^^ Conflict from ~A, ~A ^^^" origin-file-name info1))
+	      (list (format nil "vvv Conflict from ~A, ~A vvv" destination-file-name info2))
 	      chunk2
-	      (list (format nil "^^^ Conflict from ~A, ~A ^^^" file2 info2)))))
+	      (list (format nil "^^^ Conflict from ~A, ~A ^^^" destination-file-name info2)))))
       (cond
-	((equal (pathname-name path1) (pathname-name *map-file-name*))
-	  (let ((mappings1 (read-file path1))
-	       (mappings2 (read-file path2)))
-	    (multiple-value-bind (merged-file conflict)
-		(two-way-merge mappings1 mappings2
-			       :equality #'equal
-			       :conflicting t
-			       :delete-markup-function #'delete-markup
-			       :replace-markup-function #'replace-markup)
-	      (prin1-file path1 merged-file)
-	      conflict)))
-	(t (multiple-value-bind (merged-file conflict)
-	       (two-way-merge path1 path2 :conflicting t
+	((equal (pathname-name origin-file) (pathname-name *map-file-name*))
+	 (let ((origin-mapping (read-file origin-file))
+	       (destination-mapping (read-file destination-file)))
+	   (multiple-value-bind (merged-file conflict)
+	       (two-way-merge origin-mapping destination-mapping
+			      :equality #'equal
+			      :conflicting t
 			      :delete-markup-function #'delete-markup
 			      :replace-markup-function #'replace-markup)
-	     (list-to-file merged-file path2)
+	     (format t "merged-file: ~a~%" merged-file)
+	     (prin1-file destination-file merged-file)
+	     (break)
+	     conflict)))
+	(t (multiple-value-bind (merged-file conflict)
+	       (two-way-merge origin-file destination-file :conflicting t
+			      :delete-markup-function #'delete-markup
+			      :replace-markup-function #'replace-markup)
+	     (list-to-file merged-file destination-file)
 	     conflict))))))
 
 (defgeneric two-way-merge (sequence1 sequence2
