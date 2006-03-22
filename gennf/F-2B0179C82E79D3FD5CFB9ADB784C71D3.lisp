@@ -16,7 +16,6 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp,v 1.4 2006/03/22 08:47:09 sigsegv Exp $
 
 ;; Handling of command line arguments.
 

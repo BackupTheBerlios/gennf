@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.39 2006/03/21 12:12:57 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.40 2006/03/22 12:55:48 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -93,6 +93,9 @@ command."
   "Add files to versioned files."
   (prin1 files)
   (port-path:in-directory *sandbox-directory*
+    (when (null files)
+      (format t "~%You must atleast specify one file~%")
+      (return-from subcommand-add))
     (dolist (namestring files)
       (let* ((id (format nil "~A" (guid-gen)))
 	     (path (pathname namestring))
@@ -130,7 +133,7 @@ the sandbox."
     (delete-file old-file-absolute)))
 
 (define-subcommand (checkout co) subcommand-checkout
-    (module &key (root r) (branch b) (change c))
+    (module &key (:required root r) (branch b) (change c))
   "Check out the indicated branch. If no branch is given 1 is taken."
   (let ((working-directory
 	 (merge-pathnames (make-pathname :directory (list :relative module))))
@@ -143,7 +146,7 @@ the sandbox."
       (subcommand-resync))))
 
 (define-subcommand setup subcommand-setup
-    (module &key (root r) (symbolic-name n) (description d))
+    (module &key (:required root r) (symbolic-name n) (description d))
   "Setup a new module."
   (let ((access (make-instance 'access :root root)))
     (create-empty-repository module access)
@@ -174,7 +177,8 @@ files are committed."
     (subcommand-resync)))
 
 (define-subcommand (branch br) subcommand-branch
-    (module &key (root-from f) (root-to t) (branch b) (change c))
+    (module &key (:required root-from f) (:required root-to t)
+	    (:required branch b) (change c))
   (let* ((access1 (make-instance 'access :root root-from))
 	 (access2 (make-instance 'access :root root-to)))
     ;; FIXME: check the correct access
@@ -190,8 +194,8 @@ files are committed."
       (format t "$ gennf checkout ~A ~A ~A~%" module root-from identifier))))
 
 (define-subcommand (merge mg) subcommand-merge
-    (module &key (root-from f) (branch-from b) (root-to t) (branch-to d)
-	    (change c))
+    (module &key (:required root-from f) (:required branch-from b)
+	    (:required root-to t) (:required branch-to d) (change c))
   "Merge branch-from into branch-to."
   (let* ((access1 (make-instance 'access :root root-to))
 	 (access2 (make-instance 'access :root root-from)))
