@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp,v 1.3 2006/03/20 01:01:03 florenz Exp $
+;; $Id: F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp,v 1.4 2006/03/22 08:47:09 sigsegv Exp $
 
 ;; Handling of command line arguments.
 
@@ -88,56 +88,56 @@ string are the command arguments."
 			      ,(generate-argument-parser parameter-list))
 			     (,parsed-arguments
 			      (funcall ,parser ,arguments))
-			     ,@(mapcar
-				#'(lambda (variable)
-				    `(,(second variable) 
-				      (extract ',(second variable)
-				       ,parsed-arguments)))
-				parameter-list))
-		       ,@forms2)
+			     ,@(generate-variables parameter-list 
+						   parsed-arguments))
+			,(generate-reqired-keyword-check parameter-list 
+							 parsed-arguments)
+			,@forms2)
 		     `(progn ,@forms2)))
-	     (lambda-list (if command-arguments `(&rest ,arguments) ())))
+	   (lambda-list (if command-arguments
+			    `(&rest ,arguments)
+			    ())))
       `(progn
-	;; Generate function defintion, depends on the :in-meta-directory flag.
-	,(if (eql (first forms) :in-meta-directory)
-	     `(defun ,function-name ,lambda-list
-	       (let* ((*startup-directory* (port-path:current-directory))
-		      (*meta-directory* (find-meta-directory))
-		      (*sandbox-directory* (port-path:get-parent-directory
-					    *meta-directory*)))
-		 (in-meta-directory
-		   (let* ((sandbox (read-sandbox-file))
-			  (*module* (module sandbox))
-			  (*branch* (branch sandbox))
-			  (*access* (get-access (access sandbox)
-						*access-file-name*))
-			  (*map-file*
-			   (port-path:append-pathnames
-			    *meta-directory*
-			    (branch-identifier-to-directory *branch*)
-			    *map-file-name*)))
-		     ,body))))
-	     `(defun ,function-name ,lambda-list
-	       ,body))
-	;; Register description of subcommand in *subcommand-help*.
-	(setf *subcommand-help*
-	 (reassoc ,command-name
-	  ,(format nil "~A~%~%~A~%"
-		   (generate-command-syntax command-name parameter-list)
-		   description)
-	  *subcommand-help* :test #'string=))
-	;; Register subcommand in *subcommand-full-name*.
-	(pushnew ,command-name *subcommand-full-names* :test #'string=)
-	;; Register subcommand in *subcommand-list*.
-	(mapcar
-	 #'(lambda (name)
-	     (setf *subcommand-list*
-		   (reassoc (format nil "~(~A~)" name)
-			    #',function-name *subcommand-list*
-			    :test #'string=)))
-	 (if (listp ',subcommand-names)
-	     ',subcommand-names
-	     (list ',subcommand-names)))))))
+	 ;; Generate function defintion, depends on the :in-meta-directory flag.
+	 ,(if (eql (first forms) :in-meta-directory)
+	      `(defun ,function-name ,lambda-list
+		 (let* ((*startup-directory* (port-path:current-directory))
+			(*meta-directory* (find-meta-directory))
+			(*sandbox-directory* (port-path:get-parent-directory
+					      *meta-directory*)))
+		   (in-meta-directory
+		     (let* ((sandbox (read-sandbox-file))
+			    (*module* (module sandbox))
+			    (*branch* (branch sandbox))
+			    (*access* (get-access (access sandbox)
+						  *access-file-name*))
+			    (*map-file*
+			     (port-path:append-pathnames
+			      *meta-directory*
+			      (branch-identifier-to-directory *branch*)
+			      *map-file-name*)))
+		       ,body))))
+	      `(defun ,function-name ,lambda-list
+		 ,body))
+	 ;; Register description of subcommand in *subcommand-help*.
+	 (setf *subcommand-help*
+	       (reassoc ,command-name
+			,(format nil "~A~%~%~A~%"
+				 (generate-command-syntax command-name parameter-list)
+				 description)
+			*subcommand-help* :test #'string=))
+	 ;; Register subcommand in *subcommand-full-name*.
+	 (pushnew ,command-name *subcommand-full-names* :test #'string=)
+	 ;; Register subcommand in *subcommand-list*.
+	 (mapcar
+	  #'(lambda (name)
+	      (setf *subcommand-list*
+		    (reassoc (format nil "~(~A~)" name)
+			     #',function-name *subcommand-list*
+			     :test #'string=)))
+	  (if (listp ',subcommand-names)
+	      ',subcommand-names
+	      (list ',subcommand-names)))))))
 
 (defun parse-argument-list (argument-list)
   "Parse a define-subcommand argument list."
@@ -176,7 +176,10 @@ string are the command arguments."
 (defun parse-key-specification (argument)
   "Parse a key description."
   (cond
-    ((consp argument) (acons :key argument ()))
+    ((consp argument)
+          (if  (eq :required (first argument))
+	       (acons :required-key (rest argument) ())
+	       (acons :key argument ())))
     ((symbolp argument) (acons :key (list argument) ()))
     (t (error "List or symbol expected."))))
 
@@ -194,7 +197,9 @@ input must be from parse-argument-list."
 	  (remove-if-not #'(lambda (element) (eql :plain (car element)))
 			 abstract-syntax))
 	 (key-arguments
-	  (remove-if-not #'(lambda (element) (eql :key (car element)))
+	  (remove-if-not #'(lambda (element)
+			     (or (eql :required-key (car element))
+				 (eql :key (car element))))
 			 abstract-syntax))
 	 (rest-arguments
 	  (remove-if-not #'(lambda (element) (eql :rest (car element)))
@@ -277,3 +282,21 @@ input must be from parse-argument-list."
 	  (:rest (append-syntax (format nil " ~(~A~)..."
 					(second parameter)))))))
     syntax))
+
+(defun generate-variables (parsed-lambda-list parsed-arguments-variable)
+    (mapcar #'(lambda (variable)
+                   `(,(second variable)
+                      (extract ',(second variable)
+                               ,parsed-arguments-variable)))
+               parsed-lambda-list))
+  
+(defun generate-reqired-keyword-check (parsed-lambda-list parsed-arguments-variable)
+  (let ((required-args (mapcan #'(lambda (x)
+                                   (if (eql (car x) :required-key)
+                                       (list (cadr x))))
+                               parsed-lambda-list)))
+    `(unless (subsetp ',required-args
+		      (mapcar #'(lambda (x)
+				  (car x)) ,parsed-arguments-variable))
+       (error "missing required argument(s): ~{~A~}"
+	      (set-difference ',required-args ,parsed-arguments-variable)))))
