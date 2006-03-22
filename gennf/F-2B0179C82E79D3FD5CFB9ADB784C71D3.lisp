@@ -271,15 +271,15 @@ input must be from parse-argument-list."
       (dolist (parameter parsed-parameter-list)
 	(case (first parameter)
 	  (:plain (append-syntax (format nil " ~(~A~)" (second parameter))))
-	  (:key (append-syntax
+	  (:rest (append-syntax (format nil " ~(~A~)..."
+					(second parameter))))
+	  (t (append-syntax
 		 (format nil " [~A" (long-argument-string (second parameter))))
 		(when (> (length parameter) 2)
 		  (dolist (key (cddr parameter))
 		    (append-syntax 
 		     (format nil "|~A" (short-argument-string key)))))
-		(append-syntax (format nil " ~(~A~)]" (second parameter))))
-	  (:rest (append-syntax (format nil " ~(~A~)..."
-					(second parameter)))))))
+		(append-syntax (format nil " ~(~A~)]" (second parameter)))))))
     syntax))
 
 (defun generate-variables (parsed-lambda-list parsed-arguments-variable)
