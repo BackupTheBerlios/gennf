@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.15 2006/03/20 01:01:03 florenz Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.16 2006/03/24 14:10:34 sigsegv Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -91,6 +91,10 @@ paths provided by the user are resolved against this directory.")
 
 (defparameter *map-file-name* (make-pathname :name "MAP" )
   "Name of map file.")
+
+(defparameter *checkpoint-file-name* (make-pathname :name "CHECKPOINT" )
+  "Name of checkpoint file")
+
 
 (defparameter *update-special-meta-files*
   (list *branch-file-name* *access-file-name*

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.20 2006/03/21 12:12:57 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.21 2006/03/24 14:10:34 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from Meta-CVS.
@@ -75,6 +75,18 @@
     :documentation "Userattributes in a plist."))
   (:documentation "A single mapping for a single source file."))
 
+
+(define-condition malformed-map-file-error (error)
+  ((text 
+    :initarg :text
+    :reader text)
+   (reader-condition
+    :initarg :reader-condition
+    :reader reader-condition)
+   (file
+    :initarg :file
+    :reader file)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Operations (Reading, Writing, Adding)
@@ -110,7 +122,7 @@ exactly an alist."
   (when (or (not (consp alist))
 	    (not (and (keywordp (first alist))
 		      (stringp (second alist)))))
-    (error "Map-file broken."))
+    (error 'malformed-map-file :text "Map-file broken.~%Please repair."))
   (case (first alist)
     ((:file)
      (let ((entry (make-instance 'mapping
@@ -136,7 +148,13 @@ exactly an alist."
 
 (defun read-map-file (&optional (file *map-file-name*))
   "Reads Meta-CVS mapping-file and returns list of mappings."
-  (mapcar #'alist-to-mapping (read-file file)))
+  (handler-case 
+      (mapcar #'alist-to-mapping (read-file file))
+    (end-of-file (c) (error 'malformed-map-file-error :text "MAP-File broken."
+			    :file file :reader-condition c))
+    (error () (error 'malformed-map-file-error :text "MAP-File broken."
+		      :file file))))
+
 
 (defun write-map-file (mapping-list &optional (file *map-file-name*))
   "Writes mapping-lists to file."
@@ -222,6 +240,22 @@ FIXME: This should include resolving relative pathnames etc."
     (unwind-protect
 	 (setf list (remove-mapping map sequence))
       (write-map-file list file))))
+
+(defgeneric sync-mappings (store branch)
+(:documentation "syncs listings of mappings to disk"))
+
+(defmethod sync-mappings ((sequence list) branch)
+  "syncs list of mappings to  branch  disk"
+  ;; FIXME: Tests koennten hier hin
+  (mapcar #'(lambda (mapping)
+	      (format t "***** syncing: ~a -> ~a ~%" (id mapping) (path mapping))
+	      (sync mapping branch))
+	  sequence))
+
+(defmethod sync-mappings ((file pathname) branch)
+  "syncs map-file in branch to disk"
+  (sync-mappings (read-map-file file) branch))
+
 
 (defun create-new-mapping (&key
 			   (kind :file)
@@ -359,29 +393,9 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
   filemap)
 
 
-
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ;; Syncing 
-
-
-(defun make-hard-link (path1 path2)
-  "Creates a hardlink for the missing pathspec.
-path1 and path2 must be abolute."
-  (let (existing
-	to-create
-	(exists1p (port-path:path-exists-p path1))
-	(exists2p (port-path:path-exists-p path2)))
-    (cond 
-      ((and exists1p (not exists2p))
-       (setf to-create path2)
-       (setf existing path1))
-      ((and exists2p (not exists1p))
-       (setf to-create path1)
-       (setf existing path2))
-      ((and (not exists1p) (not exists2p))
-       (error "None of the files exists."))
-      (t (error "Both files exist.")))
-    (port-path:hard-link existing to-create)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
 (defgeneric sync (mapping branch-directory)
   (:documentation "Syncs files from *meta-directory* to sandbox."))
@@ -409,6 +423,26 @@ path1 and path2 must be abolute."
 	  ;; FIXME: Softlinking 
 	  (:symlink 
 	   (error "Symblic links are not yet implemented.")))))))
+
+(defun make-hard-link (path1 path2)
+  "Creates a hardlink for the missing pathspec.
+path1 and path2 must be abolute."
+  (let (existing
+	to-create
+	(exists1p (port-path:path-exists-p path1))
+	(exists2p (port-path:path-exists-p path2)))
+    (cond 
+      ((and exists1p (not exists2p))
+       (setf to-create path2)
+       (setf existing path1))
+      ((and exists2p (not exists1p))
+       (setf to-create path1)
+       (setf existing path2))
+      ((and (not exists1p) (not exists2p))
+       (error "None of the files exists."))
+      (t (error "Both files exist.")))
+    (port-path:hard-link existing to-create)))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

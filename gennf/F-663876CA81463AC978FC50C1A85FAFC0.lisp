@@ -16,17 +16,17 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.5 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.6 2006/03/24 14:10:34 sigsegv Exp $
 
 ;; Manipulations of merges.
 
 (in-package :gennf)
 
 (defclass merge (change)
-  ((origin :initarg :origin
-	   :accessor origin
-	   :documentation "The origin of a merge is a reference to
-another change."))
+  ((origin
+    :initarg :origin
+    :accessor origin
+    :documentation "The origin of a merge is a reference to another change."))
   (:documentation "A merge is the result of creating a new change
 not with new code but with code from some other change."))
 
@@ -56,9 +56,10 @@ not with new code but with code from some other change."))
       (prin1 (convert-to-alist merge) stream)))
 
 (defclass origin ()
-  ((identifier :initarg :identifier
-	       :accessor identifier
-	       :documentation "Identifier of change referring to.")
+  ((identifier
+    :initarg :identifier
+    :accessor identifier
+    :documentation "Identifier of change referring to.")
    (branch :initarg :branch
 	   :accessor branch
 	   :documentation "Branch of change referring to")

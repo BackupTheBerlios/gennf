@@ -204,6 +204,9 @@
   "MCVS/F-BB223D44B63BE9E1F84D89EE7FDDFB69.tex"
   "doc/gennf-report.tex")
  (:FILE
+  "MCVS/F-BDE4772767B008D34EF06CA4CC5B2E6B.lisp"
+  "prototype/checkpoint.lisp")
+ (:FILE
   "MCVS/F-C25BFAA9CFD16915F31BF90D03646B52.lisp"
   "sbcl-port/link.lisp")
  (:FILE

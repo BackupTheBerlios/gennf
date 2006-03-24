@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.20 2006/03/21 12:12:56 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.21 2006/03/24 14:10:34 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -421,20 +421,20 @@ deleted (no conflicts is the ususal case when using merge for
 branching."
   (port-path:in-temporary-directory
       (:temporary-pathname temporary-directory
-       :always-cleanup nil)
+			   :always-cleanup nil)
     ;; In temporary-directory two directories are created:
     ;; destination and origin. The data to be merged in is
     ;; stored in origin and the latest change of the branch
     ;; which will receive the merge is stored in destination.
-    (let* ((destination-directory (merge-pathnames *merge-destination*
-						   temporary-directory))
+    (let* ((destination-directory (port-path:append-pathnames
+				   temporary-directory  *merge-destination* *meta-directory-name*))
 	   (destination-branch-directory (branch-identifier-to-directory
 					  branch))
 	   (destination-branch-absolute (merge-pathnames
 					 destination-branch-directory
 					 destination-directory))
-	   (origin-directory (merge-pathnames *merge-origin*
-					      temporary-directory))
+	   (origin-directory (port-path:append-pathnames
+			      temporary-directory  *merge-origin* *meta-directory-name*))
 	   (origin-branch-directory (branch-identifier-to-directory
 				     origin-branch))
 	   (origin-branch-absolute (merge-pathnames origin-branch-directory
@@ -509,7 +509,6 @@ Origin files are in ~A.~%"
 	    (port-path:copy-file complete-filename
 				 destination-branch-absolute)))
 	;; Merge common files.
-	(break)
 	(dolist (file common-files)
 	  (let ((origin-file (merge-pathnames file
 					      origin-branch-absolute))
@@ -524,8 +523,8 @@ Origin files are in ~A.~%"
 	    (format t "Doing file ~A~%" file)
 	    (when (appropriate-two-way-merge origin-file destination-file
 					     origin-info destination-info)
-	      (setf conflicts t)
-	      (format t "Conflict merging file ~A.~%" file))))
+	      (setf conflicts t))))
+	;;(format t "Conflict merging file ~A.~%" file))))
 	;; Create merge entry.
 	(backend-get module access (list *access-file-name*)
 		     destination-directory)
@@ -574,7 +573,7 @@ Origin files are in ~A.~%"
 	      (format t "The conflicting files are in ~A.~%"
 		      (namestring destination-directory))
 	      (return-from distribution-merge
-		(values temporary-directory
+		(values destination-directory
 			(union common-files uncommon-files :test #'equal))))
 	    (let ((uncommon-files-prefixed (branch-prefix-file-list
 					    uncommon-files
@@ -592,7 +591,7 @@ Origin files are in ~A.~%"
 					      *access-file-name*)))))))))
   ;; If the operation completes we return NIL for success
   ;; (because in the case of conflicts the temporary pathname is returned).
-  nil)
+  (values nil nil) )
 
 (defun log-message-merge (merge)
   "Generate a log message for a merge."

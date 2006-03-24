@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.41 2006/03/22 14:00:09 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.42 2006/03/24 14:10:34 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -78,6 +78,33 @@ command."
 	(format t "The following commands are available:~%")
 	(dolist (subcommand *subcommand-full-names*)
 	  (format t "~A~%" subcommand)))))
+
+(define-subcommand sync subcommand-sync (&rest path)
+  "Syncs current directory or the specified path"
+  (let* ((raw-directory (if (null path)
+			    (port-path:current-directory)
+			    (first path))))
+    (port-path:with-directory-form ((directory raw-directory))
+      (format t "sycing in directory ~a~% " directory)
+      (if (port-path:directory-pathname-p directory)
+	  (port-path:in-directory directory
+	    (let*  ((*startup-directory* (port-path:current-directory))
+		    (*meta-directory* (find-meta-directory))
+		    (*sandbox-directory* (port-path:get-parent-directory
+					  *meta-directory*)))
+	      (in-meta-directory
+		(let* (meta-file)
+		  (if (port-path:path-exists-p *checkpoint-file-name*)
+		      (setf meta-file (read-checkpoint-file))
+		      (setf meta-file (read-sandbox-file)))
+		  (let* ((*module* (module meta-file))
+			 (*branch* (branch meta-file))
+			 (*map-file*
+			  (port-path:append-pathnames
+			   *meta-directory*
+			   (branch-identifier-to-directory *branch*)
+			   *map-file-name*)))
+		    (sync-mappings *map-file* *branch*))))))))))
 
 (define-subcommand resync subcommand-resync ()
   ;; FIXME: files are not properly renamed.
@@ -178,27 +205,72 @@ files are committed."
 
 (define-subcommand (branch br) subcommand-branch
     (module &key (:required root-from f) (:required root-to t)
-	    (:required branch b) (change c))
-  (let* ((access1 (make-instance 'access :root root-from))
-	 (access2 (make-instance 'access :root root-to)))
+	    (branch b) (change c))
+  (let* ((source (make-instance 'access :root root-from))
+	 (destination (make-instance 'access :root root-to)))
     ;; FIXME: check the correct access
-    (unless (backend-known-module-p module access2)
-      (format t "Creating new module ~A at ~A.~%" module root-to)
-      (create-empty-repository module access2))
-    (let ((identifier (create-empty-branch module access2)))
-      (distribution-merge module access1 identifier
-			  access2 (parse-integer branch)
+    (format t "**** Checking for existing module ~a in destination ~a.~%"
+	    module root-to)
+    (unless (backend-known-module-p module destination)
+      (format t "**** Creating new module ~A at ~A.~%" module root-to)
+      (create-empty-repository module destination))
+    (format t "**** Creating empty branch.~%")
+    (let ((identifier (create-empty-branch module destination)))
+      ;;       (format t "**** Merging both branches~%")
+      ;;       (format t
+      ;; 	      "**** distribution-merge:~%module: ~a~%source: ~a~%identifier: ~a
+      ;; destination: ~a~%branch: ~a~%"
+      ;;	      module source identifier destination branch)
+      (distribution-merge module destination identifier
+			  source (parse-integer branch)
 			  (if change (parse-integer change)))
-      (format t "Created branch number ~A.~%" identifier)
-      (format t "The branch can be checked out with:~%")
+      (format t "**** Created branch number ~A.~%" identifier)
+      (format t "**** The branch can be checked out with:~%")
       (format t "$ gennf checkout ~A ~A ~A~%" module root-from identifier))))
+
 
 (define-subcommand (merge mg) subcommand-merge
     (module &key (:required root-from f) (:required branch-from b)
 	    (:required root-to t) (:required branch-to d) (change c))
   "Merge branch-from into branch-to."
-  (let* ((access1 (make-instance 'access :root root-to))
-	 (access2 (make-instance 'access :root root-from)))
-    (distribution-merge module access1 branch-from access2 branch-to change)))
+  (let* ((source (make-instance 'access :root root-from))
+	 (destination (make-instance 'access :root root-to)))
+    (multiple-value-bind (destination-directory files) 
+	(distribution-merge module destination branch-to source branch-from change)
+      (unless destination-directory 
+	(format t "merge finished cleanly.")
+	(return-from subcommand-merge))
+      ;; handling CONFLICT, writing CHECKPOINT
+      (let* ((*meta-directory* destination-directory)
+	     (*sandbox-directory* (port-path:get-parent-directory *meta-directory*)))
+	(in-meta-directory
+	  (let* ((branch-directory (branch-identifier-to-directory branch-to))
+		 (map-file (port-path:append-pathnames *meta-directory*
+						       branch-directory
+						       *map-file-name*)))
+	    (format t "writing CHECKPOINT: ~%~t~a~%~t~a~%~t~a~%~t~a~%"
+		    files branch-to module root-to)
+	    (write-checkpoint-file
+	     (make-instance 'checkpoint :files files :branch branch-to
+			    :module module :root root-to)
+	     *checkpoint-file-name*)
+	    (handler-case 
+		(let* ((mapping-list (read-map-file map-file))
+		       (existing-mapping-list
+			(remove-if-not #'(lambda (m) 
+					   (port-path:path-exists-p
+					    (port-path:append-pathnames *meta-directory*
+									branch-directory
+									(id m))))
+				       mapping-list)))
+		  (sync-mappings existing-mapping-list branch-directory))
+	      (malformed-map-file-error () ; catching Error.
+		(format t "WARNING: Due to merging conflicts the MAP-FILE is broken~%")
+		(format t "WARNING: MAP-FILE in ~A is malformed~%" destination-directory)
+		(format t "WARNING: Please fix the broken MAP-FILE.~%")
+		(format t "WARNING: GENNF will otherwise *not* produce human readable named files.~%")
+		(return-from subcommand-merge)))))))))
+	
+
 
 ;;(defsubcommand merge-finish subcommand-merge-finish ()
