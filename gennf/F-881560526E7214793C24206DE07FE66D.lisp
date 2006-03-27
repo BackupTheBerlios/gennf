@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.21 2006/03/24 14:10:34 sigsegv Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.22 2006/03/27 14:27:30 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from Meta-CVS.
@@ -151,9 +151,7 @@ exactly an alist."
   (handler-case 
       (mapcar #'alist-to-mapping (read-file file))
     (end-of-file (c) (error 'malformed-map-file-error :text "MAP-File broken."
-			    :file file :reader-condition c))
-    (error () (error 'malformed-map-file-error :text "MAP-File broken."
-		      :file file))))
+			    :file file :reader-condition c))))
 
 
 (defun write-map-file (mapping-list &optional (file *map-file-name*))

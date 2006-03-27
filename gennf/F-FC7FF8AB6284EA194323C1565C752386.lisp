@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.42 2006/03/24 14:10:34 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.43 2006/03/27 14:27:30 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -79,40 +79,6 @@ command."
 	(dolist (subcommand *subcommand-full-names*)
 	  (format t "~A~%" subcommand)))))
 
-(define-subcommand sync subcommand-sync (&rest path)
-  "Syncs current directory or the specified path"
-  (let* ((raw-directory (if (null path)
-			    (port-path:current-directory)
-			    (first path))))
-    (port-path:with-directory-form ((directory raw-directory))
-      (format t "sycing in directory ~a~% " directory)
-      (if (port-path:directory-pathname-p directory)
-	  (port-path:in-directory directory
-	    (let*  ((*startup-directory* (port-path:current-directory))
-		    (*meta-directory* (find-meta-directory))
-		    (*sandbox-directory* (port-path:get-parent-directory
-					  *meta-directory*)))
-	      (in-meta-directory
-		(let* (meta-file)
-		  (if (port-path:path-exists-p *checkpoint-file-name*)
-		      (setf meta-file (read-checkpoint-file))
-		      (setf meta-file (read-sandbox-file)))
-		  (let* ((*module* (module meta-file))
-			 (*branch* (branch meta-file))
-			 (*map-file*
-			  (port-path:append-pathnames
-			   *meta-directory*
-			   (branch-identifier-to-directory *branch*)
-			   *map-file-name*)))
-		    (sync-mappings *map-file* *branch*))))))))))
-
-(define-subcommand resync subcommand-resync ()
-  ;; FIXME: files are not properly renamed.
-  :in-meta-directory
-  "Resynchronizes the map file and the sandbox."
-  (mapcar #'(lambda (mapping)
-	      (sync mapping (branch-identifier-to-directory *branch*)))
-	  (read-map-file *map-file*)))
 
 (define-subcommand add subcommand-add (&rest files)
   ;; FIXME: multiple adds!
@@ -128,7 +94,8 @@ command."
 	     (path (pathname namestring))
 	     (mapping (create-new-mapping :path path :id id)))
 	(add-mapping mapping *map-file*)
-	(subcommand-resync)))))
+	(subcommand-resync)))
+    (format t "~{~a ~}" files)))
 
 (define-subcommand (delete del rm) subcommand-delete (&rest files)
   :in-meta-directory
@@ -270,7 +237,74 @@ files are committed."
 		(format t "WARNING: Please fix the broken MAP-FILE.~%")
 		(format t "WARNING: GENNF will otherwise *not* produce human readable named files.~%")
 		(return-from subcommand-merge)))))))))
+
+(define-subcommand sync subcommand-sync (&rest path)
+  "Syncs current directory or the specified path"
+  (let* ((raw-directory (if (null path)
+			    (port-path:current-directory)
+			    (first path))))
+    (port-path:with-directory-form ((directory raw-directory))
+      (format t "sycing in directory ~a~% " directory)
+      (if (port-path:directory-pathname-p directory)
+	  (port-path:in-directory directory
+	    (let*  ((*startup-directory* (port-path:current-directory))
+		    (*meta-directory* (find-meta-directory))
+		    (*sandbox-directory* (port-path:get-parent-directory
+					  *meta-directory*)))
+	      (in-meta-directory
+		(let* (meta-file)
+		  (if (port-path:path-exists-p *checkpoint-file-name*)
+		      (setf meta-file (read-checkpoint-file))
+		      (setf meta-file (read-sandbox-file)))
+		  (let* ((*module* (module meta-file))
+			 (*branch* (branch meta-file))
+			 (*map-file*
+			  (port-path:append-pathnames
+			   *meta-directory*
+			   (branch-identifier-to-directory *branch*)
+			   *map-file-name*)))
+		    (sync-mappings *map-file* *branch*))))))))))
+
+(define-subcommand resync subcommand-resync ()
+  ;; FIXME: files are not properly renamed.
+  :in-meta-directory
+  "Resynchronizes the map file and the sandbox."
+  (mapcar #'(lambda (mapping)
+	      (sync mapping (branch-identifier-to-directory *branch*)))
+	  (read-map-file *map-file*)))
 	
 
+(define-subcommand merge-finish subcommand-merge-finish (&rest path)
+  "continues a merge with conflicts."
+  (let* ((raw-directory (if (null path)
+			    (port-path:current-directory)
+			    (first path))))
+    (port-path:with-directory-form ((directory raw-directory))
+      (format t "~%*** continuing in directory ~a~%" directory)
+      (if (port-path:directory-pathname-p directory)
+	  (port-path:in-directory directory
+	    (let* ((*startup-directory* (port-path:current-directory))
+		   (*meta-directory* (find-meta-directory))
+		   (*sandbox-directory* (port-path:get-parent-directory
+					 *meta-directory*)))
+	      (in-meta-directory
+		(let* ((checkpoint (read-checkpoint-file *checkpoint-file-name*))
+		       (*branch* (branch checkpoint))
+		       (root (root checkpoint))
+		       (module (module checkpoint))
+		       (files (files checkpoint))
+		       (*access* (make-instance 'access :root root)))
+		  (distribution-merge-finish module *branch* *access* raw-directory files)
+					; remove directory
+		  ))))))))
+				  
+				  
+  
 
-;;(defsubcommand merge-finish subcommand-merge-finish ()
+  ;; in Meta directory
+  ;; read checkpoint file
+  ;; invoke distribution-merge-finish
+;;  (let* ((checkpoint (read-checkpoint-file *checkpoint-file-name*)) 
+	 
+		    		    
+		    

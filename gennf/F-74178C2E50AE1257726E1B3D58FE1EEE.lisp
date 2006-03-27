@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.21 2006/03/24 14:10:34 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.22 2006/03/27 14:27:30 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -598,11 +598,11 @@ Origin files are in ~A.~%"
   (format nil "Created the following merge.~%~A"
 	  (log-message-format merge)))
 
-(defun merge-finish (module branch access directory files)
+(defun distribution-merge-finish (module branch access directory files)
   "Finishes a stuck merge. branch and access have to be the same
 as for merge and directory and files are merge's return values.
 The directory is deleted after"
-  (let ((destination-directory (merge-pathnames *merge-destination*
+  (let ((destination-directory (merge-pathnames *meta-directory-name*
 						directory)))
     (port-path:in-directory destination-directory
       (let* ((branch-directory (branch-identifier-to-directory branch))
@@ -612,5 +612,4 @@ The directory is deleted after"
 			      branch-directory)))
 	;; Include access file into list.
 	(backend-commit module "merge-finish" access
-			(cons *access-file-name* files-prefixed)))))
-  (port-path:delete-directory-tree directory))
+			(cons *access-file-name* files-prefixed))))))

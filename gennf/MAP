@@ -31,6 +31,9 @@
   (:EXEC
    T))
  (:FILE
+  "MCVS/F-24A443AA6A691B170F1B1DE11017E375.sh"
+  "prototype/tests/test.sh")
+ (:FILE
   "MCVS/F-24AFFF4D581EFC1C6EF802B4AAB5D27B.lisp"
   "sbcl-port/system.lisp")
  (:FILE
