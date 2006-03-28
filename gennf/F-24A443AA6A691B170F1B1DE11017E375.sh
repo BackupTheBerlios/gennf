@@ -1,22 +1,16 @@
 #! /usr/local/bin/bash 
 
 GENNF=/home/ni/sigsegv/src/lisp/gennf/prototype/gennf
-REPO_A=/tmp/a
-REPO_B=/tmp/b
-MODULE=foo
 
-#export GENNF REPO_A REPO_B MODULE
-
-set -e
-
-### Directory-Structure.
-rm -rf a b 
-mkdir -p  a b 
-
-### Repos init
-rm -rf $REPO_A $REPO_B
-cvs -d $REPO_A init
-cvs -d $REPO_B init
+function die()
+{
+    WHAT=$1
+    HOW=${2:-1}
+    echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+    echo "@ $WHAT"
+    echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+    exit $2
+}
 
 function gennf_co() 
 {
@@ -24,12 +18,13 @@ function gennf_co()
     MODULE=$2
     REPO=$3
     (
-	cd $WHERE || echo  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-	echo "****************************************"
-	echo "gennf co $MODULE -r $REPO"
-	echo "****************************************"
-	$GENNF co $MODULE -r $REPO
-    )
+	cd $WHERE || die "could not 'cd' to $WHERE"
+
+	echo "********************************************************************************"
+	echo " gennf co $MODULE -r $REPO"
+	echo "********************************************************************************"
+	$GENNF co $MODULE -r $REPO || die "error while: gennf co"
+    ) || die "could not perform gennf_co" $?
 }
 
 function gennf_add()
@@ -38,12 +33,12 @@ function gennf_add()
     MODULE=$2
     WHAT=$3
     (
-	cd $WHERE/$MODULE || echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-	echo "****************************************"
-	echo "gennf add $WHAT"
-	echo "****************************************"
-	$GENNF add $WHAT
-    )
+	cd $WHERE/$MODULE  || die "could not 'cd' to $WHERE"
+	echo "********************************************************************************"
+	echo " gennf add $WHAT"
+	echo "********************************************************************************"
+	$GENNF add $WHAT || exit 2
+    ) || die "could not perform gennf_add" $?
 
 }
 
@@ -52,25 +47,74 @@ function gennf_ci()
     WHERE=$1
     MODULE=$2
     (
-	cd $WHERE/$MODULE || echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-	echo "****************************************"
-	echo "gennf ci"
-	echo "****************************************"
-	$GENNF ci
-    )
+	cd $WHERE/$MODULE  || die "could not 'cd' to $WHERE"
+	echo "********************************************************************************"
+	echo " gennf ci"
+	echo "********************************************************************************"
+	$GENNF ci || exit 2
+    ) || die "could not perform gennf_ci" $?
 }
 
-# function gennf_branch()
-# {
-# }
+function gennf_branch()
+{
 
-# function gennf_merge()
-# {
+    MODULE=$1
+    REPO_A=$2
+    REPO_B=$3
+    BRANCH=$4
 
-# }
+    echo "********************************************************************************"
+    echo " gennf branch $MODULE -f $REPO_A -t $REPO_B  -b $BRANCH"    
+    echo "********************************************************************************"
+
+    $GENNF branch $MODULE  -f $REPO_A -t $REPO_B  -b $BRANCH || die "could not perform gennf_branch"
+}
+
+function gennf_merge()
+{
+
+    MODULE=$1
+    REPO_A=$2
+    REPO_B=$3
+    BRANCH=$4
+    DEST=$5
+
+    echo "********************************************************************************"
+    echo " gennf merge $MODULE -f $REPO_A -t $REPO_B  -b $BRANCH"    
+    echo "********************************************************************************"
+
+    $GENNF merge $MODULE  -f $REPO_A -t $REPO_B -b $BRANCH -d $DEST || die "could not perform gennf_branch"
+}
+
+########################################
+# 
+########################################
+
+set -e
+
+MODULE=foo
+
+BRANCH_NAME1=a
+BRANCH_NAME2=b
+
+REPO_A=/tmp/$BRANCH_NAME1
+REPO_B=/tmp/$BRANCH_NAME2
+
+### Directory-Structure.
+rm -rf a b 
+mkdir -p  a b 
+
+### Repos init
+
+rm -rf $REPO_A $REPO_B
+cvs -d $REPO_A init
+cvs -d $REPO_B init
 
 ## creating module foo
-echo "*** calling gennf: $GENNF setup $MODULE -r $REPO_A"
+
+echo "********************************************************************************"
+echo " gennf setup $MODULE -r $REPO_A"
+echo "********************************************************************************"
 $GENNF setup $MODULE -r $REPO_A
 
 gennf_co a $MODULE $REPO_A
@@ -82,13 +126,9 @@ gennf_co a $MODULE $REPO_A
 
 gennf_add a $MODULE main.c
 
-
 gennf_ci a $MODULE 
 
-
-# brachning the repo
-echo "*** calling gennf: $GENNF branch $MODULE -f /tmp/a -t /tmp/b -b 1"
-$GENNF branch $MODULE -f /tmp/a -t /tmp/b -b 1
+gennf_branch $MODULE $REPO_A $REPO_B 1
 
 gennf_co b $MODULE $REPO_B
 
@@ -101,15 +141,15 @@ gennf_ci b $MODULE
 
 (
     cd a/$MODULE
-    echo "branch aaaaaaaaaaaaaa" > main.
+    echo "branch aaaaaaaaaaaaaa" > main.c
 )
 
 gennf_ci a $MODULE
 
+gennf_merge $MODULE $REPO_A $REPO_B 1 1
 
-# merging...
-echo "*** $GENNF merge foo -f $REPO_A -t $REPO_B -b 1 -d 1"
-$GENNF merge foo -f $REPO_A -t $REPO_B -b 1 -d 1
-echo <<EOF
- A conflict was generated and now has to be resolved
+cat <<EOF
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@ A conflict was generated and now has to be resolved
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 EOF

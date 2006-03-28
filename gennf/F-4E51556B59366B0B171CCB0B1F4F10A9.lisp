@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.38 2006/03/18 23:37:21 florenz Exp $
+;; $Id: F-4E51556B59366B0B171CCB0B1F4F10A9.lisp,v 1.39 2006/03/28 14:11:45 sigsegv Exp $
 
 ;; All functions that interact with CVS directly live in
 ;; this file. These routines are only called from backend.lisp
@@ -80,7 +80,7 @@ exit-code is mentioned in the error message."
   (debug
     (debug-format "cvs invoked with following arguments:~%~A"
 		  arguments))
-  (invoke-program *cvs-command-name* arguments))
+  (invoke-program-silently *cvs-command-name* arguments))
 
 (defun cvs-default-error-handling (&rest args)
   "Default error handling is to signal a condition if

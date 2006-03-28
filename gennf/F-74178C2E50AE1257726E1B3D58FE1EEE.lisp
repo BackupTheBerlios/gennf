@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.22 2006/03/27 14:27:30 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.23 2006/03/28 14:11:45 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -99,7 +99,6 @@ access file and the branch subdirectory with it's change file."
 						 :identifier change)
 		    branch-directory)))
 	;; Retrieve the files into *meta-directory*.
-	(format t "files: ~a~%" files)
 	(backend-get module access files *meta-directory*)
 	;; Write sandbox-file.
 	(write-sandbox-file

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.43 2006/03/27 14:27:30 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.44 2006/03/28 14:11:45 sigsegv Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -54,11 +54,11 @@
 	(unless command
 	  (error "Specify a subcommand!~%"))
 	(dispatch-subcommand command command-arguments)
-	(quit))
+	(quit 0))
     (error (condition)
       (progn
 	(error-output "~%~A~%~%" condition)
-	(quit)))))
+	(quit 1)))))
 
 (defun dispatch-subcommand (command command-arguments)
   (apply (extract command *subcommand-list* :test #'string=)
@@ -84,7 +84,6 @@ command."
   ;; FIXME: multiple adds!
   :in-meta-directory
   "Add files to versioned files."
-  (prin1 files)
   (port-path:in-directory *sandbox-directory*
     (when (null files)
       (format t "~%You must atleast specify one file~%")
@@ -94,8 +93,8 @@ command."
 	     (path (pathname namestring))
 	     (mapping (create-new-mapping :path path :id id)))
 	(add-mapping mapping *map-file*)
-	(subcommand-resync)))
-    (format t "~{~a ~}" files)))
+	(subcommand-sync)))
+    (format t "~{~a ~}~%" files)))
 
 (define-subcommand (delete del rm) subcommand-delete (&rest files)
   :in-meta-directory
@@ -137,7 +136,7 @@ the sandbox."
       (distribution-checkout module access
 			     (if branch (parse-integer branch) 1)
 			     (if change (parse-integer change)))
-      (subcommand-resync))))
+      (subcommand-sync))))
 
 (define-subcommand setup subcommand-setup
     (module &key (:required root r) (symbolic-name n) (description d))
@@ -168,7 +167,7 @@ files are committed."
   "Bring files to latest change or to the indicated change."
   (let ((f-files (translate-to-f-files files *map-file*)))
     (distribution-update *module* *access* *branch* f-files change)
-    (subcommand-resync)))
+    (subcommand-sync)))
 
 (define-subcommand (branch br) subcommand-branch
     (module &key (:required root-from f) (:required root-to t)
@@ -183,17 +182,12 @@ files are committed."
       (create-empty-repository module destination))
     (format t "**** Creating empty branch.~%")
     (let ((identifier (create-empty-branch module destination)))
-      ;;       (format t "**** Merging both branches~%")
-      ;;       (format t
-      ;; 	      "**** distribution-merge:~%module: ~a~%source: ~a~%identifier: ~a
-      ;; destination: ~a~%branch: ~a~%"
-      ;;	      module source identifier destination branch)
       (distribution-merge module destination identifier
 			  source (parse-integer branch)
 			  (if change (parse-integer change)))
-      (format t "**** Created branch number ~A.~%" identifier)
+;;; (format t "**** Created branch number ~A.~%" identifier) 
       (format t "**** The branch can be checked out with:~%")
-      (format t "$ gennf checkout ~A ~A ~A~%" module root-from identifier))))
+      (format t "$ gennf checkout ~A -r ~A -c ~A~%" module root-from identifier))))
 
 
 (define-subcommand (merge mg) subcommand-merge
@@ -215,8 +209,6 @@ files are committed."
 		 (map-file (port-path:append-pathnames *meta-directory*
 						       branch-directory
 						       *map-file-name*)))
-	    (format t "writing CHECKPOINT: ~%~t~a~%~t~a~%~t~a~%~t~a~%"
-		    files branch-to module root-to)
 	    (write-checkpoint-file
 	     (make-instance 'checkpoint :files files :branch branch-to
 			    :module module :root root-to)
@@ -244,7 +236,7 @@ files are committed."
 			    (port-path:current-directory)
 			    (first path))))
     (port-path:with-directory-form ((directory raw-directory))
-      (format t "sycing in directory ~a~% " directory)
+      (format t "sycing in directory ~a~%" directory)
       (if (port-path:directory-pathname-p directory)
 	  (port-path:in-directory directory
 	    (let*  ((*startup-directory* (port-path:current-directory))
@@ -263,17 +255,9 @@ files are committed."
 			   *meta-directory*
 			   (branch-identifier-to-directory *branch*)
 			   *map-file-name*)))
-		    (sync-mappings *map-file* *branch*))))))))))
-
-(define-subcommand resync subcommand-resync ()
-  ;; FIXME: files are not properly renamed.
-  :in-meta-directory
-  "Resynchronizes the map file and the sandbox."
-  (mapcar #'(lambda (mapping)
-	      (sync mapping (branch-identifier-to-directory *branch*)))
-	  (read-map-file *map-file*)))
+		    (sync-mappings *map-file*
+				   (branch-identifier-to-directory *branch*)))))))))))
 	
-
 (define-subcommand merge-finish subcommand-merge-finish (&rest path)
   "continues a merge with conflicts."
   (let* ((raw-directory (if (null path)
@@ -287,6 +271,8 @@ files are committed."
 		   (*meta-directory* (find-meta-directory))
 		   (*sandbox-directory* (port-path:get-parent-directory
 					 *meta-directory*)))
+	      (format t "*s-d*: ~s~%*m-d*: ~s~%*s-d*: ~s~%" 
+		      *startup-directory* *meta-directory* *sandbox-directory*)
 	      (in-meta-directory
 		(let* ((checkpoint (read-checkpoint-file *checkpoint-file-name*))
 		       (*branch* (branch checkpoint))
@@ -294,17 +280,10 @@ files are committed."
 		       (module (module checkpoint))
 		       (files (files checkpoint))
 		       (*access* (make-instance 'access :root root)))
-		  (distribution-merge-finish module *branch* *access* raw-directory files)
-					; remove directory
-		  ))))))))
-				  
-				  
-  
-
-  ;; in Meta directory
-  ;; read checkpoint file
-  ;; invoke distribution-merge-finish
-;;  (let* ((checkpoint (read-checkpoint-file *checkpoint-file-name*)) 
-	 
-		    		    
-		    
+		  (distribution-merge-finish module *branch* *access*
+					     *sandbox-directory* files)
+		  ;; removing temporary directory (two levels above the sandbox)
+		  (pp:delete-directory-tree 
+		   (port-path:get-parent-directory
+		    (port-path:get-parent-directory
+		     *sandbox-directory*)))))))))))
