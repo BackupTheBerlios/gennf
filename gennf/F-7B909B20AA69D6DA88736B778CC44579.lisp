@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.12 2006/03/24 14:10:34 sigsegv Exp $
+;; $Id: F-7B909B20AA69D6DA88736B778CC44579.lisp,v 1.13 2006/03/28 19:31:10 florenz Exp $
 
 
 ;; Computing differences of files and merging them.
@@ -122,12 +122,16 @@ They are used to put in conflict information"
 			      :conflicting t
 			      :delete-markup-function #'delete-markup
 			      :replace-markup-function #'replace-markup)
+
+	     (format t "merged-file: ~a~%" merged-file)
+
 	     (prin1-file destination-file merged-file)
 	     conflict)))
 	(t (multiple-value-bind (merged-file conflict)
 	       (two-way-merge origin-file destination-file :conflicting t
 			      :delete-markup-function #'delete-markup
 			      :replace-markup-function #'replace-markup)
+	     (format t "TTTTT")
 	     (list-to-file merged-file destination-file)
 	     conflict))))))
 
