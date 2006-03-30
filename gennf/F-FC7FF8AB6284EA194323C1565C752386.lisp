@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.44 2006/03/28 14:11:45 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.45 2006/03/30 16:48:40 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -146,7 +146,7 @@ the sandbox."
     (create-empty-branch module access :symbolic-name symbolic-name
 			 :description description)
     (format t "The new module can be checked out with:~%")
-    (format t "$ gennf checkout ~A ~A~%" module root)))
+    (format t "$ gennf checkout ~A --root ~A~%" module root)))
 
 (define-subcommand (commit ci) subcommand-commit (&rest files)
   :in-meta-directory
@@ -231,12 +231,12 @@ files are committed."
 		(return-from subcommand-merge)))))))))
 
 (define-subcommand sync subcommand-sync (&rest path)
-  "Syncs current directory or the specified path"
+  "Syncs current directory or the specified path."
   (let* ((raw-directory (if (null path)
 			    (port-path:current-directory)
 			    (first path))))
     (port-path:with-directory-form ((directory raw-directory))
-      (format t "sycing in directory ~a~%" directory)
+      (format t "Syncing in directory ~a~%" directory)
       (if (port-path:directory-pathname-p directory)
 	  (port-path:in-directory directory
 	    (let*  ((*startup-directory* (port-path:current-directory))
@@ -256,15 +256,46 @@ files are committed."
 			   (branch-identifier-to-directory *branch*)
 			   *map-file-name*)))
 		    (sync-mappings *map-file*
-				   (branch-identifier-to-directory *branch*)))))))))))
-	
+				   (branch-identifier-to-directory
+				    *branch*)))))))))))
+
+(define-subcommand info subcommand-info
+    (&key (:flag verbose v) (module m) (root r) (branch b))
+  "Reports information about a branch."
+  (let (access)
+    (if (or root module branch)
+	(progn
+	  (unless (and root module)
+	    (error "All of --module, --root, have to be provided."))
+	  (setf access (make-instance 'access :root root)))
+	(let ((*meta-directory* (find-meta-directory)))
+	  (in-meta-directory
+	    (let ((sandbox (read-sandbox-file)))
+	      (setf branch (branch sandbox))
+	      (setf module (module sandbox))
+	      (setf access (get-access (access sandbox)
+				       *access-file-name*))))))
+    (let* ((latest-access (retrieve-latest-access module access))
+	   (latest-branches (retrieve-latest-branch module access)))
+      (format t "The module ~A has the following branches:~%~%"
+	      module)
+      (format t "~A~%" (pretty-branches-overview latest-branches)))))
+
+;; 	(format t "~A~%" (retrieve-latest-access
+;; 			  module
+;; 			  (make-instance 'access :root root)))
+;; 	(format t "~A~%" (retrieve-latest-branch
+;; 			  module
+;; 			  (make-instance 'access :root root))))
+
+
 (define-subcommand merge-finish subcommand-merge-finish (&rest path)
   "continues a merge with conflicts."
   (let* ((raw-directory (if (null path)
 			    (port-path:current-directory)
 			    (first path))))
     (port-path:with-directory-form ((directory raw-directory))
-      (format t "~%*** continuing in directory ~a~%" directory)
+      (format t "~%*** Continuing in directory ~a~%" directory)
       (if (port-path:directory-pathname-p directory)
 	  (port-path:in-directory directory
 	    (let* ((*startup-directory* (port-path:current-directory))
@@ -274,7 +305,8 @@ files are committed."
 	      (format t "*s-d*: ~s~%*m-d*: ~s~%*s-d*: ~s~%" 
 		      *startup-directory* *meta-directory* *sandbox-directory*)
 	      (in-meta-directory
-		(let* ((checkpoint (read-checkpoint-file *checkpoint-file-name*))
+		(let* ((checkpoint (read-checkpoint-file
+				    *checkpoint-file-name*))
 		       (*branch* (branch checkpoint))
 		       (root (root checkpoint))
 		       (module (module checkpoint))
@@ -282,7 +314,8 @@ files are committed."
 		       (*access* (make-instance 'access :root root)))
 		  (distribution-merge-finish module *branch* *access*
 					     *sandbox-directory* files)
-		  ;; removing temporary directory (two levels above the sandbox)
+		  ;; Removing temporary directory
+		  ;; (two levels above the sandbox).
 		  (pp:delete-directory-tree 
 		   (port-path:get-parent-directory
 		    (port-path:get-parent-directory

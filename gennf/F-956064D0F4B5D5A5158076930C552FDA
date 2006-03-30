@@ -16,7 +16,7 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.4 2006/03/20 01:01:03 florenz Exp $
+# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.5 2006/03/30 16:48:39 florenz Exp $
 
 LISP = sbcl
 EVALOPT = --eval

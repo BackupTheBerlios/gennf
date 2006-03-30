@@ -97,7 +97,8 @@ string are the command arguments."
 			    `(&rest ,arguments)
 			    ())))
       `(progn
-	 ;; Generate function defintion, depends on the :in-meta-directory flag.
+         ;; Generate function defintion, depends on the
+	 ;; :in-meta-directory flag.
 	 ,(if (eql (first forms) :in-meta-directory)
 	      `(defun ,function-name ,lambda-list
 		 (let* ((*startup-directory* (port-path:current-directory))
@@ -122,7 +123,8 @@ string are the command arguments."
 	 (setf *subcommand-help*
 	       (reassoc ,command-name
 			,(format nil "~A~%~%~A~%"
-				 (generate-command-syntax command-name parameter-list)
+				 (generate-command-syntax command-name
+							  parameter-list)
 				 description)
 			*subcommand-help* :test #'string=))
 	 ;; Register subcommand in *subcommand-full-name*.
@@ -176,11 +178,16 @@ string are the command arguments."
   "Parse a key description."
   (cond
     ((consp argument)
-          (if  (eq :required (first argument))
-	       (acons :required-key (rest argument) ())
-	       (acons :key argument ())))
+     (cond
+       ((eql :required (first argument))
+	(acons :required-key (rest argument) ()))
+       ((eql :flag (first argument))
+	(acons :flag-key (rest argument) ()))
+       (t
+	(acons :key argument ()))))
     ((symbolp argument) (acons :key (list argument) ()))
     (t (error "List or symbol expected."))))
+
 
 (defun parse-rest-arguments (argument-list)
   "Parse the rest parameter."
@@ -198,6 +205,7 @@ input must be from parse-argument-list."
 	 (key-arguments
 	  (remove-if-not #'(lambda (element)
 			     (or (eql :required-key (car element))
+				 (eql :flag-key (car element))
 				 (eql :key (car element))))
 			 abstract-syntax))
 	 (rest-arguments
@@ -240,19 +248,25 @@ input must be from parse-argument-list."
 	  
 (defun generate-key-parser-case (abstract-syntax)
   "Generate code to parse a certain key parameter."
-  (flet ((generate-case (symbol value &optional (long t))
+  (flet ((generate-case (type symbol value &optional (long t))
 	   (let ((option-string (if long
 				    (long-argument-string value)
 				    (short-argument-string value))))
 	   `((string= (first token-list) ,option-string)
-	     (if (second token-list)
-		 (append (acons ',symbol (second token-list) ())
-			 (parse-keys (nthcdr 2 token-list)))
-		 (error "Argument to ~A expected." ,option-string))))))
-    (let ((symbol (second abstract-syntax)))
-	 (cons (generate-case symbol symbol)
+	     ,(cond
+	       ((or (eql type :key) (eql type :required-key))
+		`(if (second token-list)
+		  (append (acons ',symbol (second token-list) ())
+		   (parse-keys (nthcdr 2 token-list)))
+		  (error "Argument to ~A expected." ,option-string)))
+	       ((eql type :flag-key)
+		`(append (acons ',symbol t ())
+		  (parse-keys (cdr token-list)))))))))
+    (let ((type (first abstract-syntax))
+	  (symbol (second abstract-syntax)))
+	 (cons (generate-case type symbol symbol)
 	       (mapcar #'(lambda (value)
-			   (generate-case symbol value nil))
+			   (generate-case type symbol value nil))
 		       (nthcdr 2 abstract-syntax))))))
 
 (defun long-argument-string (symbol)
@@ -267,19 +281,28 @@ input must be from parse-argument-list."
   "Generate a syntax description for command."
   (let ((syntax (format nil "~A" command-name)))
     (flet ((append-syntax (string)
-	     (setf syntax (format nil "~A~A" syntax string))))
+	     (setf syntax (format nil "~A~A" syntax string)))
+	   (alternatives (parameter)
+	     (let ((description
+		    (format nil "~A"
+			    (long-argument-string (second parameter)))))
+	       (when (> (length parameter) 2)
+		 (dolist (key (cddr parameter))
+		   (setf description
+		     (format nil "~A|~A" description
+			     (short-argument-string key)))))
+	       description)))
       (dolist (parameter parsed-parameter-list)
 	(case (first parameter)
 	  (:plain (append-syntax (format nil " ~(~A~)" (second parameter))))
 	  (:rest (append-syntax (format nil " ~(~A~)..."
 					(second parameter))))
+	  (:flag-key (append-syntax
+		      (format nil " [~A]" (alternatives parameter))))
 	  (t (append-syntax
-		 (format nil " [~A" (long-argument-string (second parameter))))
-		(when (> (length parameter) 2)
-		  (dolist (key (cddr parameter))
-		    (append-syntax 
-		     (format nil "|~A" (short-argument-string key)))))
-		(append-syntax (format nil " ~(~A~)]" (second parameter)))))))
+	      (format nil " [~A ~(~A~)]"
+		      (alternatives parameter)
+		      (second parameter)))))))
     syntax))
 
 (defun generate-variables (parsed-lambda-list parsed-arguments-variable)
@@ -289,7 +312,8 @@ input must be from parse-argument-list."
                                ,parsed-arguments-variable)))
                parsed-lambda-list))
   
-(defun generate-reqired-keyword-check (parsed-lambda-list parsed-arguments-variable)
+(defun generate-reqired-keyword-check
+    (parsed-lambda-list parsed-arguments-variable)
   (let ((required-args (mapcan #'(lambda (x)
                                    (if (eql (car x) :required-key)
                                        (list (cadr x))))

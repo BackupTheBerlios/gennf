@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.19 2006/03/18 23:37:21 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.20 2006/03/30 16:48:39 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -344,3 +344,16 @@ containg the change number and all changed files."
   (format nil "Change-identifier ~A.~%Changed files: ~A."
 	  (identifier change)
 	  (list-to-string (all-changed-files change) :convert #'namestring)))
+
+;; (defun retrieve-all-changes (module access branch)
+;;   "Returns a list of all changes in sequence plus
+;; those that are linked by the oldest change in the sequence."
+;;   (let ((start (retrieve-latest-changes module access branch)))
+;;     (if (typep (first (last start)) 'merge)
+;; 	(let* ((origin (origin (first (last start))))
+;; 	       (latest-access (retrieve-latest-access module access))
+;; 	       (remote-branch (branch origin))
+;; 	       (remote-access (get-access (access origin) latest-access)))
+;; 	  (append start (retrieve-all-changes module remote-access
+;; 					      remote-branch)
+;; 	start)))

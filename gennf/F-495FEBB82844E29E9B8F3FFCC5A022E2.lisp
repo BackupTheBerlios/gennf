@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.10 2006/03/18 23:37:21 florenz Exp $
+;; $Id: F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp,v 1.11 2006/03/30 16:48:39 florenz Exp $
 
 ;; This file contains routines to manipulate access entries.
 
@@ -139,3 +139,12 @@ a sequence of accesses."
   "Return a string that containts root and the access method."
   (format nil "~A:~A" (symbol-name (backend access))
 	  (root access)))
+
+(defun retrieve-latest-access (module access)
+  "Returns latest access file for the indicated module
+directly from the repository."
+  (let ((latest-access ()))
+    (port-path:in-temporary-directory (:temporary-pathname temporary-directory)
+      (backend-get module access (list *access-file-name*) temporary-directory)
+      (setf latest-access (read-access-file *access-file-name*)))
+    latest-access))

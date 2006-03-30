@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.23 2006/03/28 19:31:10 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.24 2006/03/30 16:48:39 florenz Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from Meta-CVS.
@@ -391,25 +391,6 @@ duplicate objects. Otherwise returns the filemap, sorted by path."
   filemap)
 
 
-
-(defun make-hard-link (path1 path2)
-  "Creates a hardlink for the missing pathspec.
-path1 and path2 must be abolute."
-  (let (existing
-	to-create
-	(exists1p (port-path:path-exists-p path1))
-	(exists2p (port-path:path-exists-p path2)))
-    (cond 
-      ((and exists1p (not exists2p))
-       (setf to-create path2)
-       (setf existing path1))
-      ((and exists2p (not exists1p))
-       (setf to-create path1)
-       (setf existing path2))
-      ((and (not exists1p) (not exists2p))
-       (error "None of the files exists."))
-      (t (error "Both files exist.")))
-    (port-path:hard-link existing to-create)))
 
 (defgeneric sync (mapping branch-directory)
   (:documentation "Syncs files from *meta-directory* to sandbox."))

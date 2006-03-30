@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.9 2006/03/18 23:37:21 florenz Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.10 2006/03/30 16:48:39 florenz Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -60,7 +60,7 @@ NIL (see change.lisp for an explaination of this beheviour)."
 		   :symbolic-name (extract :symbolic-name alist)
 		   :description (extract :description alist))))
 
-(defun read-branch-file ()
+(defun read-branch-file (&optional (file *branch-file-name*))
   "Reads a branch file and returns a list of branch objects."
   (mapcar #'(lambda (alist) (alist-to-branch alist))
 	  (read-file *branch-file-name*)))
@@ -177,3 +177,27 @@ on a checked out sandbox."))
 (defun write-sandbox-file (sandbox &optional (file *sandbox-file-name*))
   "Write sandbox object to file."
   (prin1-file file (convert-to-alist sandbox)))
+
+(defun retrieve-latest-branch (module access)
+  "Returns latest access file for the indicated module
+directly from the repository."
+  (let ((latest-branch ()))
+    (port-path:in-temporary-directory (:temporary-pathname temporary-directory)
+      (backend-get module access (list *branch-file-name*) temporary-directory)
+      (setf latest-branch (read-branch-file *branch-file-name*)))
+    latest-branch))
+
+(defun pretty-branches-overview (branches)
+  "Creates an overview for all branches like this:
+Branch:      #
+Name:        n
+Description: d
+
+..."
+  (flet ((pretty-description (branch)
+	   (format nil
+		   "Branch:      ~A~%Name:        ~A~%Description: ~A~%~%"
+		   (identifier branch) (symbolic-name branch)
+		   (description branch))))
+    (reduce #'(lambda (s1 s2) (format nil "~A~A" s1 s2))
+	    (reverse (mapcar #'pretty-description branches)))))

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.17 2006/03/28 14:11:45 sigsegv Exp $
+;; $Id: F-769D6330165D17D4921D9970720734B7.lisp,v 1.18 2006/03/30 16:48:39 florenz Exp $
 
 ;; This file defines global variables which somehow define
 ;; gennf's configuration.
@@ -27,7 +27,7 @@
 ;; Debugging.
 ;;
 
-(defparameter *debug-mode* nil
+(defparameter *debug-mode* t
   "Switches on debug mode.")
 
 (defparameter *debug-output-prefix* "DEBUG: "
