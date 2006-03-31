@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.45 2006/03/30 16:48:40 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.46 2006/03/31 16:42:16 florenz Exp $
 
 ;; Main module. Basic operations of gennf are implemented in this file.
 
@@ -266,7 +266,7 @@ files are committed."
     (if (or root module branch)
 	(progn
 	  (unless (and root module)
-	    (error "All of --module, --root, have to be provided."))
+	    (error "--module and --root, have to be provided, because no META directory could be found."))
 	  (setf access (make-instance 'access :root root)))
 	(let ((*meta-directory* (find-meta-directory)))
 	  (in-meta-directory
@@ -280,14 +280,6 @@ files are committed."
       (format t "The module ~A has the following branches:~%~%"
 	      module)
       (format t "~A~%" (pretty-branches-overview latest-branches)))))
-
-;; 	(format t "~A~%" (retrieve-latest-access
-;; 			  module
-;; 			  (make-instance 'access :root root)))
-;; 	(format t "~A~%" (retrieve-latest-branch
-;; 			  module
-;; 			  (make-instance 'access :root root))))
-
 
 (define-subcommand merge-finish subcommand-merge-finish (&rest path)
   "continues a merge with conflicts."

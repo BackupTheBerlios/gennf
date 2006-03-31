@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.10 2006/03/30 16:48:39 florenz Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.11 2006/03/31 16:42:16 florenz Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -63,7 +63,7 @@ NIL (see change.lisp for an explaination of this beheviour)."
 (defun read-branch-file (&optional (file *branch-file-name*))
   "Reads a branch file and returns a list of branch objects."
   (mapcar #'(lambda (alist) (alist-to-branch alist))
-	  (read-file *branch-file-name*)))
+	  (read-file file)))
 
 (defun write-branch-file (sequence)
   "Write the sequence of branches to the branch file."
