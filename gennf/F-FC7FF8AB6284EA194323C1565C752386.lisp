@@ -16,9 +16,9 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.46 2006/03/31 16:42:16 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.47 2006/04/01 12:45:52 florenz Exp $
 
-;; Main module. Basic operations of gennf are implemented in this file.
+;; Main module. Subcommands of gennf are implemented in this file.
 
 (in-package :gennf)
 
@@ -44,6 +44,7 @@
 
 (defun gennf ()
   "Startup function."
+
   (handler-case
       (let* ((arguments (rest (posix-arguments)))
 	     (command (first arguments))
@@ -185,9 +186,9 @@ files are committed."
       (distribution-merge module destination identifier
 			  source (parse-integer branch)
 			  (if change (parse-integer change)))
-;;; (format t "**** Created branch number ~A.~%" identifier) 
       (format t "**** The branch can be checked out with:~%")
-      (format t "$ gennf checkout ~A -r ~A -c ~A~%" module root-from identifier))))
+      (format t "$ gennf checkout ~A -r ~A -c ~A~%"
+	      module root-from identifier))))
 
 
 (define-subcommand (merge mg) subcommand-merge
@@ -197,13 +198,15 @@ files are committed."
   (let* ((source (make-instance 'access :root root-from))
 	 (destination (make-instance 'access :root root-to)))
     (multiple-value-bind (destination-directory files) 
-	(distribution-merge module destination branch-to source branch-from change)
+	(distribution-merge module destination branch-to source
+			    branch-from change)
       (unless destination-directory 
 	(format t "merge finished cleanly.")
 	(return-from subcommand-merge))
-      ;; handling CONFLICT, writing CHECKPOINT
+      ;; Handling CONFLICT, writing CHECKPOINT.
       (let* ((*meta-directory* destination-directory)
-	     (*sandbox-directory* (port-path:get-parent-directory *meta-directory*)))
+	     (*sandbox-directory* (port-path:get-parent-directory
+				   *meta-directory*)))
 	(in-meta-directory
 	  (let* ((branch-directory (branch-identifier-to-directory branch-to))
 		 (map-file (port-path:append-pathnames *meta-directory*
@@ -216,18 +219,20 @@ files are committed."
 	    (handler-case 
 		(let* ((mapping-list (read-map-file map-file))
 		       (existing-mapping-list
-			(remove-if-not #'(lambda (m) 
-					   (port-path:path-exists-p
-					    (port-path:append-pathnames *meta-directory*
-									branch-directory
-									(id m))))
-				       mapping-list)))
+			(remove-if-not
+			 #'(lambda (m) 
+			     (port-path:path-exists-p
+			      (port-path:append-pathnames *meta-directory*
+							  branch-directory
+							  (id m))))
+			 mapping-list)))
 		  (sync-mappings existing-mapping-list branch-directory))
 	      (malformed-map-file-error () ; catching Error.
-		(format t "WARNING: Due to merging conflicts the MAP-FILE is broken~%")
-		(format t "WARNING: MAP-FILE in ~A is malformed~%" destination-directory)
-		(format t "WARNING: Please fix the broken MAP-FILE.~%")
-		(format t "WARNING: GENNF will otherwise *not* produce human readable named files.~%")
+		(format t "WARNING: Due to merging conflicts the MAP file is broken~%")
+		(format t "WARNING: MAP file in ~A is malformed~%"
+			destination-directory)
+		(format t "WARNING: Please fix the broken MAP file.~%")
+		(format t "WARNING: gennf will otherwise *not* produce human readable named files.~%")
 		(return-from subcommand-merge)))))))))
 
 (define-subcommand sync subcommand-sync (&rest path)
@@ -275,11 +280,17 @@ files are committed."
 	      (setf module (module sandbox))
 	      (setf access (get-access (access sandbox)
 				       *access-file-name*))))))
-    (let* ((latest-access (retrieve-latest-access module access))
-	   (latest-branches (retrieve-latest-branch module access)))
+    (let* ((latest-branches (retrieve-latest-branch module access)))
       (format t "The module ~A has the following branches:~%~%"
 	      module)
-      (format t "~A~%" (pretty-branches-overview latest-branches)))))
+      (dolist (branch latest-branches)
+	(format t "~A~%~%" (info-format branch))
+	(when verbose
+	  (format t "This branch has the following changes:~%~%")
+	  (dolist (change (retrieve-all-changes module access
+						(identifier branch)))
+	    (format t "~A~%" (info-format change)))
+	  (format t "~%~%"))))))
 
 (define-subcommand merge-finish subcommand-merge-finish (&rest path)
   "continues a merge with conflicts."

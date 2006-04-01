@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.24 2006/03/30 16:48:39 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.25 2006/04/01 12:45:52 florenz Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from Meta-CVS.
@@ -25,7 +25,7 @@
 ;; TODO: 
 ;; - structure generating
 ;; - structure syncing
-;; - implementing usal gennf file interface
+;; - implementing usual gennf file interface
 ;; 
 ;; Done:
 ;; - reading
@@ -244,16 +244,16 @@ FIXME: This should include resolving relative pathnames etc."
 
 (defmethod sync-mappings ((sequence list) branch)
   "syncs list of mappings to  branch  disk"
-  ;; FIXME: Tests koennten hier hin
+  ;; FIXME: Place some tests here.
   (mapcar #'(lambda (mapping)
-	      (format t "***** syncing: ~a -> ~a ~%" (id mapping) (path mapping))
+	      (format t "***** syncing: ~a -> ~a ~%"
+		      (id mapping) (path mapping))
 	      (sync mapping branch))
 	  sequence))
 
 (defmethod sync-mappings ((file pathname) branch)
   "syncs map-file in branch to disk"
   (sync-mappings (read-map-file file) branch))
-
 
 (defun create-new-mapping (&key
 			   (kind :file)
@@ -437,7 +437,6 @@ path1 and path2 must be abolute."
        (error "None of the files exists."))
       (t (error "Both files exist.")))
     (port-path:hard-link existing to-create)))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.21 2006/03/31 16:42:16 florenz Exp $
+;; $Id: F-03018E8471DDD49AD47174CF158A9286.lisp,v 1.22 2006/04/01 12:45:52 florenz Exp $
 
 ;; This file contains routines to manipulate changes,
 ;; change files, and sequences of changes.
@@ -352,12 +352,23 @@ those that are linked by the oldest change in the sequence."
 		 (if change
 		     (without-newer-changes change sequence)
 		     sequence))))
-    (if (typep (first (last start)) 'merge)
-	(let* ((origin (origin (first (last start))))
-	       (latest-access (retrieve-latest-access module access))
-	       (remote-branch (branch origin))
-	       (remote-access (get-access (access origin) latest-access))
-	       (remote-change (identifier origin)))
-	  (append start (retrieve-all-changes module remote-access
-					      remote-branch remote-change)))
-	start)))
+    (debug
+      (debug-format "~A~%" start)
+      (debug-format "Second type is ~A~%." (type-of (second (reverse start)))))
+    ;; Grab out the second change in the sequence. If this is a merge
+    ;; its origin is followed to get the other changes. It is the second
+    ;; cange because the first is always the one with the map file.
+    (let ((possibly-merge (second (reverse start))))
+      (if (typep possibly-merge 'merge)
+	  (let* ((origin (origin possibly-merge))
+		 (latest-access (retrieve-latest-access module access))
+		 (remote-branch (branch origin))
+		 (remote-access (get-access (access origin) latest-access))
+		 (remote-change (identifier origin)))
+	    (append start (retrieve-all-changes module remote-access
+						remote-branch remote-change)))
+	  start))))
+
+(defmethod info-format ((change change))
+  "Return <CHANGE: number>."
+  (format nil "<CHANGE: ~A>" (identifier change)))

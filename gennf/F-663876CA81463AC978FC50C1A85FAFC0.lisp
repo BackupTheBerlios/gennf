@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.6 2006/03/24 14:10:34 sigsegv Exp $
+;; $Id: F-663876CA81463AC978FC50C1A85FAFC0.lisp,v 1.7 2006/04/01 12:45:52 florenz Exp $
 
 ;; Manipulations of merges.
 
@@ -109,3 +109,13 @@ message as a string."
 	  (access origin)
 	  (branch origin)
 	  (identifier origin)))
+
+(defmethod info-format ((merge merge))
+  "Return <MERGE: number / origin>."
+  (format nil "<MERGE: ~A / ~A>" (identifier merge)
+	  (info-format (origin merge))))
+
+(defmethod info-format ((origin origin))
+  "Origin <ORIGIN: root=..., branch=..., change=...>."
+  (format nil "<ORIGIN: access=~A, branch=~A, change=~A>"
+	  (access origin) (branch origin) (identifier origin)))

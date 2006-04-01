@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.20 2006/03/18 23:37:21 florenz Exp $
+;; $Id: F-48D1C070D93800E7560AEE00EF78D0B2.lisp,v 1.21 2006/04/01 12:45:52 florenz Exp $
 
 ;; This file contains various functions and macros that
 ;; do not fit into any of the other files.
@@ -118,10 +118,14 @@ and return those that are found."
 
 
 ;;
-;; Things concerning log messages.
+;; Formatting functions.
 ;; 
 
 (defgeneric log-message-format (entitiy)
   (:documentation "Convert entity into some string suitable for putting
 it into a log message. entity may e. g. be an access and is transformed into
 its root string and the access method."))
+
+(defgeneric info-format (change)
+  (:documentation "Return a string representing the change suitable for
+te info subcommand."))

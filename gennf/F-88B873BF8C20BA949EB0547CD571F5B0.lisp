@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.7 2006/03/28 14:11:45 sigsegv Exp $
+;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.8 2006/04/01 12:45:52 florenz Exp $
 
 ;; All functions that call SBCL specific extensions (i. e. funtions
 ;; of some sb-* package) go in here.
@@ -55,10 +55,10 @@
 					output error) &body forms)
   (with-gensyms (process)
     `(let ((,process (sb-ext:run-program ,program
-					,arguments
-					:search t
-					:output :stream
-					:error :stream)))
+					 ,arguments
+					 :search t
+					 :output :stream
+					 :error :stream)))
       (let ,(remove ()
 		    (list (when exit-code
 			    `(,exit-code (sb-ext:process-exit-code ,process)))

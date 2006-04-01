@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.11 2006/03/31 16:42:16 florenz Exp $
+;; $Id: F-080CF3710F46A1C94984A6BD78462AC7.lisp,v 1.12 2006/04/01 12:45:52 florenz Exp $
 
 ;; Manipulation of branches and sequences of branches.
 
@@ -187,6 +187,16 @@ directly from the repository."
       (setf latest-branch (read-branch-file *branch-file-name*)))
     latest-branch))
 
+(defmethod info-format ((branch branch))
+  "Return
+Branch:      #
+Name:        n
+Description: d"
+  (format nil
+	  "Branch:      ~A~%Name:        ~A~%Description: ~A"
+	  (identifier branch) (symbolic-name branch)
+	  (description branch)))
+
 (defun pretty-branches-overview (branches)
   "Creates an overview for all branches like this:
 Branch:      #
@@ -194,10 +204,5 @@ Name:        n
 Description: d
 
 ..."
-  (flet ((pretty-description (branch)
-	   (format nil
-		   "Branch:      ~A~%Name:        ~A~%Description: ~A~%~%"
-		   (identifier branch) (symbolic-name branch)
-		   (description branch))))
-    (reduce #'(lambda (s1 s2) (format nil "~A~A" s1 s2))
-	    (reverse (mapcar #'pretty-description branches)))))
+  (reduce #'(lambda (s1 s2) (format nil "~A~%~%~A" s1 s2))
+	  (reverse (mapcar #'info-format branches))))
