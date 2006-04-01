@@ -1,11 +1,8 @@
 TODO
 ====
 
-High priority
--------------
-* List of all changes of a branch. This includes following links.
 
-Low priority/Deferred
+Low priority/deferred
 ---------------------
 * 3 way merge for branching (if this is not implemented, the accoding
   section in the report should be updated, because 3 way merge is in
@@ -26,8 +23,6 @@ Low priority/Deferred
     consequently used yet.
   * The retry macro should signal a condition if the maximum
     number of retries is exceeded.
-* These items should be included in the report in the 'Dropped
-  Features' section.
 
 
 ABANDONED
@@ -41,20 +36,20 @@ COMMANDS
 
 Those are the basic command line instructions.
 			  			   
-* add file	       | 
-* move file1 file2     | File Layer
-* remove file	       |    	   
-			  	   	      
+* add file	       |
+* move file1 file2     | file layer
+* remove file	       |
+
 * update [files ...]   |       	   
 * commit [files ...]   |  
 		       |
-* checkout	       | Repository Layer
+* checkout	       |
 		       |
 * branch	       |
-* merge		       |
+* merge		       | repository layer
 * merge-finish         | 
-* new                  |
+* setup                |
                        |
 * diff                 |
-* changes              |
+* info                 |
 * log                  |

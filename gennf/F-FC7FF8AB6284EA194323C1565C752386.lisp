@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.47 2006/04/01 12:45:52 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.48 2006/04/01 13:03:23 florenz Exp $
 
 ;; Main module. Subcommands of gennf are implemented in this file.
 
@@ -52,8 +52,6 @@
 	(debug
 	  (debug-format "Command: ~a~%Arguments: ~a~%" command
 			command-arguments))
-	(unless command
-	  (error "Specify a subcommand!~%"))
 	(dispatch-subcommand command command-arguments)
 	(quit 0))
     (error (condition)
@@ -62,8 +60,10 @@
 	(quit 1)))))
 
 (defun dispatch-subcommand (command command-arguments)
-  (apply (extract command *subcommand-list* :test #'string=)
-	 command-arguments))
+  (let ((subcommand (extract command *subcommand-list* :test #'string=)))
+    (if subcommand
+	(apply subcommand command-arguments)
+	(error "Specifiy a subcommand!"))))
 
 ;;
 ;; Subcommands.
