@@ -112,6 +112,9 @@
   "MCVS/F-42DFD065A78C998A3E47C9493FF221E7.lisp"
   "src/packages.lisp")
  (:FILE
+  "MCVS/F-456BD96CDEFE5086F68B54338511A946.sh"
+  "scripts/package.sh")
+ (:FILE
   "MCVS/F-48D1C070D93800E7560AEE00EF78D0B2.lisp"
   "src/miscellaneous.lisp")
  (:FILE
