@@ -16,7 +16,7 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.6 2006/04/03 17:28:29 florenz Exp $
+# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.7 2006/04/03 22:42:32 florenz Exp $
 
 # Install options.
 DESTDIR=
@@ -39,6 +39,8 @@ FASLS = access.fasl backend-cvs.fasl backend.fasl branch.fasl \
 EXECUTABLE=gennf
 IMAGE=gennf.img
 SYSTEM=gennf
+
+default : $(IMAGE)
 
 $(EXECUTABLE): $(SOURCES)
 	$(LISP) $(EVALOPT) "(require :asdf)" \
