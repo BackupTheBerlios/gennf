@@ -27,6 +27,21 @@ function gennf_co()
     ) || die "could not perform gennf_co" $?
 }
 
+function gennf_up() 
+{
+    WHERE=$1
+    MODULE=$2
+    REPO=$3
+    (
+	cd $WHERE || die "could not 'cd' to $WHERE"
+
+	echo "********************************************************************************"
+	echo " gennf update $MODULE -r $REPO"
+	echo "********************************************************************************"
+	$GENNF update $MODULE -r $REPO || die "error while: gennf update"
+    ) || die "could not perform gennf_update" $?
+}
+
 function gennf_add()
 {
     WHERE=$1

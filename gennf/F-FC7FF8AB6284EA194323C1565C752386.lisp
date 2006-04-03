@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.49 2006/04/03 12:15:33 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.50 2006/04/03 14:12:18 sigsegv Exp $
 
 ;; Main module. Subcommands of gennf are implemented in this file.
 
@@ -93,8 +93,8 @@ command."
       (let* ((id (format nil "~A" (guid-gen)))
 	     (path (pathname namestring))
 	     (mapping (create-new-mapping :path path :id id)))
-	(add-mapping mapping *map-file*)
-	(subcommand-sync)))
+	(add-mapping mapping *map-file*)))
+    (subcommand-sync)
     (format t "~{~a ~}~%" files)))
 
 (define-subcommand (delete del rm) subcommand-delete (&rest files)
