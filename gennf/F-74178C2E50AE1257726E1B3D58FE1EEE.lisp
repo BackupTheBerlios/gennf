@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.23 2006/03/28 14:11:45 sigsegv Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.24 2006/04/03 17:28:29 florenz Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -463,7 +463,7 @@ branching."
 	   ;; Can it be relied on that the elements from
 	   ;; intersection's first argument go to the result?
 	   ;; If not, this has to be rewritten, because revision
-	   ;; numbers from destination habe to be in
+	   ;; numbers from destination have to be in
 	   ;; common-files-and-revisions.
 	   (common-files-and-revisions
 	    (intersection destination-files-and-revisions
@@ -475,6 +475,11 @@ branching."
 				     destination-branch-directory))
 	   (common-files
 	    (remove-revisions common-files-and-revisions))
+	   ;; Files that are common but are not merged
+	   ;; because they have identical content in both
+	   ;; branches go here. This is important because they must
+	   ;; not appear in the merges file-map.
+	   (unchanged-common-files ())
 	   ;; Uncommon files are just added.
 	   (uncommon-files
 	    (set-difference origin-files common-files :test #'equal)))
@@ -514,16 +519,19 @@ Origin files are in ~A.~%"
 		(destination-file (merge-pathnames
 				   file
 				   destination-branch-absolute))
-		(origin-info (format nil "branch: ~A / root: ~A (origin)"
-				     origin-branch (root origin-access)))
-		(destination-info
-		 (format nil "branch: ~A / root: ~A (destination)"
-			 branch (root access))))
-	    (format t "Doing file ~A~%" file)
-	    (when (appropriate-two-way-merge origin-file destination-file
-					     origin-info destination-info)
-	      (setf conflicts t))))
-	;;(format t "Conflict merging file ~A.~%" file))))
+		(origin-info "ORIGIN")
+		(destination-info "DESTINATION"))
+	    ;; Check if files' content differ. A merge is only allowed
+	    ;; if they are not the same.
+	    (if (samep origin-file destination-file)
+		(push file unchanged-common-files)
+		(progn
+		  (format t "Merging file ~A~%" file)
+		  (when (appropriate-two-way-merge
+			 origin-file destination-file
+			 origin-info destination-info)
+		    (setf conflicts t)
+		    (format t "Conflict merging file ~A.~%" file))))))
 	;; Create merge entry.
 	(backend-get module access (list *access-file-name*)
 		     destination-directory)
@@ -550,7 +558,10 @@ Origin files are in ~A.~%"
 	      ;; Add merge to new change-sequence
 	      (setf new-changes (add-change merge new-changes)))))
 	;; Add files to merge's file-map and write change sequence.
-	(dolist (file common-files)
+	;; Only those common files which differed are added to the
+	;; file-map.
+	(dolist (file (set-difference common-files unchanged-common-files
+				      :test #'equal))
 	  (setf new-changes (add-file-to-changes file new-changes)))
 	(dolist (file uncommon-files)
 	  (setf new-changes (add-file-to-changes file new-changes)))

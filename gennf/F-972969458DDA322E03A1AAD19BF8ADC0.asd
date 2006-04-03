@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.22 2006/04/01 12:45:52 florenz Exp $
+;; $Id: F-972969458DDA322E03A1AAD19BF8ADC0.asd,v 1.23 2006/04/03 17:28:29 florenz Exp $
 
 ;; ASDF system defintion in ASDF-INSTALL style.
 
@@ -33,7 +33,7 @@
   :maintainer "Florian Lorenzen <florenz@berlios.de>"
   :licence "GPL"
   :description "Prototype implementaion of distributed version management."
-  :depends-on (:osicat :port-path :cldoc :cl-difflib)
+  :depends-on (:osicat :port-path :cl-difflib)
   :components
   ((:file "packages")
    (:file "gennf"
@@ -45,7 +45,7 @@
 				  "backend" "branch" "change" "mapping"
 				  "error" "debug" "merging"))
    (:file "access"
-	  :depends-on ("packages" "configuration" "files"))
+	  :depends-on ("packages" "configuration" "files" "miscellaneous"))
    (:file "backend"
 	  :depends-on ("packages" "backend-cvs" "miscellaneous" "directories"))
    (:file "backend-cvs"
@@ -70,7 +70,7 @@
    (:file "miscellaneous"
 	  :depends-on ("packages"))
    (:file "sbcl"
-	  :depends-on ("packages"))
+	  :depends-on ("packages" "configuration"))
    (:file "mapping"
 	  :depends-on ("packages" "files" "configuration"))
    (:file "error"

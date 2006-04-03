@@ -16,33 +16,42 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.5 2006/03/30 16:48:39 florenz Exp $
+# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.6 2006/04/03 17:28:29 florenz Exp $
 
+# Install options.
+DESTDIR=
+PREFIX=/usr/local
+INSTALL_ROOT=$(DESTDIR)/$(PREFIX)
+
+# Build options.
 LISP = sbcl
 EVALOPT = --eval
 SOURCES = access.lisp backend-cvs.lisp backend.lisp branch.lisp \
-	change.lisp configuration.lisp debug.lisp directories.lisp \
-	distribution.lisp error.lisp files.lisp gennf.lisp \
+	change.lisp checkpoint.lisp configuration.lisp debug.lisp \
+	directories.lisp distribution.lisp error.lisp files.lisp gennf.lisp \
 	mapping.lisp merge.lisp merging.lisp miscellaneous.lisp \
 	packages.lisp sbcl.lisp gennf.asd command-line.lisp
 FASLS = access.fasl backend-cvs.fasl backend.fasl branch.fasl \
-	change.fasl configuration.fasl debug.fasl directories.fasl \
-	distribution.fasl error.fasl files.fasl gennf.fasl \
+	change.fasl checkpoint.fasl configuration.fasl debug.fasl \
+	directories.fasl distribution.fasl error.fasl files.fasl gennf.fasl \
 	mapping.fasl merge.fasl merging.fasl miscellaneous.fasl \
 	packages.fasl sbcl.fasl command-line.fasl
+EXECUTABLE=gennf
+IMAGE=gennf.img
+SYSTEM=gennf
 
-gennf: $(SOURCES)
+$(EXECUTABLE): $(SOURCES)
 	$(LISP) $(EVALOPT) "(require :asdf)" \
-		$(EVALOPT) "(asdf:operate 'asdf:load-op :$@)" \
+		$(EVALOPT) "(asdf:operate 'asdf:load-op :$(SYSTEM))" \
 		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\" :executable t :toplevel #'gennf::gennf)"
 
-gennf.img: $(SOURCES)
+$(IMAGE): $(SOURCES)
 	$(LISP) $(EVALOPT) "(require :asdf)" \
-		$(EVALOPT) "(asdf:operate 'asdf:load-op :gennf)" \
+		$(EVALOPT) "(asdf:operate 'asdf:load-op :$(SYSTEM))" \
 		$(EVALOPT) "(sb-ext:save-lisp-and-die \"$@\")"
 
 clean:
 	rm $(FASLS)
 
 distclean: clean
-	rm gennf gennf.img
+	rm $(EXECUTABLE) $(IMAGE)

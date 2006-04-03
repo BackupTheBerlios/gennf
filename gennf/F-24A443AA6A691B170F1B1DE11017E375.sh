@@ -1,6 +1,8 @@
 #! /usr/local/bin/bash 
+#
+# test.sh
 
-GENNF=/home/ni/sigsegv/src/lisp/gennf/prototype/gennf
+GENNF=gennf
 
 function die()
 {
@@ -109,15 +111,15 @@ set -e
 
 MODULE=foo
 
-BRANCH_NAME1=a
-BRANCH_NAME2=b
+BRANCH_NAME1=a1
+BRANCH_NAME2=b1
 
 REPO_A=/tmp/$BRANCH_NAME1
 REPO_B=/tmp/$BRANCH_NAME2
 
 ### Directory-Structure.
-rm -rf a b 
-mkdir -p  a b 
+rm -rf $BRANCH_NAME1 $BRANCH_NAME2
+mkdir -p $BRANCH_NAME1 $BRANCH_NAME2
 
 ### Repos init
 
@@ -132,34 +134,37 @@ echo " gennf setup $MODULE -r $REPO_A"
 echo "********************************************************************************"
 $GENNF setup $MODULE -r $REPO_A
 
-gennf_co a $MODULE $REPO_A
+gennf_co $BRANCH_NAME1 $MODULE $REPO_A
 
 (
-    cd a/$MODULE
+    cd $BRANCH_NAME1/$MODULE
     touch main.c
+    echo "/* comment */" > another.c
 )
 
-gennf_add a $MODULE main.c
+gennf_add $BRANCH_NAME1 $MODULE main.c
 
-gennf_ci a $MODULE 
+gennf_add $BRANCH_NAME1 $MODULE another.c
+
+gennf_ci $BRANCH_NAME1 $MODULE 
 
 gennf_branch $MODULE $REPO_A $REPO_B 1
 
-gennf_co b $MODULE $REPO_B
+gennf_co $BRANCH_NAME2 $MODULE $REPO_B
 
 (
-    cd b/$MODULE
+    cd $BRANCH_NAME2/$MODULE
     echo "branch b" > main.c
 )
 
-gennf_ci b $MODULE 
+gennf_ci $BRANCH_NAME2 $MODULE 
 
 (
-    cd a/$MODULE
+    cd $BRANCH_NAME1/$MODULE
     echo "branch aaaaaaaaaaaaaa" > main.c
 )
 
-gennf_ci a $MODULE
+gennf_ci $BRANCH_NAME1 $MODULE
 
 gennf_merge $MODULE $REPO_A $REPO_B 1 1
 
@@ -168,3 +173,4 @@ cat <<EOF
 @@@@@@@@@ A conflict was generated and now has to be resolved
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 EOF
+

@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# gennf
+#
+# Driver for gennf using SBCL.
+
+%%CL%% --noinform --c %%IMAGE%% --end-runtime-options \
+     --eval "(gennf::gennf)" --end-toplevel-options $@

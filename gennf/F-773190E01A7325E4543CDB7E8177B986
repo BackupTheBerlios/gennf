@@ -1,0 +1,206 @@
+			  README file for fd
+	    a very simple finite domain constraint solver
+            =============================================
+
+	      Florian Lorenzen <florenz@cs.tu-berlin.de>
+
+
+			       Contents
+			       --------
+
+    1. Introduction
+    2. Installation
+    3. Solving Constraint Satisfaction Problems
+
+
+			   1. Introduction
+			   ---------------
+
+    fd is a simple finite domain constraint solver which implements
+the algorithms introduced in Petra Hofstedt's 'Introduction to
+Constraint Programming' lecture held at Berlin Technical
+University. The algorithms are taken from the winter semester 2004/05
+revision of the lecture notes, referred to as [PH04] in the following.
+
+    The solver is written in Common Lisp [1], developed using the SBCL
+[2] implementation of the language, but any other ANSI compliant
+implementation should do as well. The code tries to resemble the
+algorithm's (imperative) pseudo code description in [PH04] as closely
+as possible but the necessary glue code is written in a functional
+style (sometimes leading to slightly odd constructions).
+
+    There is a small testsuite for the solver based on Peter Seibel's
+testframework [3]. Furthermore, two examples applications are
+included:
+
+    1. There is a framework to solve Sudoku puzzles.
+    2. The well-known SEND+MORE=MONEY (and the smaller END+ORE=ONEY)
+       is implemented in fd.
+
+    The solver implements two basic operations: solv and entail. solv
+is implemented as a simple backtracking solver as well as a domain
+reduction solver (though the latter one backtracks, too). entail is
+implemented by means of the solv operation, which is possible because
+the structure is closed with regard to negation. However, only atomic
+constraints can be entailed.
+
+    A Constraint Satisfaction Problem (CSP) in fd may consist of 
+one or more atomic constraints which are put into conjunction. An
+atomic constraint is one of
+
+    1. fd-in: a domain constraint which contstraints the values of a
+       variable to a finite set of integers;
+    2. fd-eq, fd-neq: equality, inequality of two expressions;
+    3. fd-le, fd-lt, fd-ge, fd-gt: less-or-equal, less-than,
+       greater-or-equal, greater-than relationship of two expressions.
+
+    An expression consists of fd-add, fd-sub, fd-mul, fd-div, fd-mod,
+fd-pow: addition, subtraction, multiplication, (integer) divison,
+modulo and exponentiaton of variables or constant integers.
+
+    A proper CSP defines one domain constraint (fd-in) for each
+variable and as many predicates over expressions as necessary to model
+the problem to solve. There are no special algorithms for constraints
+like alldifferent. Instead there is a function to generate pairwise
+inequlaties for a set of variables to express alldifferent.
+
+    The solver has poor performance, but it is not tuned in any
+way. Also its memory consumption is huge but in general this is not a
+problem due to the Common Lisp implementation's garbage collector.
+The latter and also a some of the performance issues are related to
+the fact that fd manipulates the CSP directly instead of intermediate,
+more efficient representations to keep it simple.
+
+    I wrote the solver as part of preparation for my compiler
+construction exam March 2006 and extended it slightly afterwards. I
+consider it as a simple implementation of simple constraint solving
+algorithms to play with. Perhaps it is of any help for future students
+of the 'Introduction to Constraint Programming' or a similair class.
+If you find any bugs or other oddities, feel free to send me an email
+or -- better -- an email with a patch.
+
+
+			   2. Installation
+			   ---------------
+
+    fd can be downloaded from
+
+    http://user.cs.tu-berlin.de/~florenz/fd/fd-0.1.tar.gz
+
+    The tarball is ASDF-Installable [4]. Download it and evaluate the
+following forms at your favourite Common Lisp REPL (the first two
+lines are to load ASDF and ASDF-Install which may not be necessary in
+any case):
+
+    CL-USER> (require 'asdf)
+    CL-USER> (asdf:operate 'asdf:load-op :asdf-install)
+    CL-USER> (asdf-install:install "/path/to/tarball/fd-0.1.tar.gz")
+
+    In order for this to work, the testframework from [3] has to be
+installed and must be ASDF loadable.
+
+    Now change to the fd-test package and run the tests:
+
+    CL-USER> (in-package :fd-test)
+    FD-TEST> (test-short-fd)
+    FD-TEST> (test-long-fd)
+
+    Both functions should return T, and the second will run
+considerably longer than the first one (it runs about 30 seconds on a
+Pentium III with 1 GHz, 256 MB of core memory).
+
+    Now you can write your own CSPs and solve them with fd (see next
+section).
+
+
+	     3. Solving Constraint Satisfaction Problems
+	     -------------------------------------------
+
+    To solve a CSP with fd, you have to write a Common Lisp file to
+define the constraints and then run one of the solver routines on
+it. You can also give the CSP at the REPL directly if you prefer.
+
+    A conjunction of constraints is simply a list of atomic
+constraints. The CSP (from [PH04], p. 50)
+
+    x in {3, 5, 6, 7, 9} /\ y in {2, 3, 4, 5, 6} /\ x |= 7 /\ x+y <= 8
+
+    looks like this in fd syntax:
+
+    '((fd-in x (3 5 6 7 9)) (fd-in y (2 3 4 5 6))
+      (fd-neq x 7) (fd-le (fd-add x y) 8))
+
+    That means, variables can be typed in as symbols, relations and
+arithmetic expressions are transformed to prefix notation. The fd-in
+contraints a variable to one of the values (which must be integers) in
+the list. There is a function fd:interval which generates an
+enumeration from its first argument up to its second argument to avoid
+having to type e. g. (fd-in x (1 2 ... 999 1000)).
+
+    It is now possible to operate on this CSP, which is bound to
+variable *csp* in the rest of this section:
+
+    1. (fd:fd-solv *csp*) returns a solution to the CSP or NIL if there is
+       none. Currently, the simple backtracking-solver is used for
+       fd-solv.
+    2. (fd:dom-red-solv *csp*) is the same as (fd:fd-solv ...) but the
+       domain reduction solver is used.
+    3. (fd:fd-entail *csp* atomic-constraint) entails atomic-constraint
+       from *csp*. The possible answers are T, NIL and fd:fd-delay.
+    4. (fd:node-consistency *csp*) returns a node consistent CSP.
+    5. (fd:arc-consistency *csp*) returns an arc consistenrt CSP.
+    6. (fd:local-consistency *csp*) returns a local consistent CSP.
+
+    The last three operations are automatically used by solv and
+dom-red-solv, but they can be called explicitly to examine their effect.
+
+    One last remark: If you try to solve SEND+MORE=MONEY with fd, 
+go at least for one or two cups of coffee and something interesting to
+read or a nice person to talk to: fd is very bad at solving this
+problem because the local-consistency can not do any good and it falls
+nearly completely to backtracking. But there is a 'real world' problem
+which works a litte bit better:
+
+		    Solving Sudoku puzzles with fd
+
+    There is a tiny framework to solve Sudoku puzzles with fd. It is
+not very fast because arc- cannot do much work an so it all falls to
+backtracking. But anyway, it works like this:
+
+    A Sudoku puzzle is entered as a list of list like this:
+
+    '((1 3 5) (1 5 5) ... (...))
+
+    A triple (i j v) means that the field at row i and column j is
+preset with v. This specification is fed into
+sudoku:generate-constraints which returns a CSP suitable to be fed
+into solv:
+
+    CL-USER> (fd:solv (sudoku:generate-constraints '((1 3 5) ...)))
+
+    This returns a consistent CSP with each variable restricted to a
+one element domain. Because this solution is hard to decipher, there
+is fd:show-solution, which prints the assignment for each variable in
+a better to read fashion.
+
+    CL-USER> (fd:show-solution (fd:solv (sudoku:generate-constraints ...)))
+
+    returns something like:
+
+    ((S11 . 8) (S12 . 3) (S13 . 7)
+     (S14 . 6) (S15 . 9) (S16 . 1)
+     (S17 . 5) (S18 . 4) (S19 . 2)
+     ...)
+
+    which is to be read as: S11, which is field row 1, column 1 has to
+be 8, S12, i. e. field row 1, column 2 is 3 etc.
+
+
+			       Software
+			       --------
+
+[1] Common Lisp, http://www.lispworks.com/documentation/HyperSpec/
+[2] Steel Bank Common Lisp, http://sbcl.sourceforge.net/
+[3] Peter Seibel's Lispbox, http://www.gigamonkeys.com/book/lispbox/
+[4] ASDF-Install, http://www.cliki.net/ASDF-Install
+[5] ASDF, http://www.cliki.net/ASDF

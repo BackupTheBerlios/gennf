@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.25 2006/04/01 12:45:52 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.26 2006/04/03 17:28:29 florenz Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from Meta-CVS.
@@ -122,7 +122,7 @@ exactly an alist."
   (when (or (not (consp alist))
 	    (not (and (keywordp (first alist))
 		      (stringp (second alist)))))
-    (error 'malformed-map-file :text "Map-file broken.~%Please repair."))
+    (error 'malformed-map-file-error :text "Map-file broken.~%Please repair."))
   (case (first alist)
     ((:file)
      (let ((entry (make-instance 'mapping
@@ -240,19 +240,19 @@ FIXME: This should include resolving relative pathnames etc."
       (write-map-file list file))))
 
 (defgeneric sync-mappings (store branch)
-(:documentation "syncs listings of mappings to disk"))
+  (:documentation "syncs listings of mappings to disk"))
 
 (defmethod sync-mappings ((sequence list) branch)
-  "syncs list of mappings to  branch  disk"
+  "Syncs list of mappings to  branch  disk"
   ;; FIXME: Place some tests here.
   (mapcar #'(lambda (mapping)
-	      (format t "***** syncing: ~a -> ~a ~%"
+	      (format t "***** Syncing: ~a -> ~a ~%"
 		      (id mapping) (path mapping))
 	      (sync mapping branch))
 	  sequence))
 
 (defmethod sync-mappings ((file pathname) branch)
-  "syncs map-file in branch to disk"
+  "Syncs map-file in branch to disk"
   (sync-mappings (read-map-file file) branch))
 
 (defun create-new-mapping (&key

@@ -16,16 +16,19 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.8 2006/04/01 12:45:52 florenz Exp $
+;; $Id: F-88B873BF8C20BA949EB0547CD571F5B0.lisp,v 1.9 2006/04/03 17:28:29 florenz Exp $
 
 ;; All functions that call SBCL specific extensions (i. e. funtions
 ;; of some sb-* package) go in here.
 ;; To support other Common Lisp implementations a similair
-;; file has to be provided.
+;; file for that implementation has to be provided.
 
 (in-package :gennf)
 
+
 (defun invoke-program (program arguments)
+  "Invokes program connecting the in- and output channels to the
+standard channels."
   (sb-ext:process-exit-code
    (sb-ext:run-program program arguments
 		       :search t
@@ -33,15 +36,16 @@
 		       :input t
 		       :output t)))
 
-
 (defun invoke-program-silently (program arguments)
+  "Invokes program discarding all its output. This policy is overriden
+when in debug mode. In the latter case all the programs output to standard
+error resp. standard output is written to the invoker's output."
   (sb-ext:process-exit-code
    (sb-ext:run-program program arguments
 		       :search t
-		       :error nil
+		       :error (if *debug-mode* *error-output* nil)
 		       :input nil
-		       :output nil)))
-
+		       :output (if *debug-mode* *error-output* nil))))
 
 (defun posix-arguments ()
   "Returns the command line arguments."
@@ -53,6 +57,8 @@
 
 (defmacro with-program-output ((program arguments &key exit-code
 					output error) &body forms)
+  "Macro to invoke a program and connect its output channels to
+given streams. All streams that are not conncted to are discarded."
   (with-gensyms (process)
     `(let ((,process (sb-ext:run-program ,program
 					 ,arguments

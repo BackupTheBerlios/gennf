@@ -16,26 +16,11 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.50 2006/04/03 14:12:18 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.51 2006/04/03 17:28:29 florenz Exp $
 
 ;; Main module. Subcommands of gennf are implemented in this file.
 
 (in-package :gennf)
-
-;; For development purposes only.
-(defparameter *devel-root2*
-;  "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk2")
-  "/home/florian/gennf-junk2")
-(defparameter *devel-access2*
-  (make-instance 'access :root *devel-root2*))
-(defparameter *devel-root*
-;  "florenz@fiesta.cs.tu-berlin.de:/home/f/florenz/gennf-junk")
-  "/home/florian/gennf-junk")
-(defparameter *devel-access*
-  (make-instance 'access :root *devel-root*))
-(eval-when (:execute :compile-toplevel :load-toplevel)
-  (proclaim '(optimize (cl:debug 3))))
-;; End of development only section.
 
 
 ;;
@@ -175,7 +160,7 @@ files are committed."
 	    (branch b) (change c))
   (let* ((source (make-instance 'access :root root-from))
 	 (destination (make-instance 'access :root root-to)))
-    ;; FIXME: check the correct access
+    ;; FIXME: check the correct access.
     (format t "**** Checking for existing module ~a in destination ~a.~%"
 	    module root-to)
     (unless (backend-known-module-p module destination)
@@ -187,8 +172,8 @@ files are committed."
 			  source (parse-integer branch)
 			  (if change (parse-integer change)))
       (format t "**** The branch can be checked out with:~%")
-      (format t "$ gennf checkout ~A -r ~A -c ~A~%"
-	      module root-from identifier))))
+      (format t "$ gennf checkout ~A --root ~A --branch ~A~%"
+	      module root-to identifier))))
 
 
 (define-subcommand (merge mg) subcommand-merge
@@ -227,7 +212,7 @@ files are committed."
 							  (id m))))
 			 mapping-list)))
 		  (sync-mappings existing-mapping-list branch-directory))
-	      (malformed-map-file-error () ; catching Error.
+	      (malformed-map-file-error () ; Catching error.
 		(format t "WARNING: Due to merging conflicts the MAP file is broken~%")
 		(format t "WARNING: MAP file in ~A is malformed~%"
 			destination-directory)
@@ -305,8 +290,10 @@ files are committed."
 		   (*meta-directory* (find-meta-directory))
 		   (*sandbox-directory* (port-path:get-parent-directory
 					 *meta-directory*)))
-	      (format t "*s-d*: ~s~%*m-d*: ~s~%*s-d*: ~s~%" 
-		      *startup-directory* *meta-directory* *sandbox-directory*)
+	      (debug
+		(debug-format t "*s-d*: ~s~%*m-d*: ~s~%*s-d*: ~s~%" 
+			      *startup-directory* *meta-directory*
+			      *sandbox-directory*))
 	      (in-meta-directory
 		(let* ((checkpoint (read-checkpoint-file
 				    *checkpoint-file-name*))
@@ -317,9 +304,6 @@ files are committed."
 		       (*access* (make-instance 'access :root root)))
 		  (distribution-merge-finish module *branch* *access*
 					     *sandbox-directory* files)
-		  ;; Removing temporary directory
-		  ;; (two levels above the sandbox).
-		  (pp:delete-directory-tree 
-		   (port-path:get-parent-directory
-		    (port-path:get-parent-directory
-		     *sandbox-directory*)))))))))))
+		  ;; The user shall remove the temporary files.
+		  (format t "Please delete the remaining crap in ~A~%"
+			  *sandbox-directory*)))))))))
