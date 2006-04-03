@@ -479,12 +479,76 @@ Again, it would have been better to work without \textsc{cvs} and
 using simpler software to store the revisions of files like
 \textsc{common~lisp} versions of \texttt{diff} and \texttt{patch}.
 
-\emph{
-However, it seems that the prototype could be finished until mid of
-February -- though probably very buggy -- and can be handed to Fabian
-Otto, to be enriched by directory structure and a user interface.
-}
+\subsection{Structuring} 
 
+Section \ref{distrib} describes the general structure of the MAP-files.
+
+We choosed the same representation of MAP-files as \textsc{metacv} to
+support a possible import of projects. By starting with copying basic
+function from \textsc{metacvs} over to the prototype, we first
+implemented reading and writing of \textsc{metacvs} compatible
+MAP-files. The internal reprensentation of a single mapping differed
+in using a modern class based method.
+
+The functions for creating and syncing a directory structure were
+written without the help of \textsc{metacvs} code. The functions of
+\textsc{metacvs} relied on \textsc{clisp}'s FFI. While
+\textsc{metacvs} offers suport for softlinks we decided that this
+feature has less priority. A simple error is signaled when a
+MAP-files with information for symlinks is read.
+
+The next step was to combine both parts so that the distribution would
+honour MAP-Files in its repository. The MAP-file are having two sides,
+since the are versioned meta data. It turned out that we often needed
+to debug the intersection between these parts. We had e.g. change the
+representation of the F-files. At first we strored the META directory
+and the branch number with as F-files entry. This made the syncing and
+creating of the directory structure very simple. But merging MAP-File
+would have get more complecated since each branch has a unique number.
+It was then decided to just store the F-file name in the map file.
+
+After merging the two parts we decided to implement a simple frontend.
+By using a macro as abstraction it should now be easy to extend the
+frontend with new subcommands. It generates from a lisp lambda list
+like structure command line parser and hooks the function into the
+subcommand dispatcher. It also takes the optional function
+documentation string to build a command line help. It also offers a
+flag for subcommands which need a working repository copy and reads
+all possible meta data. We later extended the macro for required and
+flag style arguments.
+
+\begin{verbatim}
+(define-subcommand (checkout co) subcommand-checkout
+    (module &key (:required root r) (branch b) (change c))
+  "Check out the indicated branch. If no branch is given 1 is taken."
+  <subcommand-code>)
+\end{verbatim}
+
+\begin{verbatim}
+(define-subcommand add subcommand-add (&rest files)
+  :in-meta-directory
+  "Add files to versioned files."
+  <subcommand-code>)
+\end{verbatim}
+
+The above code would allow a user to use the following commands:
+
+\begin{verbatim}
+$ gennf help checkout
+
+checkout module [--root|-r root] [--branch|-b branch] [--change|-c change]
+
+Check out the indicated branch. If no branch is given 1 is taken.
+
+$ gennf checkout module-foo --root /some/where/ -b 1 -c 2 
+  ...
+
+$ gennf add main.c
+main.c
+\end{verbatim}
+
+To test the new frontend we wrote a little shell based test suite. It allowed us 
+to test new features while changes to the code kept stable. As much as 
 
 \subsection{Dropped features}
 
@@ -501,7 +565,8 @@ Functionality which is not implemented includes:
   efficiently merge them into another branch.
 \item Calculation and browsing of differencs between any two changes
   of a branch, either for all files or some restricted set.
-\item Replication as described in section \ref{distrib}.
+\item Replication as described in section \ref{istrib}.
+\item Symlink support in MAP-Files.
 \end{itemize}
 
 In addition to these not implemented features the code leaks some

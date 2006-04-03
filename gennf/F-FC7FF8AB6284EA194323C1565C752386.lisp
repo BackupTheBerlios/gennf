@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.48 2006/04/01 13:03:23 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.49 2006/04/03 12:15:33 sigsegv Exp $
 
 ;; Main module. Subcommands of gennf are implemented in this file.
 
@@ -84,10 +84,10 @@ command."
 (define-subcommand add subcommand-add (&rest files)
   ;; FIXME: multiple adds!
   :in-meta-directory
-  "Add files to versioned files."
+  "Add files to be controlled by gennf"
   (port-path:in-directory *sandbox-directory*
     (when (null files)
-      (format t "~%You must atleast specify one file~%")
+      (format t "~%You must at least specify one file~%")
       (return-from subcommand-add))
     (dolist (namestring files)
       (let* ((id (format nil "~A" (guid-gen)))
