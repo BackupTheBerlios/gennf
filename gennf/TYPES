@@ -1,4 +1,6 @@
-(("asd" :DEFAULT)
+(("1" :DEFAULT)
+ ("1~" :DEFAULT)
+ ("asd" :DEFAULT)
  ("aux" :IGNORE)
  ("c" :DEFAULT)
  ("dvi" :IGNORE)

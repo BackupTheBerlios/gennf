@@ -97,6 +97,9 @@
   "MCVS/F-3CDB81902ABA8CED95DEEBDA8590315E.lisp"
   "sbcl-port/chatter.lisp")
  (:FILE
+  "MCVS/F-3DA461A9E5F9146C3B60D0598ED42548.1"
+  "prototype/gennf.1")
+ (:FILE
   "MCVS/F-3E293DB4FDF7D70F72EC266B13D28C65.txt"
   "doc/description.txt")
  (:FILE

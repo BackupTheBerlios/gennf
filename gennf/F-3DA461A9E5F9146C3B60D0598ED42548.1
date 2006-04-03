@@ -1,0 +1,320 @@
+.\" Copyright 2006 Florian Lorenzen, Fabian Otto
+.\" 
+.\" This file is part of gennf.
+.\"
+.\" gennf is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" gennf is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with gennf; if not, write to the Free Software
+.\" Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.\" $Id: F-3DA461A9E5F9146C3B60D0598ED42548.1,v 1.1 2006/04/03 21:47:14 florenz Exp $
+.TH GENNF 1 $Date: 2006/04/03 21:47:14 $ OSSI "gennf manual"
+.SH NAME
+gennf \- distributed version management tool
+.SH SYNOPSIS
+.B gennf help
+[
+.I command
+]
+.br
+.B gennf
+.I command
+.I module
+[
+.I options
+]
+.br
+.B gennf
+.I command
+.IR files ...
+.SH DESCRIPTION
+.PP
+gennf is a distributed version management tool which uses CVS as its
+storage backend. Version-tracking of the directory structure is done
+like in Meta-CVS via a MAP-file which maps internally generated file
+names to their user visible counterparts in the file system.
+.PP
+With gennf it is possible create arbitrary branches from an existing
+repository. Conceptually, a repository is a set of branches. Branches
+in turn are sequences of changes and a change is a bundle of files
+that were changed in a commit.
+.PP
+Changes also come into being when merging branches but they are
+called merge in this case. A merge stores an origin, that is, it
+remembers where it comes from. As branches that are merged may come
+from different repositories an origin establishes a link between the
+two lines of development and remembers its history.
+.PP
+In fact, creating a branch from an existing repository is just merging
+one of its changes in the empty branch.
+.SH USAGE
+.PP
+gennf has repository only commands and sandbox command which
+require a checked out copy of some branch but may also interact with
+the repository.
+.SS "Repository only commands"
+.PP
+Those commands require a root-string of a repository. As gennf uses
+CVS as its storage backend root-strings are repository locations that
+are acceptable by CVS's
+.B -d
+option or in the
+.B CVSROOT
+environment variable
+.PP
+Examples for root-strings are:
+.PP
+.RS
+.B /var/cvsroot/gurgleblasterproject
+.br
+.B cvs.kreteserver.org:/home/cvs/enselproject
+.RE
+.PP
+A description of the repository only commands follows.
+.\" *** setup
+.HP
+.B setup
+.I module
+.BR --root | -r
+.I root
+.br
+[
+.BR --symbolic-name | -n
+.I name
+]
+[
+.BR --description | -d
+.I description
+]
+.PP
+Set up a
+.I module
+at the given
+.IR root .
+.\" *** branch
+.HP
+.B branch
+.I module
+.BR --root-from | -f
+.I root1
+.BR --root-to | -t
+.I root2
+.br
+.BR --branch | -b
+.I branch-number
+[
+.BR --change | -c
+.I change-number
+]
+.PP
+Create a new branch of
+.I module
+at
+.I root2
+by branching of at
+.I branch-number
+from the repository at
+.IR root1 .
+If the optional
+.I change-number
+is provided not the latest change from the indicated branch is the origin
+of the new offspring but the given one.
+.\" *** merge
+.HP
+.B merge
+.I module
+.BR --root-from | -f
+.I root1
+.BR --branch-from | -o
+.I branch-number1
+.br
+.BR --root-to | -t
+.I root2
+.BR --branch-to | -d
+.I branch-number2
+.br
+[
+.BR --change | -c
+.I change-number
+]
+.PP
+Merge
+.I branch-number1
+at location
+.I root1
+into
+.I branch-number2
+at
+.IR root2
+for
+.IR module .
+This operation most often leads to some conflicts while merging the
+files of the two branches. In this case, gennf returns with a message
+indicating where the files with conflict annotations can be
+found. After manually resolving these, the merge operation is
+completed with the command
+.BR merge-finish .
+If the optional
+.I change-number
+is given, analoguosly to a branch operation not the latest change of
+.I branch-number1
+is taken but the provided one.
+.\" *** merge-finish
+.HP
+.B merge-finish
+[
+.I path
+]
+.PP
+Finishes up an interrupted merge. If not called inside the temporary
+sandbox a
+.I path
+can be given to indicate where to merge can be continued from.
+.SS "Sandbox commands"
+.PP
+These commands require a checked out sandbox or create a checked out sandbox.
+.\" *** checkout
+.HP
+.B checkout
+.I module
+.BR --root | -r
+.I root
+.br
+[
+.BR --branch | -b
+.I branch-number
+]
+[
+.BR --change | -c
+.I change-number
+]
+.PP
+Check out a sandbox copy of
+.I module
+from
+.I root
+and place it in the current working directory. If no
+.I branch-number
+is given, the first branch is taken. If no
+.I change-number
+is given, the latest one is checked out.
+.\" *** update
+.HP
+.B update
+[
+.BR --change | -c
+.I change-number
+]
+.IR files ...
+.PP
+Incorporate changes in the currently checked out branch into the
+sandbox. If
+.I files
+are given, update only these files.
+If a
+.I change-number
+is given, the update is not performed to the latest but to
+the provided change. It is, however, not possible to update to an
+older change than the checked out one. For this purpose, a fresh copy
+with
+.B checkout
+has to be fetched with a the
+.B --change
+option given.
+.\" *** add
+.HP
+.B add
+.IR files ...
+.PP
+Add
+.I files
+to the set of versioned files.
+.\" *** delete
+.HP
+.B delete
+.IR files ...
+.PP
+Remove
+.I files
+from the set of versioned files. Attention: They are deleted from the sandbox!
+.\" *** move
+.HP
+.B move
+.I from to
+.PP
+Rename a file
+.I from
+to
+.IR to .
+Like mv(1)
+.B move
+can be used for renaming and moving files.
+.\" *** sync
+.HP
+.B sync
+[
+.I path
+]
+Resynchronizes the filenames in the sandbox or in the given
+.I path
+which must also be a sandbox. Sometimes, the internal-external
+filename mapping gets confused,
+.B sync
+may help. This command is also helpful, after fixing a broken MAP file
+in a merge to restore the external filenames.
+.SS "Miscellaneous commands"
+.PP
+These last set of commands are for some informational purpose.
+.\" *** help
+.HP
+.B help
+[
+.I command
+]
+.PP
+Provides a short help for
+.I command
+.\" *** info
+.HP
+.B info
+[
+.BR --root | -r
+]
+[
+.BR --module | -m
+]
+[
+.B --verbose
+]
+.PP
+Display information about a repository. A list of known branches is
+put out and if
+.B --verbose
+is enabled the branch's change sequence is displayed.
+If
+.B info
+is called inside a sandbox, the repository of this module is
+queried, if outside a sandbox or with
+.B --root
+and
+.B --module
+given a \`remote\' query can be done.
+.SH BUGS
+The list of bugs and incompletenesses of gennf is recursively
+enumerable at minimum, at least it is not LOOP computable...
+.SH "SEE ALSO"
+.BR cvs ( 1 )
+.br
+.B Meta-CVS
+.I http://users.footprints.net/~kaz/mcvs.html
+.SH AUTHORS
+Florian Lorenzen, Fabian Otto
