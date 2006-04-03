@@ -6,10 +6,10 @@
   "demo/data/fd.1/tests.lisp")
  (:FILE
   "MCVS/F-03018E8471DDD49AD47174CF158A9286.lisp"
-  "prototype/change.lisp")
+  "src/change.lisp")
  (:FILE
   "MCVS/F-080CF3710F46A1C94984A6BD78462AC7.lisp"
-  "prototype/branch.lisp")
+  "src/branch.lisp")
  (:FILE
   "MCVS/F-110028874129637B0C39BD239A411D5A.sh"
   "demo/init.sh")
@@ -41,13 +41,13 @@
    T))
  (:FILE
   "MCVS/F-24A443AA6A691B170F1B1DE11017E375.sh"
-  "prototype/tests/test.sh")
+  "tests/test.sh")
  (:FILE
   "MCVS/F-24AFFF4D581EFC1C6EF802B4AAB5D27B.lisp"
   "sbcl-port/system.lisp")
  (:FILE
   "MCVS/F-251FB522127FF9A2E037DC904E011C8D.lisp"
-  "prototype/backend.lisp")
+  "src/backend.lisp")
  (:FILE
   "MCVS/F-29FB69F157E9E7A56ECB122CE30DA49B.lisp"
   "demo/data/fd.1/packages.lisp")
@@ -59,7 +59,7 @@
   "doc/beispiel0.fig")
  (:FILE
   "MCVS/F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp"
-  "prototype/command-line.lisp")
+  "src/command-line.lisp")
  (:FILE
   "MCVS/F-2BC2C357A250EFF4CA5E7EA9E9FE09B2.png"
   "doc/orthogonal.png")
@@ -74,7 +74,7 @@
   "sbcl-port/gpgme/gpgme.lisp")
  (:FILE
   "MCVS/F-30EF3053A7C985825F7B9994E584FB40"
-  "prototype/NOTES")
+  "src/NOTES")
  (:FILE
   "MCVS/F-32A3BA955BE6E0F48ABEDF5C42137D5E.lisp"
   "sbcl-port/convert.lisp")
@@ -98,7 +98,7 @@
   "sbcl-port/chatter.lisp")
  (:FILE
   "MCVS/F-3DA461A9E5F9146C3B60D0598ED42548.1"
-  "prototype/gennf.1")
+  "doc/gennf.1")
  (:FILE
   "MCVS/F-3E293DB4FDF7D70F72EC266B13D28C65.txt"
   "doc/description.txt")
@@ -110,13 +110,13 @@
   "sbcl-port/create.lisp")
  (:FILE
   "MCVS/F-42DFD065A78C998A3E47C9493FF221E7.lisp"
-  "prototype/packages.lisp")
+  "src/packages.lisp")
  (:FILE
   "MCVS/F-48D1C070D93800E7560AEE00EF78D0B2.lisp"
-  "prototype/miscellaneous.lisp")
+  "src/miscellaneous.lisp")
  (:FILE
   "MCVS/F-495FEBB82844E29E9B8F3FFCC5A022E2.lisp"
-  "prototype/access.lisp")
+  "src/access.lisp")
  (:FILE
   "MCVS/F-4A3E7EA0D66193EB3C63340BB6150E24"
   "sbcl-port/gpgme/Makefile")
@@ -125,7 +125,7 @@
   "doc/folien.tex")
  (:FILE
   "MCVS/F-4E51556B59366B0B171CCB0B1F4F10A9.lisp"
-  "prototype/backend-cvs.lisp")
+  "src/backend-cvs.lisp")
  (:FILE
   "MCVS/F-4F2D9B26F5FB9FA0F66EBB82BE7E8EF1.lisp"
   "sbcl-port/prop.lisp")
@@ -149,7 +149,7 @@
   "doc/beispiel1.fig")
  (:FILE
   "MCVS/F-663876CA81463AC978FC50C1A85FAFC0.lisp"
-  "prototype/merge.lisp")
+  "src/merge.lisp")
  (:FILE
   "MCVS/F-6763C87866B0E9BE56C154839D6FAB55.lisp"
   "sbcl-port/purge.lisp")
@@ -163,13 +163,13 @@
    T))
  (:FILE
   "MCVS/F-74178C2E50AE1257726E1B3D58FE1EEE.lisp"
-  "prototype/distribution.lisp")
+  "src/distribution.lisp")
  (:FILE
   "MCVS/F-74915F0862B511AC9C233FDCB87DBEF8.lisp"
   "sbcl-port/update.lisp")
  (:FILE
   "MCVS/F-769D6330165D17D4921D9970720734B7.lisp"
-  "prototype/configuration.lisp")
+  "src/configuration.lisp")
  (:FILE
   "MCVS/F-773190E01A7325E4543CDB7E8177B986"
   "demo/data/fd.1/README")
@@ -178,22 +178,25 @@
   "sbcl-port/find-bind.lisp")
  (:FILE
   "MCVS/F-7B909B20AA69D6DA88736B778CC44579.lisp"
-  "prototype/merging.lisp")
+  "src/merging.lisp")
  (:FILE
   "MCVS/F-7FC7BAE8FEAFAA140D1560EE6A936C40.sh"
   "sbcl-port/unix-bindings/link.sh")
  (:FILE
   "MCVS/F-82ED3D193589C12259001984C9E7F8C9.lisp"
-  "prototype/debug.lisp")
+  "src/debug.lisp")
  (:FILE
   "MCVS/F-83B842F2203F2AE6157E430B77F56938.lisp"
-  "prototype/files.lisp")
+  "src/files.lisp")
  (:FILE
   "MCVS/F-881560526E7214793C24206DE07FE66D.lisp"
-  "prototype/mapping.lisp")
+  "src/mapping.lisp")
  (:FILE
   "MCVS/F-88B873BF8C20BA949EB0547CD571F5B0.lisp"
-  "prototype/sbcl.lisp")
+  "src/sbcl.lisp")
+ (:FILE
+  "MCVS/F-8DABE8B18445612E7BACC5ED4A54DDD2"
+  "INSTALL")
  (:FILE
   "MCVS/F-8DCC1EAB0AC1AA83610B8937F1036236.lisp"
   "demo/data/fd.2/send-more-money.lisp")
@@ -205,13 +208,13 @@
   "sbcl-port/meta-cvs-system.lisp")
  (:FILE
   "MCVS/F-956064D0F4B5D5A5158076930C552FDA"
-  "prototype/Makefile")
+  "src/Makefile")
  (:FILE
   "MCVS/F-95C6CE34C92BFC81CD71E5369B3789B1"
-  "prototype/driver-template")
+  "src/driver-template")
  (:FILE
   "MCVS/F-972969458DDA322E03A1AAD19BF8ADC0.asd"
-  "prototype/gennf.asd")
+  "src/gennf.asd")
  (:FILE
   "MCVS/F-97770D7ED2DFF388BC60EAB380950A77.lisp"
   "sbcl-port/dirwalk.lisp")
@@ -253,7 +256,7 @@
   "demo/data/fd.3/fd.asd")
  (:FILE
   "MCVS/F-BDE4772767B008D34EF06CA4CC5B2E6B.lisp"
-  "prototype/checkpoint.lisp")
+  "src/checkpoint.lisp")
  (:FILE
   "MCVS/F-C25BFAA9CFD16915F31BF90D03646B52.lisp"
   "sbcl-port/link.lisp")
@@ -267,7 +270,7 @@
   "sbcl-port/clisp-unix.lisp")
  (:FILE
   "MCVS/F-CD3AD5F3865AB17A39CA5B43B888F3F2.lisp"
-  "prototype/directories.lisp")
+  "src/directories.lisp")
  (:FILE
   "MCVS/F-CFBD089794364D7302A831B65433E06E.lisp"
   "demo/data/fd.1/fd.lisp")
@@ -285,7 +288,7 @@
   "doc/beispiel2.fig")
  (:FILE
   "MCVS/F-DA9E90AB46860DC75ED36F2D7CAFE3BF.lisp"
-  "prototype/error.lisp")
+  "src/error.lisp")
  (:FILE
   "MCVS/F-DB44335E28A35B07E9898EBA58DFFAA5.lisp"
   "demo/data/fd.1/send-more-money.lisp")
@@ -320,7 +323,7 @@
   "sbcl-port/multi-hash.lisp")
  (:FILE
   "MCVS/F-FC7FF8AB6284EA194323C1565C752386.lisp"
-  "prototype/gennf.lisp")
+  "src/gennf.lisp")
  (:FILE
   "MCVS/F-FD67F73260C22A0EC7EF43A6F702E80F.lisp"
   "sbcl-port/seqfuncs.lisp")
