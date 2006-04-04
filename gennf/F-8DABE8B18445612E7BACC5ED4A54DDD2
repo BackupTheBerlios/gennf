@@ -43,7 +43,7 @@ Building and installing gennf
 
 To build gennf, expand the tarball
 
-$ gzip -d gennf-x.y.tar.gz | tar xf -
+$ gzip -d -c gennf-x.y.tar.gz | tar xf -
 
 and change to the gennf-x.y directory. Type
 
