@@ -1,19 +1,36 @@
+# Copyright 2005 Florian Lorenzen, Fabian Otto
+#
+# This file is part of gennf.
+#
+# gennf is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# gennf is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with gennf; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# $Id: F-3F4138A4F58263BB4707A581845F60C2.include,v 1.2 2006/04/04 14:37:59 florenz Exp $
 
 # Build options.
 LISP = sbcl
-PDFLATEX= pdflatex
-
+EVALOPT = --eval
+PDFLATEX = pdflatex
 
 # Install options.
-DESTDIR=
-PREFIX=/usr/local
-# generates 2 slashes if destdir is not set.
+DESTDIR =
+PREFIX = /usr/local
+# Generates 2 slashes if DESTDIR is not set.
 INSTALL_ROOT=$(DESTDIR)/$(PREFIX)
 
-
-MANDIR=$(INSTALL_ROOT)/share/man
-DOCDIR=$(INSTALL_ROOT)/share/doc
-LIBDIR=$(INSTALL_ROOT)/lib
-BINDIR=$(INSTALL_ROOT)/bin
-SYSTEM=gennf
-
+MANDIR = $(INSTALL_ROOT)/share/man
+DOCDIR = $(INSTALL_ROOT)/share/doc
+LIBDIR = $(INSTALL_ROOT)/lib
+BINDIR = $(INSTALL_ROOT)/bin
+SYSTEM = gennf

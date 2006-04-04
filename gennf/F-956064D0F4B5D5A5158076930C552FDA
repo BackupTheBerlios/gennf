@@ -16,11 +16,12 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.8 2006/04/04 10:55:27 sigsegv Exp $
+# $Id: F-956064D0F4B5D5A5158076930C552FDA,v 1.9 2006/04/04 14:37:59 florenz Exp $
+#
+# GNU Makefile to compile gennf.
+#
 
-include ../Makefile.include
-
-EVALOPT = --eval
+include ../GNUmakefile.include
 
 SOURCES = access.lisp backend-cvs.lisp backend.lisp branch.lisp \
 	change.lisp checkpoint.lisp configuration.lisp debug.lisp \
@@ -34,18 +35,17 @@ FASLS = access.fasl backend-cvs.fasl backend.fasl branch.fasl \
 	mapping.fasl merge.fasl merging.fasl miscellaneous.fasl \
 	packages.fasl sbcl.fasl command-line.fasl
 
-EXECUTABLE=gennf
+EXECUTABLE = gennf
 
-IMAGE=gennf.img
+IMAGE = gennf.img
 
-DRIVER= driver
+DRIVER = driver
 
-TEMPLATE= driver.in
-
+TEMPLATE = driver.in
 
 ########################################
 
-all : $(IMAGE) patch
+all: $(IMAGE) patch
 
 $(EXECUTABLE): $(SOURCES)
 	$(LISP) $(EVALOPT) "(require :asdf)" \
@@ -62,13 +62,13 @@ clean:
 	rm -f $(EXECUTABLE) $(IMAGE)
 
 patch: 
-	@echo $(LIBDIR)
-	sed -e "s,%%CL%%,$(LISP)," -e "s,%%IMAGE%%,$(LIBDIR)/$(SYSTEM)/$(IMAGE)," $(TEMPLATE) > $(DRIVER)
+	sed -e "s,%%CL%%,$(LISP)," \
+	-e "s,%%IMAGE%%,$(LIBDIR)/$(SYSTEM)/$(IMAGE)," $(TEMPLATE) > $(DRIVER)
 
 install: $(DRIVER)
 	mkdir -p $(BINDIR) $(LIBDIR)/$(SYSTEM)
 	chmod 755 $(BINDIR) $(LIBDIR)/$(SYSTEM)
-	cp $(IMAGE)	$(LIBDIR)/$(SYSTEM)
-	cp $(DRIVER)	$(BINDIR)/$(SYSTEM)
+	cp $(IMAGE) $(LIBDIR)/$(SYSTEM)
+	cp $(DRIVER) $(BINDIR)/$(SYSTEM)
 	chmod 644 $(LIBDIR)/$(SYSTEM)/$(IMAGE)
 	chmod 755 $(BINDIR)/$(SYSTEM)

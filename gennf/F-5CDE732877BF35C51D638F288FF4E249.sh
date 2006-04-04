@@ -1,3 +1,5 @@
+#!/bin/sh
+#
 # Copyright 2005 Florian Lorenzen, Fabian Otto
 #
 # This file is part of gennf.
@@ -16,27 +18,28 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-5C5530420E39780B0C1FD9AFDAFADB7F,v 1.2 2006/04/04 14:37:59 florenz Exp $
+# $Id: F-5CDE732877BF35C51D638F288FF4E249.sh,v 1.1 2006/04/04 14:37:59 florenz Exp $
 #
-# GNU Makefile to build and install gennf.
+# Script to upload PDF files to the gennf homepage at
+# http://gennf.berlios.de/.
 #
 
-include GNUmakefile.include 
+FILES=$@
 
-TARGETS = src doc
+if [ -z "$FILES" ]; then
+    echo "No files given. Abort."
+    exit 1
+fi
 
-.PHONY: $(TARGETS)
+SERVER=shell.berlios.de
+ROOT=/home/groups/gennf/htdocs
 
-all: $(TARGETS)
+if [ -n "$BERLIOS_USER" ]; then
+    BERLIOS_USER={$BERLIOS_USER}@
+fi
 
-doc:
-	cd $@ && $(MAKE)
-
-src:
-	cd $@ && $(MAKE)
-
-install:
-	for I in $(TARGETS); do cd $$I && $(MAKE) $@ && cd ..; done
-
-clean:
-	for I in $(TARGETS); do cd $$I && $(MAKE) $@ && cd ..; done
+for f in $FILES; do
+    echo "Upload of $f."
+    scp $f $BERLIOS_USER$SERVER:$ROOT
+    ssh $USER$SERVER "cd $ROOT; chmod 664 $f"
+done

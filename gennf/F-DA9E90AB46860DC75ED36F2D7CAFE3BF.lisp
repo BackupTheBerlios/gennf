@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-DA9E90AB46860DC75ED36F2D7CAFE3BF.lisp,v 1.2 2006/03/18 23:37:22 florenz Exp $
+;; $Id: F-DA9E90AB46860DC75ED36F2D7CAFE3BF.lisp,v 1.3 2006/04/04 14:37:59 florenz Exp $
 
 ;; Code for error handling.
 
@@ -60,38 +60,38 @@ always cause cleanup and repitition.
 
 An example looks like this:
 
-;; (retry (('some-error :maximum 5 :condition-variable error
-;;                      :cleanup (progn (inspect error) (repair-the-stuff)))
-;;         ('another-exception :cleanup (failure-recover)))
-;;   (do-some-work)
-;;   (do-some-more-work))
+;;; (retry (('some-error :maximum 5 :condition-variable error
+;;;                      :cleanup (progn (inspect error) (repair-the-stuff)))
+;;;         ('another-exception :cleanup (failure-recover)))
+;;;   (do-some-work)
+;;;   (do-some-more-work))
 
 Macroexpansion yields:
 
-;; (LET ((#:G1844 (LIST (0 0))))
-;;  (LOOP WITH
-;;        #:G1843
-;;        DO
-;;        (SETF #:G1843 NIL)
-;;        (HANDLER-CASE (PROGN (DO-SOME-WORK) (DO-SOME-MORE-WORK))
-;;                      ('ANOTHER-EXCEPTION NIL (FAILURE-RECOVER)
-;;                       (SET #:G1843 T))
-;;                      ('SOME-ERROR (ERROR)
-;;                       (PROGN (INSPECT ERROR) (REPAIR-THE-STUFF))
-;;                       (WHEN (< (NTH 1 #:G1844) 5)
-;;                         (SETF #:G1843 T)
-;;                         (INCF (NTH 1 #:G1844)))))
-;;        WHILE
-;;        #:G1843))
+;;; (LET ((#:G1844 (LIST (0 0))))
+;;;  (LOOP WITH
+;;;        #:G1843
+;;;        DO
+;;;        (SETF #:G1843 NIL)
+;;;        (HANDLER-CASE (PROGN (DO-SOME-WORK) (DO-SOME-MORE-WORK))
+;;;                      ('ANOTHER-EXCEPTION NIL (FAILURE-RECOVER)
+;;;                       (SET #:G1843 T))
+;;;                      ('SOME-ERROR (ERROR)
+;;;                       (PROGN (INSPECT ERROR) (REPAIR-THE-STUFF))
+;;;                       (WHEN (< (NTH 1 #:G1844) 5)
+;;;                         (SETF #:G1843 T)
+;;;                         (INCF (NTH 1 #:G1844)))))
+;;;        WHILE
+;;;        #:G1843))
 
 Another hint: If a variable, which is used in the macro's
 body, is to be used in cleanup, too, there is no other choice as
 to either make is special or to wrap the whole macro with a let
 to introduce the variable lexically:
 
-;; (let ((some-variable some-initialization))
-;;   (retry ((exception :cleanup (some-form-using-some-variable)))
-;;     (some-code-also-using-some-variable)))"
+;;; (let ((some-variable some-initialization))
+;;;   (retry ((exception :cleanup (some-form-using-some-variable)))
+;;;     (some-code-also-using-some-variable)))"
   (with-gensyms (retry counters)
     (let ((conditions nil)
 	  (condition-variables nil)

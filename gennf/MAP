@@ -61,9 +61,6 @@
   "MCVS/F-2B0179C82E79D3FD5CFB9ADB784C71D3.lisp"
   "src/command-line.lisp")
  (:FILE
-  "MCVS/F-2BC2C357A250EFF4CA5E7EA9E9FE09B2.png"
-  "doc/orthogonal.png")
- (:FILE
   "MCVS/F-2C0F41AAC3235E20FE0FBC3E10FA5950.lisp"
   "demo/data/fd.1/sudoku.lisp")
  (:FILE
@@ -104,7 +101,7 @@
   "doc/description.txt")
  (:FILE
   "MCVS/F-3F4138A4F58263BB4707A581845F60C2.include"
-  "Makefile.include")
+  "GNUmakefile.include")
  (:FILE
   "MCVS/F-40CE98E89C297E85E8209004EE49D372.lisp"
   "sbcl-port/checkout.lisp")
@@ -143,13 +140,16 @@
   "sbcl-port/move.lisp")
  (:FILE
   "MCVS/F-58D8930AD0215DAF4F30E752A5EF3EA1"
-  "doc/Makefile")
+  "doc/GNUmakefile")
  (:FILE
   "MCVS/F-5B815906BE2D64E9BC2E48B76242BFF2.lisp"
   "sbcl-port/sync.lisp")
  (:FILE
   "MCVS/F-5C5530420E39780B0C1FD9AFDAFADB7F"
-  "Makefile")
+  "GNUmakefile")
+ (:FILE
+  "MCVS/F-5CDE732877BF35C51D638F288FF4E249.sh"
+  "scripts/publish.sh")
  (:FILE
   "MCVS/F-5D53AE4674717BF80056E24988D89A49.lisp"
   "sbcl-port/unix-bindings/unix.lisp")
@@ -217,7 +217,7 @@
   "sbcl-port/meta-cvs-system.lisp")
  (:FILE
   "MCVS/F-956064D0F4B5D5A5158076930C552FDA"
-  "src/Makefile")
+  "src/GNUmakefile")
  (:FILE
   "MCVS/F-95C6CE34C92BFC81CD71E5369B3789B1"
   "src/driver.in")
@@ -256,7 +256,7 @@
   "sbcl-port/unix-bindings/Makefile")
  (:FILE
   "MCVS/F-B457DDF336218AEBF4158383BC4BB553.html"
-  "htdocs/index.html")
+  "htdoc/index.html")
  (:FILE
   "MCVS/F-BB223D44B63BE9E1F84D89EE7FDDFB69.tex"
   "doc/gennf-report.tex")
@@ -329,7 +329,7 @@
   "sbcl-port/branch.lisp")
  (:FILE
   "MCVS/F-F5F9CBEE29B1CA30AD6F0D501CD0B51A"
-  "doc/makefile-folien")
+  "doc/GNUmakefile-folien")
  (:FILE
   "MCVS/F-FABFD2A24671001E7FA5E630FED91059.lisp"
   "sbcl-port/multi-hash.lisp")

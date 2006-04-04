@@ -1,31 +1,64 @@
-# Makefile for gennf documentation.
+# Copyright 2005 Florian Lorenzen, Fabian Otto
+#
+# This file is part of gennf.
+#
+# gennf is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# gennf is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with gennf; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# $Id: F-58D8930AD0215DAF4F30E752A5EF3EA1,v 1.12 2006/04/04 14:37:59 florenz Exp $
+#
+# GNU Makefile for gennf documentation.
 #
 
-include ../Makefile.include
+include ../GNUmakefile.include
 
-
-PDFLATEX= pdflatex
-
-DOCS =	gennf-report.pdf
-MANPAGES= gennf.1
-
+DOCS = gennf-report.pdf
+CODEDOC = gennf-doc
+MANPAGES = gennf.1
 
 .SUFFIXES: .tex .pdf
 
-all : $(DOCS)
+.PHONY: $(CODEDOC)
+
+all: $(DOCS)
 
 .tex.pdf:
 	$(PDFLATEX) $<
 	$(PDFLATEX) $<
 
-clean :
+$(CODEDOC):
+	$(LISP) $(EVALOPT) "(require 'asdf)" \
+	$(EVALOPT) "(push (merge-pathnames #p\"src/\" \
+	(make-pathname :directory (butlast \
+	(pathname-directory *default-pathname-defaults*)))) \
+	asdf:*central-registry*)" \
+	$(EVALOPT) "(asdf:operate 'asdf:load-op :cldoc)" \
+	$(EVALOPT) "(asdf:operate 'asdf:load-op :gennf)" \
+	$(EVALOPT) "(cldoc:extract-documentation 'cldoc:html \
+	\"$@\" (asdf:find-system :$(SYSTEM)) \
+	:table-of-contents-title \"$(SYSTEM)\")" \
+	$(EVALOPT) "(quit)"
+
+clean:
 	rm -f *.aux *.log *.bak *~ *.toc
 	rm -f $(DOCS)
+	rm -rf $(CODEDOC)
 
 install: all
 	mkdir -p $(MANDIR)/man1 $(DOCDIR)/$(SYSTEM)
 	chmod 755 $(MANDIR)/man1 $(DOCDIR)/$(SYSTEM)
-	cp $(MANPAGES)	$(MANDIR)/man1
-	cp $(DOCS)	$(DOCDIR)/$(SYSTEM)
+	cp $(MANPAGES) $(MANDIR)/man1
+	cp $(DOCS) $(DOCDIR)/$(SYSTEM)
 	for I in $(MANPAGES); do chmod 644 $(MANDIR)/man1/$$I; done
 	for I in $(DOCS); do chmod 644 $(DOCDIR)/$(SYSTEM)/$$I; done

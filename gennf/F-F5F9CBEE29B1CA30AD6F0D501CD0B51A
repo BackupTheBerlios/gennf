@@ -1,40 +1,43 @@
-# Makefile for gennf documentation.
+# Copyright 2005 Florian Lorenzen, Fabian Otto
+#
+# This file is part of gennf.
+#
+# gennf is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# gennf is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with gennf; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# $Id: F-F5F9CBEE29B1CA30AD6F0D501CD0B51A,v 1.2 2006/04/04 14:37:59 florenz Exp $
+#
+# Makefile for gennf transparencies (in German).
 #
 
-OUTPUT = gennf-report.pdf folien.pdf
-USER = $(shell if [ $(BERLIOS_USER) ]; then echo $(BERLIOS_USER)@; fi)
-SERVER = shell.berlios.de
-ROOT = /home/groups/gennf/htdocs
+OUTPUT = folien.pdf
 
 .SUFFIXES: .fig .pdf_t
 
 all : $(OUTPUT)
 
 .fig.pdf_t:
-	@echo $@
-	@echo $<
 	fig2dev -L pdftex -p dummy $< $*.pdf
 	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
 
-
-folien.pdf : folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
+$(OUTPUT): folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
 	pdflatex $<
 	pdflatex $<
-
-%.pdf : %.tex
-	pdflatex $<
-	pdflatex $<
-
-## %.pdf_t : %.fig
-## 	fig2dev -L pdftex -p dummy $< $*.pdf
-## 	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
 
 publish : gennf-report.pdf
 	scp gennf-report.pdf $(USER)$(SERVER):$(ROOT)
 	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 664 gennf-report.pdf"
 
 clean :
-	rm -f *.aux *.log *.nav *.out *.bak *~ *.snm *.toc
-
-dist-clean : clean
-	rm -f *.pdf *.pdf_t
+	rm -f *.aux *.log *.nav *.out *.bak *~ *.snm *.toc *.pdf_t $(OUTPUT)
