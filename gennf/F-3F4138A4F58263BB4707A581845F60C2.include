@@ -1,0 +1,19 @@
+
+# Build options.
+LISP = sbcl
+PDFLATEX= pdflatex
+
+
+# Install options.
+DESTDIR=
+PREFIX=/usr/local
+# generates 2 slashes if destdir is not set.
+INSTALL_ROOT=$(DESTDIR)/$(PREFIX)
+
+
+MANDIR=$(INSTALL_ROOT)/share/man
+DOCDIR=$(INSTALL_ROOT)/share/doc
+LIBDIR=$(INSTALL_ROOT)/lib
+BINDIR=$(INSTALL_ROOT)/bin
+SYSTEM=gennf
+

@@ -103,6 +103,9 @@
   "MCVS/F-3E293DB4FDF7D70F72EC266B13D28C65.txt"
   "doc/description.txt")
  (:FILE
+  "MCVS/F-3F4138A4F58263BB4707A581845F60C2.include"
+  "Makefile.include")
+ (:FILE
   "MCVS/F-40CE98E89C297E85E8209004EE49D372.lisp"
   "sbcl-port/checkout.lisp")
  (:FILE
@@ -144,6 +147,9 @@
  (:FILE
   "MCVS/F-5B815906BE2D64E9BC2E48B76242BFF2.lisp"
   "sbcl-port/sync.lisp")
+ (:FILE
+  "MCVS/F-5C5530420E39780B0C1FD9AFDAFADB7F"
+  "Makefile")
  (:FILE
   "MCVS/F-5D53AE4674717BF80056E24988D89A49.lisp"
   "sbcl-port/unix-bindings/unix.lisp")
@@ -214,7 +220,7 @@
   "src/Makefile")
  (:FILE
   "MCVS/F-95C6CE34C92BFC81CD71E5369B3789B1"
-  "src/driver-template")
+  "src/driver.in")
  (:FILE
   "MCVS/F-972969458DDA322E03A1AAD19BF8ADC0.asd"
   "src/gennf.asd")
@@ -321,6 +327,9 @@
  (:FILE
   "MCVS/F-F3CA06292A3D8237E960CB2844A8D5C0.lisp"
   "sbcl-port/branch.lisp")
+ (:FILE
+  "MCVS/F-F5F9CBEE29B1CA30AD6F0D501CD0B51A"
+  "doc/makefile-folien")
  (:FILE
   "MCVS/F-FABFD2A24671001E7FA5E630FED91059.lisp"
   "sbcl-port/multi-hash.lisp")

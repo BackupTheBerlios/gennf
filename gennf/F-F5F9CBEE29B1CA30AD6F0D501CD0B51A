@@ -1,0 +1,40 @@
+# Makefile for gennf documentation.
+#
+
+OUTPUT = gennf-report.pdf folien.pdf
+USER = $(shell if [ $(BERLIOS_USER) ]; then echo $(BERLIOS_USER)@; fi)
+SERVER = shell.berlios.de
+ROOT = /home/groups/gennf/htdocs
+
+.SUFFIXES: .fig .pdf_t
+
+all : $(OUTPUT)
+
+.fig.pdf_t:
+	@echo $@
+	@echo $<
+	fig2dev -L pdftex -p dummy $< $*.pdf
+	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
+
+
+folien.pdf : folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
+	pdflatex $<
+	pdflatex $<
+
+%.pdf : %.tex
+	pdflatex $<
+	pdflatex $<
+
+## %.pdf_t : %.fig
+## 	fig2dev -L pdftex -p dummy $< $*.pdf
+## 	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
+
+publish : gennf-report.pdf
+	scp gennf-report.pdf $(USER)$(SERVER):$(ROOT)
+	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 664 gennf-report.pdf"
+
+clean :
+	rm -f *.aux *.log *.nav *.out *.bak *~ *.snm *.toc
+
+dist-clean : clean
+	rm -f *.pdf *.pdf_t

@@ -1,40 +1,31 @@
 # Makefile for gennf documentation.
 #
 
-OUTPUT = gennf-report.pdf folien.pdf
-USER = $(shell if [ $(BERLIOS_USER) ]; then echo $(BERLIOS_USER)@; fi)
-SERVER = shell.berlios.de
-ROOT = /home/groups/gennf/htdocs
-
-.SUFFIXES: .fig .pdf_t
-
-all : $(OUTPUT)
-
-.fig.pdf_t:
-	@echo $@
-	@echo $<
-	fig2dev -L pdftex -p dummy $< $*.pdf
-	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
+include ../Makefile.include
 
 
-folien.pdf : folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
-	pdflatex $<
-	pdflatex $<
+PDFLATEX= pdflatex
 
-%.pdf : %.tex
-	pdflatex $<
-	pdflatex $<
+DOCS =	gennf-report.pdf
+MANPAGES= gennf.1
 
-## %.pdf_t : %.fig
-## 	fig2dev -L pdftex -p dummy $< $*.pdf
-## 	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
 
-publish : gennf-report.pdf
-	scp gennf-report.pdf $(USER)$(SERVER):$(ROOT)
-	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 664 gennf-report.pdf"
+.SUFFIXES: .tex .pdf
+
+all : $(DOCS)
+
+.tex.pdf:
+	$(PDFLATEX) $<
+	$(PDFLATEX) $<
 
 clean :
-	rm -f *.aux *.log *.nav *.out *.bak *~ *.snm *.toc
+	rm -f *.aux *.log *.bak *~ *.toc
+	rm -f $(DOCS)
 
-dist-clean : clean
-	rm -f *.pdf *.pdf_t
+install: all
+	mkdir -p $(MANDIR)/man1 $(DOCDIR)/$(SYSTEM)
+	chmod 755 $(MANDIR)/man1 $(DOCDIR)/$(SYSTEM)
+	cp $(MANPAGES)	$(MANDIR)/man1
+	cp $(DOCS)	$(DOCDIR)/$(SYSTEM)
+	for I in $(MANPAGES); do chmod 644 $(MANDIR)/man1/$$I; done
+	for I in $(DOCS); do chmod 644 $(DOCDIR)/$(SYSTEM)/$$I; done

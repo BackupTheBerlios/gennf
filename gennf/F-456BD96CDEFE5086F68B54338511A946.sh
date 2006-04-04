@@ -1,7 +1,11 @@
 #!/bin/sh
 
+if [ -n "${BERLIOS_USER}" ]; then
+    BERLIOS_USER=${BERLIOS_USER}@
+fi
+
 MCVS=mcvs
-CVSROOT=florenz@cvs.gennf.berlios.de:/cvsroot/gennf
+CVSROOT=${BERLIOS_USER}cvs.gennf.berlios.de:/cvsroot/gennf
 MODULE=gennf
 
 DOC_DIR=doc
@@ -10,6 +14,7 @@ TESTS_DIR=tests
 
 BASENAME=gennf
 DOC_FILES="gennf-report.tex gennf.1 Makefile"
+
 SRC_FILES="Makefile gennf.asd driver-template \
 access.lisp checkpoint.lisp \
 distribution.lisp merge.lisp backend-cvs.lisp \
@@ -19,7 +24,9 @@ files.lisp miscellaneous.lisp \
 branch.lisp debug.lisp gennf.lisp \
 packages.lisp change.lisp directories.lisp \
 mapping.lisp sbcl.lisp"
+
 TESTS_FILES="test.sh"
+
 TOPLEVEL_FILES="LICENSE INSTALL"
 
 REPLACE_VERSION="INSTALL src/gennf.asd"
@@ -41,6 +48,8 @@ VERSIONNAME=$BASENAME-$VERSION
 
 echo "Checking out $BASENAME."
 $MCVS -d $CVSROOT co -r $TAG $MODULE
+
+exit
 
 echo "Creating package directory $VERSIONNAME and subdirectories."
 mkdir $VERSIONNAME
@@ -74,7 +83,7 @@ for f in $REPLACE_VERSION; do
 done
 
 echo "Create a tarball $VERSIONNAME.tar.gz"
-tar cvzf $VERSIONNAME.tar.gz $VERSIONNAME
+tar cf -  $VERSIONNAME | gzip -c >  $VERSIONNAME.tar.gz
 
 echo "Delete checked out copy and package tree."
 rm -rf $MODULE 

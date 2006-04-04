@@ -6,6 +6,7 @@
  ("dvi" :IGNORE)
  ("fig" :DEFAULT)
  ("html" :DEFAULT)
+ ("include" :DEFAULT)
  ("ist" :DEFAULT)
  ("latex" :DEFAULT)
  ("lisp" :DEFAULT)
