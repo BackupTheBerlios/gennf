@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.26 2006/04/03 17:28:29 florenz Exp $
+;; $Id: F-881560526E7214793C24206DE07FE66D.lisp,v 1.27 2006/04/04 12:33:33 sigsegv Exp $
 
 ;; Description: creates directory structure by using a map file.
 ;; The format and the idea is derived from Meta-CVS.
@@ -246,7 +246,7 @@ FIXME: This should include resolving relative pathnames etc."
   "Syncs list of mappings to  branch  disk"
   ;; FIXME: Place some tests here.
   (mapcar #'(lambda (mapping)
-	      (format t "***** Syncing: ~a -> ~a ~%"
+	      (format t "**** Syncing: ~a -> ~a ~%"
 		      (id mapping) (path mapping))
 	      (sync mapping branch))
 	  sequence))

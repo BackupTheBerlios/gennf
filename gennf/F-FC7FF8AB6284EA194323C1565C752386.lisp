@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.52 2006/04/04 11:15:26 sigsegv Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.53 2006/04/04 12:33:34 sigsegv Exp $
 
 ;; Main module. Subcommands of gennf are implemented in this file.
 
@@ -131,8 +131,8 @@ the sandbox."
     (create-empty-repository module access)
     (create-empty-branch module access :symbolic-name symbolic-name
 			 :description description)
-    (format t "The new module can be checked out with:~%")
-    (format t "$ gennf checkout ~A --root ~A~%" module root)))
+    (format t "**** The new module can be checked out with:~%")
+    (format t "     $ gennf checkout ~A --root ~A~%" module root)))
 
 (define-subcommand (commit ci) subcommand-commit (&rest files)
   :in-meta-directory
@@ -147,8 +147,8 @@ files are committed."
 	(progn
 	  (distribution-commit *module* "<empty>" *access* *branch*
 			     changed-files)
-	  (format t "Committed all changes.~%")
-	(format t "No files changed. Nothing committed.~%"))))
+	  (format t "**** Committed all changes.~%"))
+	(format t "**** No files changed. Nothing committed.~%"))))
 
 (define-subcommand (update up) subcommand-update (&key (change c) &rest files)
   :in-meta-directory
@@ -174,7 +174,7 @@ files are committed."
 			  source (parse-integer branch)
 			  (if change (parse-integer change)))
       (format t "**** The branch can be checked out with:~%")
-      (format t "$ gennf checkout ~A --root ~A --branch ~A~%"
+      (format t "     $ gennf checkout ~A --root ~A --branch ~A~%"
 	      module root-to identifier))))
 
 
@@ -188,7 +188,7 @@ files are committed."
 	(distribution-merge module destination branch-to source
 			    branch-from change)
       (unless destination-directory 
-	(format t "Merge finished cleanly.")
+	(format t "**** Merge finished cleanly.")
 	(return-from subcommand-merge))
       ;; Handling CONFLICT, writing CHECKPOINT.
       (let* ((*meta-directory* destination-directory)
@@ -228,7 +228,7 @@ files are committed."
 			    (port-path:current-directory)
 			    (first path))))
     (port-path:with-directory-form ((directory raw-directory))
-      (format t "Syncing in directory ~a~%" directory)
+      (format t "**** Syncing in directory ~a~%" directory)
       (if (port-path:directory-pathname-p directory)
 	  (port-path:in-directory directory
 	    (let*  ((*startup-directory* (port-path:current-directory))
@@ -307,5 +307,6 @@ files are committed."
 		  (distribution-merge-finish module *branch* *access*
 					     *sandbox-directory* files)
 		  ;; The user shall remove the temporary files.
-		  (format t "Please delete the remaining crap in ~A~%"
-			  *sandbox-directory*)))))))))
+		  (format t "**** Please delete the remaining crap in ~A~%"
+			  *sandbox-directory*)
+		  (format t "     rm -rf ~a~%" *sandbox-directory*)))))))))

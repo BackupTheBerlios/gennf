@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.24 2006/04/03 17:28:29 florenz Exp $
+;; $Id: F-74178C2E50AE1257726E1B3D58FE1EEE.lisp,v 1.25 2006/04/04 12:33:33 sigsegv Exp $
 
 ;; Basic operations for changes and distributed repositories are
 ;; implemented in this file.
@@ -579,8 +579,8 @@ Origin files are in ~A.~%"
 	    ;; (cf. always-cleanup option).
 	    (progn
 	      (port-path:delete-directory-tree origin-directory)
-	      (format t "There were conflicts which have to be resolved.~%")
-	      (format t "The conflicting files are in ~A.~%"
+	      (format t "WARNING: There were conflicts which have to be resolved.~%")
+	      (format t "WARNING: The conflicting files are in ~A.~%"
 		      (namestring destination-directory))
 	      (return-from distribution-merge
 		(values destination-directory
