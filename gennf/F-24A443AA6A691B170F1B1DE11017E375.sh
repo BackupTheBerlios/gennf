@@ -2,7 +2,7 @@
 #
 # test.sh
 
-GENNF=gennf
+GENNF=../src/gennf
 
 function die()
 {

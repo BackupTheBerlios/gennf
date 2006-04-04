@@ -16,7 +16,7 @@
 ;; along with gennf; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;
-;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.51 2006/04/03 17:28:29 florenz Exp $
+;; $Id: F-FC7FF8AB6284EA194323C1565C752386.lisp,v 1.52 2006/04/04 11:15:26 sigsegv Exp $
 
 ;; Main module. Subcommands of gennf are implemented in this file.
 
@@ -144,8 +144,10 @@ files are committed."
     (debug
       (debug-format "Changed files: ~A" changed-files))
     (if changed-files
-	(distribution-commit *module* "<empty>" *access* *branch*
+	(progn
+	  (distribution-commit *module* "<empty>" *access* *branch*
 			     changed-files)
+	  (format t "Committed all changes.~%")
 	(format t "No files changed. Nothing committed.~%"))))
 
 (define-subcommand (update up) subcommand-update (&key (change c) &rest files)
@@ -186,7 +188,7 @@ files are committed."
 	(distribution-merge module destination branch-to source
 			    branch-from change)
       (unless destination-directory 
-	(format t "merge finished cleanly.")
+	(format t "Merge finished cleanly.")
 	(return-from subcommand-merge))
       ;; Handling CONFLICT, writing CHECKPOINT.
       (let* ((*meta-directory* destination-directory)
@@ -283,7 +285,7 @@ files are committed."
 			    (port-path:current-directory)
 			    (first path))))
     (port-path:with-directory-form ((directory raw-directory))
-      (format t "~%*** Continuing in directory ~a~%" directory)
+      (format t "~%**** Continuing in directory ~a~%" directory)
       (if (port-path:directory-pathname-p directory)
 	  (port-path:in-directory directory
 	    (let* ((*startup-directory* (port-path:current-directory))
