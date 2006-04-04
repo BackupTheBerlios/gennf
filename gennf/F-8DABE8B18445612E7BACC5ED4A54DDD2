@@ -1,2 +1,77 @@
 		 INSTALL NOTES FOR GENNF %%VERSION%%
 ***************************************************************************
+
+
+Build and install requirements
+------------------------------
+
+The following tools and packages are necessary to build and install
+gennf:
+
+* Steel Bank Commmon Lisp 0.9.10 (http://sbcl.sourceforge.net/)
+* pdfLaTeX (http://www.tug.org/applications/pdftex/)
+* GNU make (http://www.gnu.org/software/make/)
+* Osicat (http://common-lisp.net/project/osicat/)
+* CL-DIFFLIB (http://www.cliki.net/CL-DIFFLIB)
+* UFFI (http://uffi.b9.com/)
+* port-path (http://prdownload.berlios.de/gennf/port-path-0.1.tar.gz)
+
+It may well be possible to built with another toolchain but this
+certainly requires some hacking of the makefiles. GNU make is the only
+make guarenteed to accept the makefiles.
+pdfLaTeX is only required if you want to TeX the gennf report, which
+is done by default.
+
+Osicat, CL-DIFFLIB and UFFI are ASDF-Installable. ASDF-Install comes bundled
+with SBCL. To install e. g. CL-DIFFLIB type at the REPL:
+
+CL-USER> (asdf-install:install "cl-difflib")
+
+The package will be fetched and installed (do not forget to load
+ASDF-Install before issueing the form).
+
+port-path is a pathname library written by the gennf developers and it
+is still under development. It is not yet quite ASDF-Installable but
+you can download a tarball from the then website noted above and let
+ASDF-Install pick that file:
+
+CL-USER> (asdf-install:install "/path/to/the/port-path/tarball")
+
+
+Building and installing gennf
+-----------------------------
+
+To build gennf, expand the tarball
+
+$ gzip -d gennf-x.y.tar.gz | tar xf -
+
+and change to the gennf-x.y directory. Type
+
+$ gmake
+
+to compile the system and build the documentation.
+
+Type
+
+$ gmake install
+
+to install gennf. Normally, gennf installs its files under
+/usr/local. If you want to change that, append
+
+PREFIX=/another/path
+
+to BOTH calls to gmake.
+
+gennf can now be called with $PREFIX/bin/gennf.
+
+In case you want to change the locations of the install process, most
+of the settings are in the file GNUmakefile.include.
+
+If you want to generate the HTML documentation of the Common Lisp
+code, change to the doc subdirectory in the source tree and type
+
+$ gmake gennf-doc
+
+A subdirectory gennf-doc is created with the code
+documentation. However, CLDOC is required to generate the HTML
+files. It can be obtained from http://common-lisp.net/project/cldoc/.

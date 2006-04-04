@@ -18,7 +18,7 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-456BD96CDEFE5086F68B54338511A946.sh,v 1.3 2006/04/04 14:37:59 florenz Exp $
+# $Id: F-456BD96CDEFE5086F68B54338511A946.sh,v 1.4 2006/04/04 15:32:53 florenz Exp $
 #
 # Simple packageing script for gennf.
 #
@@ -50,9 +50,9 @@ SRC_DIR=src
 TESTS_DIR=tests
 
 BASENAME=gennf
-DOC_FILES="gennf-report.tex gennf.1 Makefile"
+DOC_FILES="gennf-report.tex gennf.1 GNUmakefile"
 
-SRC_FILES="Makefile gennf.asd driver.in \
+SRC_FILES="GNUmakefile gennf.asd driver.in \
 access.lisp checkpoint.lisp \
 distribution.lisp merge.lisp backend-cvs.lisp \
 command-line.lisp error.lisp \
@@ -64,7 +64,7 @@ mapping.lisp sbcl.lisp"
 
 TESTS_FILES="test.sh"
 
-TOPLEVEL_FILES="LICENSE INSTALL Makefile Makefile.include"
+TOPLEVEL_FILES="LICENSE INSTALL GNUmakefile GNUmakefile.include"
 
 REPLACE_VERSION="INSTALL src/gennf.asd"
 
