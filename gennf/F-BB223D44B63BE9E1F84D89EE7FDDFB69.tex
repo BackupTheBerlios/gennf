@@ -518,8 +518,8 @@ using simpler software to store the revisions of files like
 
 Section \ref{distrib} describes the general structure of the
 \texttt{MAP}-file. \GENNF{} supports operations like renaming, moving
-and deleting of files only by using the explicit subcommands delete
-and move. 
+and deleting of files only by using the explicit subcommands
+\texttt{delete} and \texttt{move}.
 
 We chose the same representation for \texttt{MAP}-files as
 \textsc{metacvs} to support a possible import of projects. By starting
@@ -568,6 +568,8 @@ With this abstraction at hand commands are defined like the following:
   <code of checkout subcommand>)
 \end{verbatim}
 
+\newpage
+
 \begin{verbatim}
 (define-subcommand add subcommand-add (&rest files)
   :in-meta-directory
@@ -590,16 +592,18 @@ $ gennf checkout module-foo --root /some/where -b 1 -c 2
 
 $ gennf add main.c
 ...
-\end{verbatim}}
+\end{verbatim}
+}
 
-  While testing the developed frontend we noticed a strange behaviour
-  of \GENNF{} when using \textsc{emacs} for editing files.
-  \textsc{emacs} renames the original file by appending a \~ and then
-  copies the file with its original file name. All changes are now
-  made to the copy of the controlled file. \textsc{emacs} behaves
-  this way because it does not recopgnize that the file is under
-  version control. If \textsc{emacs} recognizes a know version tree it will not
-  show this behavior.
+While testing the developed frontend we noticed a strange behaviour of
+\GENNF{} when using \textsc{emacs} for editing files.  \textsc{emacs}
+renames the original file by appending a \texttt{\textasciitilde} and
+then copies the file with its original file name. All changes are now
+made to the copy of the controlled file. \textsc{emacs} behaves this
+way because it does not recognize that the file is under version
+control. If \textsc{emacs} recognizes a version tree of a known
+version control system it does not show this behavior.
+
 
 \subsection{Dropped features}
 

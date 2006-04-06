@@ -1,0 +1,77 @@
+% \documentclass[german, handout]{beamer}
+\documentclass[german, presentation]{beamer}
+
+\newcommand{\GPG}{\textsc{gpg}}
+\newcommand{\PGP}{\textsc{pgp}}
+\newcommand{\SBCL}{\textsc{sbcl}}
+\newcommand{\GENNF}{\textsc{gennf}}
+\newcommand{\METACVS}{\textsc{metacvs}}
+\newcommand{\CVS}{\textsc{cvs}}
+\newcommand{\DARCS}{\textsc{darcs}}
+\newcommand{\GNUARCH}{\textsc{gnu\,arch}}
+\newcommand{\MERCURIAL}{\textsc{mercurial}}
+\newcommand{\SVK}{\textsc{svk}}
+\newcommand{\LISP}{\textsc{lisp}}
+\newcommand{\COMMONLISP}{\textsc{common lisp}}
+\newcommand{\LIBGPGME}{\textsc{libgpgme}}
+\newcommand{\OSICAT}{\textsc{osicat}}
+\newcommand{\PORTPATH}{\textsc{portpath}}
+\newcommand{\POSIX}{\textsc{posix}}
+\newcommand{\HAKEN}{\ding{51}}
+
+\usepackage{babel}
+\usepackage{stmaryrd}
+\usepackage{pifont}
+
+
+\usetheme{Rochester}
+\usefonttheme{serif}
+\usecolortheme[RGB={120,0,16}]{structure}
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{footline}{
+  \setbeamercolor{footer}{fg=white,bg=structure}
+  \begin{beamercolorbox}{footer}
+    \vskip2pt
+    \hspace{1em}Infrastrukturen zur Open Source Softwareentwicklung\hfill
+    \insertframenumber\,/\,\inserttotalframenumber\hspace{1em}
+    \vskip2pt
+  \end{beamercolorbox}
+}
+
+\author{Fabian~Otto~{\scriptsize (\texttt{sigsegv@cs.tu-berlin.de})}
+  \and Florian~Lorenzen~{\scriptsize (\texttt{florenz@cs.tu-berlin.de})}}
+
+\title{\GENNF}
+\subtitle{Verteiltes Versionsmanagement}
+\institute{TU~Berlin, FG Formale Modelle, Logik und Programmierung, \\
+Infrastrukturen zur Open Source Softwareentwicklung WS05/06 \\
+Bernd Mahr, Steffen Evers}
+\date{11. April 2006}
+
+
+
+\begin{document}
+
+\AtBeginSection[] {
+  \begin{frame}
+    \frametitle{"Ubersicht}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% \AtBeginSubsection[] {
+%   \begin{frame}
+%     \frametitle{"Ubersicht}
+%     \tableofcontents[currentsubsection]
+%   \end{frame}
+% }
+
+\frame[plain]{\titlepage}
+
+\begin{frame}
+  \frametitle{"Ubersicht}
+  \tableofcontents
+\end{frame}
+
+\end{document}
