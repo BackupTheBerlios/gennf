@@ -2,7 +2,7 @@
 #
 # init.sh
 
-source lib.sh
+. ./lib.sh
 
 
 tell "Create Repositories."
@@ -12,7 +12,8 @@ cvs -d $REPO1 init
 cvs -d $REPO2 init
 
 tell "Setup module."
-$GENNF setup $MODULE --root $REPO1
+$GENNF setup $MODULE --root $REPO1 --symbolic-name fd \
+    --description "Finite-domain-constraint-solver"
 
 tell "Create working directory."
 mkdir $WORK

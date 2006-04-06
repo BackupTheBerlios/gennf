@@ -2,7 +2,7 @@
 #
 # demo.sh
 
-source lib.sh
+. ./lib.sh
 
 
 tell "Create a branch."

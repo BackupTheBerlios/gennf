@@ -1,6 +1,6 @@
 # lib.sh
 
-function tell() {
+tell() {
     echo ">>>>>" $@
 }
 
