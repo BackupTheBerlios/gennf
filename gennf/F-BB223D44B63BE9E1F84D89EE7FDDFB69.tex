@@ -39,8 +39,7 @@
   Programmierung \\
   Prof.~Dr.~Bernd~Mahr, Steffen~Evers \bigskip \bigskip
 
-  {\LARGE \GENNF{} -- Distributed Version Management System with Code
-    Signing} \medskip
+  {\LARGE \GENNF{} -- Distributed Version Management} \medskip
 
   {\Large -- Project Report --} \bigskip \bigskip
 
@@ -72,30 +71,32 @@
     of a prototype for distributed version management using the
     central-repository oriented tool \textsc{cvs} as storage backend.
     We sketch the design and underlying techniques of the
-    implementation as well the development process and its ups and
+    implementation as well as the development process and its ups and
     downs.}
 \end{center}
 
 \vspace*{\stretch{3}}
 
+
 \tableofcontents
 \newpage
+
 
 \section*{Prologue}
 \addcontentsline{toc}{section}{Prologue}
 
-This document is the project report of \GENNF{}, a distributed version
-management system enhanced with code signing as part of the
-\emph{Infrastrukturen zur Open Source Software Entwicklung} course
-held by Steffen Evers at Berlin Technical University.
+This document is the project report for \GENNF{}, a distributed version
+management system, as part of the \emph{Infrastrukturen zur Open Source
+  Software Entwicklung} course held by Steffen Evers at Berlin
+Technical University.
 
-The document started as a scratchpad we sketched our ideas and plans
-and is currently being transformed into an intermediate report and
-once will be the final report.
+The document started as a scratchpad to sketch our ideas and plans
+and was step by step tranformed into the final report now at hand.
 
 The documente is divided into two chapters:
+
 \begin{itemize}
-\item The first chapter describes the course of the project in
+\item The first chapter describes the course of the project in roughly
   chronologically order. Decisions and steps we undertook are
   explained as well as comments from a review perspective.
 \item The second chapter describes the desgin and concepts of \GENNF{}
@@ -103,8 +104,9 @@ The documente is divided into two chapters:
   written as a desgin document in an early period of the project, some
   parts were corrected and adjusted during development or thereafter.
   Thus, this chapter can be considered as a part of the project's
-  outcome.
+  result.
 \end{itemize}
+
 
 \section*{Developers}
 \addcontentsline{toc}{section}{Developers}
@@ -112,20 +114,22 @@ The documente is divided into two chapters:
 \GENNF{} was developed by
 \begin{itemize}
 \item Fabian Otto, \texttt{sigsegv@cs.tu-berlin.de}
-\item Florian Lorenzen \texttt{florenz@cs.tu-berlin.de}
+\item Florian Lorenzen, \texttt{florenz@cs.tu-berlin.de}.
 \end{itemize}
 
 
 \chapter{The project's course \label{course}}
 
-This chapter describes in rough chronological order the different
+This chapter describes in roughly chronological order the different
 steps we undertook during the development of \GENNF{}.
+
 
 \section{The planning}
 
 The planning phase covers all the time prior to any coding. As we
 changed plans at several points there is some interleaving during the
 middle period of the project.
+
 
 \subsection{In search of a project}
 
@@ -145,35 +149,39 @@ Among them were a few we abandoned:
 We thought about improving the code merging capabilities which are
 heavily relied on in version control software. The idea was to do a
 merge not of streams of characters (the source code) but of abstract
-syntax trees of the programming language used. This seemd very
-promising because fewer conflicts should arise. We abandoned this plan
-for several reasons:
+syntax trees of the programming language\footnote{Of course any other
+  artificial language which can be effectivley described by a
+  context-free grammar -- like HTML or configuration files -- are also
+  suitable to this approach despite being \emph{no} programming
+  languages.} used. This seemd very promising because fewer conflicts
+should arise. We abandoned this plan for several reasons:
 
 \begin{itemize}
 \item It is language dependant: for every language used in the code at
-  least a context-free and a regular grammar are required. To do the
-  lexing and parsing a lexer- and parser-generator or some function
-  $\phi : G_L \rightarrow G_P \rightarrow S \rightarrow T$ with $G_L$
-  being a lexer grammar, $G_P$ a parser grammar, $S$ a source code and
-  $T$ an abstract syntax tree would have to be implemented. This is
-  not something impossible but takes quite some time.
-\item The algorithm to compare two abstract syntax trees is not so
+  least a context-free and a regular grammar are required. To do
+  lexical and syntactical analysis a lexer- and parser-generator or
+  some function $\phi : G_L \rightarrow G_P \rightarrow S \rightarrow
+  T$ with $G_L$ being a lexer grammar, $G_P$ a parser grammar, $S$ a
+  source code and $T$ an abstract syntax tree would have to be
+  implemented. This is not something impossible but takes quite some
+  time to set up in a general fashion.
+\item The algorithm to compare two abstract syntax trees is not
   trivial, at least if something better than line based diffs is
   supposed to come out. Another trouble is what to consider as a
   conflict.
-\item How to store diffs of to trees? Our idea was to store functions
-  $\tau : T \rightarrow T$ which transform one tree into the other.
-  Those function could also be used to apply the changes. At this
-  point the question arose if $\tau_1 \circ \tau_2 \neq \tau_2 \circ
-  \tau_1$ could be used as the definition of a conflict. But this is
-  probably to simple.  Those function $\tau_i$ in turn would be
-  compositions of atomic transformations of one node in the tree,
+\item How to store differences of two trees? Our idea was to store
+  functions $\tau : T \rightarrow T$ which transform one tree into the
+  other.  Those function could also be used to apply the changes. At
+  this point the question arose if $\tau_1 \circ \tau_2 \neq \tau_2
+  \circ \tau_1$ could be used as the definition of a conflict. But
+  this is probably to simple.  Those function $\tau_i$ in turn would
+  be compositions of atomic transformations of one node in the tree,
   i.~e. a combinataion of paths in the tree and actions to be taken at
   the end of the path.
 \item Preserving the code layout may be a problem, even with layout
   annotations in the syntax trees.
 \item What to use as the storage backend? Some line based store would
-  not really fulfil the needs because this meant to pretty-print the
+  not really satisfy the needs because this meant to pretty-print the
   syntax tree (using the layout annotations) and to parse the last
   checked in version at each commit. Consequently, the transformation
   function should be stored. This in the end lead to the decision to
@@ -185,7 +193,7 @@ for several reasons:
 As we found out later in February 2006, exactly this approach was
 taken by Hayase et. al. \cite{HMI05}.
 
-\subsubsection{Plans that should not stay only on paper}
+\subsubsection{Plans that should not only stay on paper}
 
 We more or less settled on two other aspects which seemed improvable
 to us:
@@ -198,7 +206,8 @@ to us:
 Code signing means, that each chunk of code checked into the
 repository has to be signed by the programmer using some
 public/private key scheme to enable other developers or users to
-verify the origin of the code (as long as keys are trustworthy).
+verify the origin of the code (as long as the keys used are
+trustworthy).
 
 Distributed means that the repository is not stored on a single server
 but that commits can be done on several servers and the results be
@@ -211,8 +220,8 @@ The code signing part should be mainly worked on by Hannes Mehnert,
 whereas Florian Lorenzen felt more reponsible for the distributive
 part. Fabian Otto would participate in both parts of the project.
 
-It was fairly clear right from the beginning that we could not and
-want not write a version management system from scratch but to
+It was fairly clear right from the beginning that we could not and did
+not want to write a version management system from scratch but to
 improcve an existing system. The two systems in question were
 \textsc{darcs} \cite{Darc06} and \textsc{metacvs} \cite{Mcvs06}.
 
@@ -222,31 +231,31 @@ should not be necessary and one option was to offer greater
 flexibility concering repositores and working copies in
 \textsc{darcs}.
 
-\textsc{metacvs} is a wrapper around \textsc{cvs} \cite{Cvs06}
-and requires only
-\textsc{cvs} on the server side. It circumvents some quirks of
-\textsc{cvs}, especially the weak handling of directory structure of a
-project. Like \textsc{cvs} it is a central-server oriented system and
-consequently the option as to introduce distribution into this system.
+\textsc{metacvs} is a wrapper around \textsc{cvs} \cite{Cvs06} and
+requires only \textsc{cvs} on the server side. It circumvents some
+quirks of \textsc{cvs}, especially the weak handling of directory
+structure of a project. Like \textsc{cvs} it is a central-server
+oriented system and consequently the option as to introduce
+distribution into this system.
 
 Concerning code signing neither of the two had support in our sense
-(\textsc{darcs} has some rudimentary support using digitally signed
+(\textsc{darcs} offers some rudimentary support using digitally signed
 mails).
 
 We decided to build on \textsc{metacvs} because it is, in turn, based
 on \textsc{cvs} which we know quite well and because it is written in
 \textsc{common~lisp} which makes rapid development at least possible.
 Another reason is that \textsc{cvs} is widely available on services
-like SourceForge \cite{Sour06} or BerliOS \cite{Berl06}
-and thus existing infrastructure is available to the new system.
+like SourceForge \cite{Sour06} or BerliOS \cite{Berl06} and thus
+existing infrastructure is available to the new system.
 
-We also had a look on a system called \textsc{dcvs} \cite{Dcvs06}, distributed
-\textsc{cvs}, but this was ruled out right from the start, beacuse its
-support several repositories is rather unflexible: each repository is
-assigned a part of code which is the only one that can be modified.
-That means the distribution must follow the responsibilities and/or
-maintenanceships of the projects which imposes to strong rules on the
-development process in our opinion.
+We also had a look on a system called \textsc{dcvs} \cite{Dcvs06},
+Distributed \textsc{cvs}, but this was ruled out right from the start,
+beacuse its support for several repositories is rather inflexible:
+each repository is assigned a part of code which is the only one that
+can be modified.  That means the distribution must follow the
+responsibilities and/or maintenanceships of the projects which imposes
+to strong rules on the development process in our opinion.
 
 \subsection{Infrastructure}
 
@@ -295,28 +304,30 @@ References:
 \end{verbatim}}
 
 We installed a \textsc{cvs} repository at
-\texttt{cvs.gennf.berlios.de:/cvsroot/gennf} which we used with
+\texttt{cvs.gennf.berlios.de:/cvsroot/gennf} for use with
 \textsc{metacvs}. For this reason the \textsc{viewcvs} interface of
-BerliOS is not so usable, because it cannot resolve \textsc{metacvs}'s
+BerliOS is not very usable as it cannot resolve \textsc{metacvs}'s
 F-files.
 
-The first version of our web-page at \texttt{http://gennf.berlios.de}
+The first version of our web-page at \texttt{http://gennf.berlios.de/}
 was online about a month later on December 12.
 
-To ease communication among the developers we installed an publicly
+To ease communication among the developers we installed a publicly
 open mailing list \texttt{gennf-devel@lists.berlios.de} on
 November~30. Some days later commit mails were enabled.  The Perl
-script \texttt{log\_accum.pl} used originally stems from the FreeBSD
-project and found the way to us via the ZEDV group at Berlin's Free
-University's physics department and the \textsc{octopus} project.
-Until mid of January it had the same problem as \textsc{viewcvs}: it
-could not resolve \textsc{metacvs}'s F-file names, until a very basic
-\texttt{MAP}-file parser was included into the script.
+script \texttt{log\_accum.pl} used to send the messages originally
+stems from the FreeBSD project and found the way to us via the ZEDV
+group at Berlin's Free University's physics department and the
+\textsc{octopus} project.  Until mid of January it had the same
+problem as \textsc{viewcvs}: it could not resolve \textsc{metacvs}'s
+F-file names until a very basic \texttt{MAP}-file parser was included
+into the script.
 
 The mailing list archives are found at
-\texttt{http://lists.berlios.de/pipermail/gennf-devel/} and as all
+\texttt{http://lists.berlios.de/pipermail/ gennf-devel/} and as all
 commit mails were sent to and many discussions took place on the list
 it reads like a (not properly edited, though) logbook of the project.
+
 
 \subsection{Designing and planning the implementation}
 
@@ -325,12 +336,12 @@ milestones. The reason for this was twofold: Firstly, it took some
 time to get the goals of the project straight. Secondly, we had the
 problem that among the three developers was one (Florian Lorenzen) who
 had to do most of the work until the mid of February 2006 and two
-others (hence Hannes Mehnert and Fabian Otto) who would not start
+others (Hannes Mehnert and Fabian Otto, hence) who would not start
 intensive work before that point of time. That constrained us to plan
 a handing over of the code at around the middle of February in a
 defined state.
 
-Having this discussed it was made up the plan, that the basic
+Having discussed this it was made up the plan, that the basic
 operations for the handling of distributed repositories should be
 protypically implemented until then. The directory structure, the code
 signing and the user-interface should be built on top of this during the
@@ -343,71 +354,77 @@ completed on January 3, 2005.
 A more in depth description of the requirements of the code signing
 was written mid of November.
 
-Our schedule then looked like this: \bigskip
+Our schedule then looked like shown in table \ref{schedule}.
 
-\begin{center}
-  \begin{tabular}{|p{.3\textwidth}|p{.6\textwidth}|}
-    \hline
-    \textmd{When} & \textmd{What} \\
-    \hline\hline
-    Nov. 15, 2005 to Jan. 1, 2006 &
-    Getting familiar with the code of \textsc{metacvs}
-    and drafting a design for distributiveness and signing. \\
-    \hline
-    Dec. 15, 2005 to Jan. 1 2006 &
-    Porting \textsc{metacvs} to \textsc{sbcl}. \\
-    \hline
-    Jan. 9 to Feb. 19, 2006 & Prototypic implementation of
-    distributed repositories (by Florian Lorenzen). \\
-    \hline
-    Jan. 24 to Jan. 30, 2006 & Preparation of the intermediate
-    presentation. \\
-    \hline
-    Feb. 20 to Mar. 31, 2006 & Implementation of the code signing
-    and the directory structure (by Hannes Mehnert and Fabian Otto). \\
-    \hline
-    Apr. 1 to Apr. 6, 2006 & Finishing the project's report
-    and preparing the presentation for final colloquium. \\
-    \hline
-    Apr. 11, 2006, 14:00 & Final colloquium, 20 minutes talk. \\
-    \hline
-  \end{tabular}
-\end{center}
+\begin{table}
+  \begin{center}
+    \begin{tabular}{@{}|@{\hspace{0.01\textwidth}}p{0.38\textwidth}
+        @{\hspace{0.01\textwidth}}|@{\hspace{0.01\textwidth}}
+        p{0.56\textwidth}@{\hspace{0.01\textwidth}}|@{}}
+      \hline
+      \textmd{When} & \textmd{What} \\
+      \hline\hline
+      Nov. 15, 2005 to Jan. 1, 2006 &
+      Getting familiar with the code of \textsc{metacvs}
+      and drafting a design for distributiveness and signing. \\
+      \hline
+      Dec. 15, 2005 to Jan. 1 2006 &
+      Porting \textsc{metacvs} to \textsc{sbcl}. \\
+      \hline
+      Jan. 9 to Feb. 19, 2006 & Prototypic implementation of
+      distributed repositories (by Florian Lorenzen). \\
+      \hline
+      Jan. 24 to Jan. 30, 2006 & Preparation of the intermediate
+      presentation. \\
+      \hline
+      Feb. 20 to Mar. 31, 2006 & Implementation of the code signing
+      and the directory structure (by Hannes Mehnert and Fabian Otto). \\
+      \hline
+      Apr. 1 to Apr. 6, 2006 & Finishing the project's report
+      and preparing the presentation for final colloquium. \\
+      \hline
+      Apr. 11, 2006, 14:00 & Final colloquium, 20 minutes talk. \\
+      \hline
+    \end{tabular}
+  \end{center}
+  \caption{The project's schedule as of end of November 2005. \label{schedule}}
+\end{table}
 
 \subsection{Throw over of the plan}
 
-On March 10, the team received a mail message from Hannes Mehnert that he
-quits the project due to more important things to do. As he had not written
-a single line of code (apart from some \TeX-code in section \ref{codesigning})
-there is nothing for someone else has to take over.
+On March 10, the team received a mail message from Hannes Mehnert that
+he quits the project due to more important things to do. As he had not
+written a single line of code (apart from some \LaTeX-code in section
+\ref{codesigning}) there is nothing for someone else has to take over.
 
-After talking to Steffen Evers we decided to throw out the Code Signing
+After talking to Steffen Evers we decided to throw out the code signing
 part of the project as this was mostly Hannes Mehnert's part.
 
-\subsection{Working on \textsc{metacvs}}
+
+\subsection{Working on {\sc metacvs}}
 
 As we decided to extend \textsc{metacvs} we started investigating the
-code of version 1.0.13 in December 2005.
+code of \textsc{metacvs} version 1.0.13 in December 2005.
 
 The system is written in \textsc{clisp} \cite{Clis06}, a particular
 \textsc{common~lisp} implementation. For the code signing part we
-wanted to rely on the \textsc{gpgme} \cite{Gnup06} library. For this reason
-including \textsc{c}-libraries was an important issue. At some point
-in the mid of December we decided to use \textsc{sbcl} \cite{Sbcl06} as the
-\textsc{lisp} implementation of choice because it supports
-\textsc{uffi} \cite{Uffi06},
-which is a cross-platform foreign function interface,
-and is less clumsy than \textsc{clisp} at some points.
+wanted to rely on the \textsc{gpgme} \cite{Gnup06} library. For this
+reason including \textsc{c}-libraries was an important issue. At some
+point in the mid of December we decided to use \textsc{sbcl}
+\cite{Sbcl06} as the \textsc{lisp} implementation of choice because it
+supports \textsc{uffi} \cite{Uffi06}, which is a cross-platform
+foreign function interface, and is less clumsy than \textsc{clisp} at
+some points.
 
 This implied porting \textsc{metacvs} to \textsc{sbcl}. After close
 looks on the implementation dependent parts of the code it was clear
-that most of them could be replaced by a portable library called
-\textsc{osicat} \cite{Osic06}, which is a high level \textsc{posix} interface.
-Inclusion of this library would make the code cleaner and more
-portable. Furthermore, we decided that the current build system of
-\textsc{metacvs} is very clumsy and that it should be replaced by the
-widely used \textsc{asdf}-package \cite{Asdf06} to compile and load
-\textsc{common~lisp} software.
+that most of them could be replaced by portable library
+\textsc{osicat} \cite{Osic06}, which is a high level \textsc{posix}
+interface.  Inclusion of this library would make the code cleaner and
+more portable. Furthermore, we decided that the current build system
+of \textsc{metacvs} is too clumsy and that it should be replaced by
+the widely used \textsc{asdf}-package \cite{Asdf06} to compile and
+load \textsc{common~lisp} software.
 
 The system was ported to \textsc{sbcl} at the end of December 2005.
 This turned out to be a waste of time some days later:
@@ -415,23 +432,23 @@ This turned out to be a waste of time some days later:
 After the specification for the distributed repositories was finished,
 it turned out, that \textsc{metacvs} is to tightly written around
 \textsc{cvs} to easily incorporate the modifications required for the
-concept of changes. For the distributed repositories and the its
-central concept of changes a clean backend abstraction, i.~e. a
-\textsc{cvs} abstraction, was required. The reason is that quite a
-different development model than \textsc{cvs}'s model should be
-realised. \textsc{metacvs} did not change the development model in any
-way but just improved \textsc{cvs} at some points.  The result of this
-philosophy ws that basically a wrapper for each \textsc{cvs} operation
+concept of changes. For the distributed repositories and its central
+concept of changes a clean backend abstraction, i.~e. a \textsc{cvs}
+abstraction, was required. The reason is that quite a different
+development model than \textsc{cvs}'s model should be realised.
+\textsc{metacvs} did not change the development model in any way but
+just improved \textsc{cvs} at some points. The result of this
+approach was that basically a wrapper for each \textsc{cvs} operation
 was provided and that the executable was called when needed.
 
-Unfortunately, \textsc{metacvs} has no inner interface that we could
+Unfortunately, \textsc{metacvs} has no interior interface that we could
 build on to benefit from its improvements over \textsc{cvs} and at the
 same time abstracting from the sandbox centered development model. The
 only possibility would have been wrapping the program once again which
-would not be a very clean solution.
+would not be a very satisfying solution.
 
-So we sorted out the aspect of \textsc{metacvs} that were very good
-ideas, which are basically the indirection layer for directory
+So, we sorted out the aspect of \textsc{metacvs} that are good
+ideas, which is basically the indirection layer for directory
 structure, and decided to implement a protype from scratch
 incorporating these ideas (and code fragments from \textsc{metacvs} as
 far as possible). At this point it was clear that a patch for
@@ -444,61 +461,58 @@ had sticked with \textsc{clisp} there would have been some quirks to
 ship around but it would have been clear that patching was not
 possible at least two weeks earlier. Unlucky enough those two weeks
 were the academic holidays -- and there would have been plenty of time
-to do useful codeing, instead of writing a superflouos port.
+to do useful codeing, instead of writing a superfluous port.
 
 At beginning of January 2006 the codeing of a prototype to implement
 the distribution model began.
+
 
 \section{Implementation}
 
 The implementation phase started at begin of January 2006.
 
+
 \subsection{The distribution prototype}
 
-The protoype for distribute repositories should provide all necessary
+The protoype for distributed repositories should provide all necessary
 basic operations as described in section \ref{distrib} but only for
 flat repositories, i.~e. without any directory structure. The idea
 behind this was that all structure would be set on top of this as it
-is done in \textsc{metacvs}.
-
-The first task for this part was to find a suitable backend
-abstraction. This turned out to be much more difficult than expected,
-again because \textsc{cvs} imposes very strict rules on how the
-development takes place. All those difficulties could somehow be
-circumvented but it only with heavy traffic between the repository and
-the client and massive use of temporary harddisk storage.
+is done in \textsc{metacvs}. Directory structure and distribution are
+somewhat orthogonal to each other.
 
 It now became clear why there is, apart from \textsc{dcvs}, no other
 distributed version management system which builds on top of
 \textsc{cvs}: \textsc{cvs} is to powerful for just using it as a store
-and retrieve engine and network transport. Just using it for this
+and retrieve engine and network transporter. Just using it for this
 purpose needs a lot of tricks. Despite this insight \textsc{cvs} was
 not replaced on the one hand side due to time constraints and on the
 other hand side because it is widely available and indeed handles the
 network for us.
 
-But a more satisfing solution would have been to take an
+But a more satisfing solution would have been to take a
 transportation protocol like HTTP or FTP and some simpler software to
 store the revisions of files.
 
-Storeing revisions of files introduces the next problem we had because
-of our sticking to \textsc{cvs}. Our concept of distribution heavily
-relies on merging different revisions of files from different
-branches. It turned out that \textsc{cvs} mergeing capabilities could
-not be used for this because they only handle merges of files that
-live in the same repository. Consequently, this merging had to be done
-by ourselves. We use \textsc{cl-difflib} \cite{Cldi06} to compute differences
-between files and some self-written routines to use this information
-to merge two files. This is not a bad solution but it costed time to
-implement of course. It also introduces the necessity to do the
-merging ourselves even in situations in which we could have used
-\textsc{cvs} because it is very undesireable to have two different
-merging algorithms -- one we can control and one we cannot -- in one
-piece of software.
+Storeing revisions of files introduced the next problem because of our
+sticking to \textsc{cvs}. Our concept of distribution heavily relies
+on merging different revisions of files from different branches. It
+turned out that \textsc{cvs} mergeing capabilities could not be used
+for this because they only handle merges of files that live in the
+same repository. Consequently, this merging had to be done by
+ourselves. We use \textsc{cl-difflib} \cite{Cldi06} to compute
+differences between files and some self-written routines to use this
+information to merge two files. This is not a bad solution but it
+costed time to implement of course. It also introduces the necessity
+to do the merging ourselves even in situations in which we could have
+used \textsc{cvs} because it is very undesireable to have two
+different merging algorithms -- one we can control and one we cannot
+-- in one piece of software.
 
 Again, it would have been better to work without \textsc{cvs} and
 using simpler software to store the revisions of files like
 \textsc{common~lisp} versions of \texttt{diff} and \texttt{patch}.
+
 
 \subsection{Structuring} 
 
@@ -513,25 +527,26 @@ prototype, we first implemented reading and writing of
 reprensentation of a single mapping differed in using a modern class
 based method.
 
-The functions for creating and syncing a directory structure were
-written without the help of \textsc{metacvs} code. The functions of
-\textsc{metacvs} relied on \textsc{clisp}'s FFI. While
-\textsc{metacvs} offers suport for softlinks we decided that this
-feature has less priority. A simple error is signaled when a
-\texttt{MAP}-files with information for symbolic links is read.
+The functions for creating and synchronizing a directory structure
+were written without the help of \textsc{metacvs} code. The functions
+of \textsc{metacvs} relied on \textsc{clisp}'s foreign function
+interface. Although \textsc{metacvs} offers suport for softlinks we
+decided that this feature has lower priority. Simply an error is
+signaled when a \texttt{MAP}-files with information for symbolic links
+is read.
 
-The next step was to combine both parts so that the distribution would
-honour \texttt{MAP}-files in its repository. The \texttt{MAP}-file are
+The next step was to combine both parts such that the distribution would
+honour \texttt{MAP}-files in a repository. The \texttt{MAP}-files are
 having two sides, since they are versioned meta data. It turned out
 that we often had to debug the intersection between these parts. We
 had e.~g. to change the representation of F-files. At first we stored
 the meta directory and the branch number in an F-file entry. This made
-the syncing and creating of the directory structure very simple.  But
-merging \texttt{MAP}-file would have gotten more complicated since
+the syncing and creating of the directory structure very simple. But
+merging \texttt{MAP}-files would have been more complicated since
 each branch has a unique number. It was then decided to just store the
 F-file name in the \texttt{MAP}-file.
 
-After merging the two parts we decided to implement a simple frontend.
+After joining the two parts we decided to implement a simple frontend.
 By using a macro as abstraction it is now straightforward to extend
 the frontend with new subcommands. It generates from a Lisp
 $\lambda$-list like structure a command line parser and hooks the
@@ -568,28 +583,30 @@ checkout module [--root|-r root] [--branch|-b branch] [--change|-c change]
 
 Check out the indicated branch. If no branch is given 1 is taken.
 
-$ gennf checkout module-foo --root /some/where/ -b 1 -c 2 
+$ gennf checkout module-foo --root /some/where -b 1 -c 2 
 ...
 
 $ gennf add main.c
 ...
 \end{verbatim}}
 
-To test the new frontend we wrote a small shell based test suite. It
-allowed us to test new features while changes to the code kept stable.
-As much as
+To test the new frontend we wrote a small shell based test suite.
+
+\emph{WHAT DOES THIS MEAN?? It allowed us to test new features while
+  changes to the code kept stable.  As much as}
+
 
 \subsection{Dropped features}
 
 Due to time constraints and the technical difficulties described in
-previous sections quite a huge number of features are not
-implemented in the prototype. Unfortunately, some very fundamental
-operations are among them.
+previous sections quite a huge amountfunctionality is not implemented
+in the prototype. Unfortunately, some very fundamental operations are
+among them.
 
 Functionality which is not implemented includes:
 
 \begin{itemize}
-\item Recording and browsing of log comments.
+\item Recording and browsing of log messages.
 \item Generating change sets (lots of changes bundled together) to
   efficiently merge them into another branch.
 \item Calculation and browsing of differencs between any two changes
@@ -615,38 +632,39 @@ some (though weak) kind of locking but one repository action of
 \section{Review}
 
 Several critical issues arised during development, and some of them
-were already mentioned in the previous sections.
-This sections again summarizes what went wrong and, furthermore, tries
-to analyze why things went wrong and if we could have circumvented
-some dead end developments.
+were already mentioned in the previous sections. This sections again
+summarizes what went wrong and, furthermore, tries to analyze why
+things went wrong and if we could have circumvented some dead end
+developments.
 
 
 \subsection{Investigation phase}
 
 From a review perspective one can state that we have overlooked some
-important things during our project's investigation phase, i. e.
+important things during our project's investigation phase, i.~e.
 during the first half of November 2005: There is at least one tool,
 namely \textsc{gnu arch}, which provides at least the functionality
-intended in our distribution approach. That is, our ideas are
-not new in any way, the only difference is that we tried a conservative
-extension of \textsc{cvs} to utilize common infrastructure.
-If we had realized \textsc{gnu arch}'s functionality right from the
-start we had solely concentrated on Code Signing (or had done an
-entirely different project) as the Code Signing support in \textsc{gnu arch}
-is somewhat weaker than our intended approach. As Hannes Mehnert
-left the team this is obsolete anyway.
+intended in our distribution approach. That is, our ideas are not new
+in any way, the only difference is that we tried a conservative
+extension of \textsc{cvs} to utilize common infrastructure.  If we had
+realized \textsc{gnu arch}'s functionality right from the start we had
+solely concentrated on code signing (or had done an entirely different
+project) as the code signing support in \textsc{gnu arch} is somewhat
+weaker than our intended approach. As Hannes Mehnert left the team
+this is obsolete anyway.
 
-Furthermore, we have spent too much time to design the distribution model.
-It would have been better to explore the possibilities of realisation
-much earlier due to the overall time period of one semester. Hence,
-a notably substantial part of our project has a conceptual nature.
+Furthermore, we have spent too much time to design the distribution
+model. It would have been better to explore the possibilities of
+realisation much earlier due to the overall time period of one
+semester. Hence, a notably substantial part of our project has a
+conceptual nature.
+
 
 \subsection{Technical issues}
 
 Our decision to base on \textsc{cvs} (and also on \textsc{metacvs})
-implicated many technical
-undesirable issues. Most of them appeared already in the previous
-section and are summarized below:
+implicated many technical undesirable issues. Most of them appeared
+already in the previous section and are summarized below:
 
 \begin{itemize}
 \item Extending \textsc{metacvs} was more difficult than expected
@@ -658,45 +676,60 @@ section and are summarized below:
   functionality routines which have precisely defined effects reulted
   in massive network bandwidth (at least for remote repositories) and
   heay usage of temporary hard disk space and copying of files.
+  The heavy network load and diskspace usage also results in very poor
+  performance. Usually, this would not be a big issue because it is in
+  general possible to optimize the performance bottlenecks in some
+  piece of software by exchangeing them with careful coded faster
+  procedures after identifying them. But in our case consequences of
+  exchangeing the backend and introduction of cacheing (to reduce the
+  network load) had consequences in the whole implementation (cf. also
+  next item), i.~e. local ooptimizations are not easily possible.
 \item One of our design goals was to avoid the necessity to store
   complete repositories in the user's workspace. This again results in
   heavy use of network bandwidth. Systems like \textsc{darcs} or
-  \textsc{gnu arch} avoid this high network load by strong usage of
+  \textsc{gnu~arch} avoid this high network load by strong usage of
   cacheing. The motivation is to replace (expensive) network bandwidth
-  by (cheap) hard disk storage. We have to admit that this statement
-  can not be discarded.
+  by (cheap) hard disk space. We have to admit that this statement
+  can not be neglected.
 \item \GENNF{} has to merge revisions of files very often. We could
   not use the \textsc{cvs} merge capabilities in all cases and had to
   replace them by self-written routines. Implementing those routines
-  consumed a considerable amount of time.  Furthermore, we implemented
+  consumed a considerable amount of time. Furthermore, we implemented
   only a two-way merge when performing a merge of branches because the
-  computation of the common ancestor for the general case is quite a
-  complex issue.  As a result, \GENNF{} is quite bad at merging which
-  is very undesireable because it is a very central operation.
+  computation of the common ancestor for the general case is a more
+  complex issue. As a result, \GENNF{} is quite bad at merging which
+  is very undesireable because it is the central operation.
 \end{itemize}
 
 
 \chapter{Concepts and desgin}
 
-\section{Code Signing \label{codesigning}}
 
-As Hannes Mehnert left the team Code Signing is not implemented and
+The following chapter describes the ideas which are partly implemented
+in the \GENNF{} prototype. As already stated in the first part of this
+report we consider the distribution model as not too suitable for real
+work for practical reasons; the ideas may be interesting, though.
+
+
+\section{Code signing \label{codesigning}}
+
+As Hannes Mehnert left the team code signing is not implemented and
 this section is to be read as a draft what could have been done.
 
 
 \subsection{Motivation}
 
-Currently most version management systems don't use any digital
+Currently most version management systems do not use any digital
 signatures for code (apart from \textsc{gnu arch} \cite{Gnua06}).
-Authentication is done
-by an own password server (\textsc{cvs}: pserver), via a \textsc{ssh} public
-key (\textsc{cvs}, \textsc{subversion} \cite{Subv06}, \textsc{darcs},
-\textsc{metacvs}) or via a digitally signed mail (\textsc{darcs}).
+Authentication is done by an own password server (\textsc{cvs}:
+pserver), via a \textsc{ssh} public key (\textsc{cvs},
+\textsc{subversion} \cite{Subv06}, \textsc{darcs}, \textsc{metacvs})
+or via a digitally signed mail (\textsc{darcs}).
 
-On the other hand, data integrity is not supported.  Every user has to
+On the other hand, data integrity is not supported. Every user has to
 trust the repository server to be secure from a possible hacker
-breaking into it.  A hacker with access to the repository is able to
-compromise the software by unperceived insert of a backdoor.
+breaking into it. A hacker with access to the repository is able to
+compromise the software by unperceived insertion of a backdoor.
 
 In the past, several big repositories have been hacked, including
 KDE\footnote{
@@ -706,9 +739,8 @@ SourceForge, \texttt{jabber.org}.
 
 \subsection{Vision}
 
-A developer using \textsc{gennf} should be able to sign his patches
-by an already known-to-work and widely deployed public key
-cryptosystem.
+A developer using \textsc{gennf} should be able to sign his patches by
+an already known-to-work and widely deployed public key cryptosystem.
 
 An auditor should be able to look at any number of parts of the code
 and sign them digitally after a successful code audit.
@@ -723,25 +755,27 @@ Thus, the trust is moved from the single point of failure (the
 repository server) to every developer (able to protect his private
 key, or otherwise revoke his key).
 
+
 \subsection{Workflows}
 
 A possible workflow for the developer would be that he first starts
 coding, fixing a bug or implementing a new feature. When he is done
-with that, during the commit he'll be asked whether he wants to sign
+with that, during the commit he will be asked whether he wants to sign
 this commit.  If he chooses to sign, he is asked for the passphrase
-protecting his private key. After successfully verification of the
+protecting his private key. After successful verification of the
 passphrase, the commit will be signed and transferred to the server.
 Authentication could probably also be done via the signature on the
-code, so no user management is anymore needed on the server, only a
+code, so no user management is needed anymore on the server, only a
 public keyring including all developer keys, but possibly anyone can
 commit, and the user has to choose who to trust during checkout.
 
 A user with access to the repository checking out can verify the
-checked out code, and see how safe it is.  Via \texttt{gennf blame}
+checked out code, and see how secure it is. Via \texttt{gennf blame}
 he should be able to look which lines are at which trust levels.
 
 Via \texttt{gennf sign} a code auditor (or user) should be able to
 sign parts of code (line-, file-based).
+
 
 \subsection{Implementation overview}
 
@@ -750,8 +784,8 @@ sign parts of code (line-, file-based).
 \item Unique patchset number, like in subversion, to match a signature
   to a revision.
 \item Virtual patchsets describing regions in source files for
-  auditor.
-\item Decide where to store signatures.  One possibility is to provide a
+  auditors.
+\item Decide where to store signatures. One possibility is to provide a
   new meta file containg the signatures, what lines and revisions they
   apply to. Putting it this way, audits can be handled in the same
   mannner. Change and audit signatures have to distinguished by some
@@ -764,6 +798,7 @@ sign parts of code (line-, file-based).
 \item Implement more \textsc{gennf} commands like \texttt{verify},
   \texttt{sign}.
 \end{itemize}
+
 
 \subsection{Implementation detail}
 
@@ -782,11 +817,13 @@ Some parts should be configurable for \textsc{gennf} code signing, a
 default key ID for the developer, a public keyring file for
 authentication on the repository server, and possibly other things.
 
-Probably an \textsc{emacs}-integration for \textsc{gennf} including
-the audit-part would be useful.
-
 
 \section{Distributed repositories \label{distrib}}
+
+This section gives a detailed overview of the distribution model
+underlying \GENNF{}. A rather abstract description as well an in depth
+example of usage is given.
+
 
 \subsection{Outline}
 
@@ -798,10 +835,10 @@ following features:
   an already existing repository which means to create a branch at
   another site. It is not necessary for this new site to store the
   whole history of the project: \textsc{gennf} will establish a link
-  between the two.  Whenever someone at the new repository requests a
+  between the two. Whenever someone at the new repository requests a
   version not locally available, it will be fetched from the original
   site. It is of course possible to replicate large parts of or the
-  whole history to improve performance or redundancy. However,
+  whole history to improve performance or yield redundancy. However,
   replicated parts of the history still know where they come from.
 
 \item The different lines of development can be merged together.
@@ -809,9 +846,10 @@ following features:
   mechanism of merge is used to create branches. In fact, a merge is
   the only basic operation \textsc{gennf} knows about, apart from
   ordinary commits (which do not come from another site but out of
-  some developer's head).  Both -- commits and merges -- are called
+  some developer's head). Both -- commits and merges -- are called
   changes.
 \end{itemize}
+
 
 \subsection{Modelling distributiveness}
 
@@ -826,7 +864,7 @@ development branches the project consists of.
 A \emph{branch} $b$ is an ordered pair $(\beta, s)$ with $\beta$ being
 a \emph{branch identifier} and $s$ being a sequence of changes.
 
-A \emph{change} $C$ is the building block of repositories.  Addition
+A \emph{change} $C$ is the building block of repositories. Addition
 of changes to a repository is the basic modification of repositories.
 
 A change can be a commit or a merge.
@@ -862,31 +900,34 @@ the fifth links this change to its origin.
 
 The origin $o$ is a 4-tuple $(\nu, \beta, \alpha, \varrho)$. The
 meaning of $\nu$, $\beta$, $\alpha$ is the same as for commits. But in
-this case they establish a link to a (possibly remote) pchange with
+this case they establish a link to a (possibly remote) change with
 number $\nu$ on branch $\beta$ reachable via access identifier
 $\alpha$.
 
 $\varrho$ indicates if the change-part of a merge $\varrho$eplicates
 the commit part of its origin. In this case traversing history along
 the merge's branch leads to the same result as traversing the origin's
-history -- at least for the one commit.  This feature is useful as
-merges are used for inheritance.  $\varrho$ is not necessary for
-inheritance to work but is convenient as it indicates that traversing
-the origin's history is the same as traversing the merge's history.
+history -- at least for one commit. This feature is useful as merges
+are used for inheritance. $\varrho$ is not necessary for inheritance
+to work but is convenient as it indicates that traversing the origin's
+history is the same as traversing the merge's history.
 
-changes, merges and commits can be implemented as classes like the
-following diagram shows:
+Changes, merges and commits can be implemented as classes like shown
+in figure \ref{classes}.
 
-\begin{center}
-  \setlength{\unitlength}{1mm}
-  \begin{picture}(25, 50) \put(0,
-    40){\framebox(25,10){\texttt{change}}} \put(12.5, 30){\vector(0,
-      1){10}} \put(0, 20){\framebox(25,10){\texttt{commit}}}
-    \put(12.5, 10){\vector(0, 1){10}} \put(0, 0){\framebox(25,
-      10){\texttt{merge}}}
-  \end{picture}
-\end{center}
-
+\begin{figure}
+  \begin{center}
+    \setlength{\unitlength}{1mm}
+    \begin{picture}(25, 50)
+      \put(0, 40){\framebox(25, 10){\texttt{change}}}
+      \put(12.5, 30){\vector(0, 1){10}}
+      \put(0, 20){\framebox(25, 10){\texttt{commit}}}
+      \put(12.5, 10){\vector(0, 1){10}}
+      \put(0, 0){\framebox(25, 10){\texttt{merge}}}
+    \end{picture}
+  \end{center}
+  \caption{Class diagram for the repository building blocks. \label{classes}}
+\end{figure}
 
 \subsubsection{Properties of the basic notions}
 
@@ -1088,7 +1129,7 @@ is an ordinary file or \texttt{:LINK} to version symbolic links.
 
 The main goal of the \texttt{MAP}-file is to resolve the trouble
 \textsc{cvs} has with directories and file moves. The entire project
-hierarchy is flattened (my guess is that the ``F'' in the F-files
+hierarchy is flattened (our guess is that the ``F'' in the F-files
 stands for \emph{flat}) and structure is provided by the
 \texttt{MAP}-file.
 
@@ -1151,7 +1192,7 @@ modifies the mappings. A move conflict appears as a conflict in the
 \texttt{MAP}-file.
 
 As gotcha, \texttt{MAP} enables version control of links and
-additional bits like the executable bit.
+additional pieces like the executable bit.
 
 In later sections the \texttt{MAP}-file will be shown as a a map --
 omitting the \texttt{MCVS}-path-prefix and quotation marks -- like
@@ -1163,6 +1204,7 @@ this:
       \mathtt{F-}b &\mapsto& d_1/f_{12} \\
       &\vdots & \\
       \mathtt{F-}c &\mapsto& d_1/f_{1k} \\
+      &\vdots & \\
       \mathtt{F-}d &\mapsto& d_m/f_{m1} \\
       &\vdots & \\
       \mathtt{F-}e &\mapsto& d_m/f_{ml} \\
@@ -1191,12 +1233,12 @@ As said, a branch is $(\beta, s)$. To completely store a branch $s$
 has to be put somewhere. This will be done in a file $\mathtt{CHANGE}$
 which is just a list of changes (merges and commits) stored in
 reversed order that the last change is accessible as head of the list.
-This file is stored along with the branche's F-files in the
+This file is stored along with the branch's F-files in the
 branch-directory.
 
 To complete a repository, a file $\mathtt{BRANCH}$ is installed, which
 contains a list of existing branches in reversed order, i.~e. the
-branch created last is head of the list.  For each branch, its
+branch created last is head of the list. For each branch, its
 identifier $\beta$ ($nu$), a symbolic name ($sy$), a description
 ($de$) is stored.
 
@@ -1204,13 +1246,13 @@ identifier $\beta$ ($nu$), a symbolic name ($sy$), a description
 \subsection{Case study}
 
 This section discusses in depth a concrete example to demonstrate the
-abstract model in a more implementation-close fashion.
+abstract model in a more application-close fashion.
 
 \subsubsection{The situation}
 
 Imagine a developer $\mathnormal{Ensel}$ (or a team of developers if
 you prefer) writing some compiler in Lisp. Later, others -- may their
-name be $\mathnormal{Krete}$ -- get interested in and join in.  They
+name be $\mathnormal{Krete}$ -- get interested and join in.  They
 decide to have their own repository. The interaction of the two
 repositories is presented in the following.
 
@@ -1274,8 +1316,8 @@ easier access and to not clutter $\mathnormal{Ensel}$'s repository
 with intermediate commits (which likely break the code) a new
 repository $r'$ is installed. The first action is
 $\underline{\triangledown}_1 c_1$, i.~e. to inherit the last state of
-$\mathnormal{Ensel}$'s code (which is the first too at this
-time\ldots).
+$\mathnormal{Ensel}$'s code (which is the first at this
+time, too\ldots).
 
 Examination of $r'$ retrieves this information:
 
@@ -1283,8 +1325,8 @@ Examination of $r'$ retrieves this information:
 \item $r=\{(\beta', \langle m'_1\rangle)\}$
 \item $(\beta',\langle m'_1\rangle)\ :\ \mathnormal{branch}$
   \begin{eqnarray*}
-    \mathnormal{sy}\ \beta' &=& \mbox{``optimizer''} \\
-    \mathnormal{de}\ \beta' &=& \mbox{``includes tail-recursion elimination''} \\
+    \mathnormal{sy}\ \beta' &=& \mbox{``Optimizer''} \\
+    \mathnormal{de}\ \beta' &=& \mbox{``Includes tail-recursion elimination''} \\
     \mathnormal{nu}\ \beta' &=& 1
   \end{eqnarray*}
 
@@ -1497,7 +1539,7 @@ Two kinds of operations have to be distinguished:
   an operation.  Branching and merging are such operations.
 \item \emph{Sandbox} operations may cause changes in the repository
   but not necessarily have to but they either change the sandbox or
-  changes in the sandbox effect the repository. Update, checkin belong
+  changes in the sandbox effect the repository. Update, commit belong
   to this category.
 \end{itemize}
 
@@ -1557,6 +1599,7 @@ changes to be replicated starting with the oldest one. For all changes
 incorporated $\varrho$ will hold.
 
 \subsubsection{merge}
+
 Merging is -- like branching -- a repository only operation.
 
 Merging is essentially a checkin of a certain change to a certain
@@ -1572,7 +1615,7 @@ branch without a sandbox and creating a merge instead of a commit:
   the \texttt{CHANGE}-file and all files including the
   \texttt{MAP}-file are checked in.
 \item If conflicts arise the user has to resolve them in the temporary
-  sandbox and the merge has to be restarted.
+  sandbox and the merge has to be finished up.
 \end{enumerate}
 
 \subsubsection{update}
@@ -1633,7 +1676,7 @@ conflicts.
 \end{thebibliography}
 
 \emph{All web page look ups were done on March 15, 2006.
-For some software packages a distinct version number is given. This is
-the version we used in our development, if none is given, the version
+For some software packages a particular version number is given. This is
+the version we used in our development, if none is given, the version number
 is irrelevant.}
 \end{document}

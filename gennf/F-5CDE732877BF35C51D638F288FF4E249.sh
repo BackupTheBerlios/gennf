@@ -18,13 +18,13 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-5CDE732877BF35C51D638F288FF4E249.sh,v 1.2 2006/04/04 16:27:11 florenz Exp $
+# $Id: F-5CDE732877BF35C51D638F288FF4E249.sh,v 1.3 2006/04/06 08:47:13 florenz Exp $
 #
 # Script to upload PDF files to the gennf homepage at
 # http://gennf.berlios.de/.
 #
 
-FILES=$@
+FILES="$@"
 
 if [ -z "$FILES" ]; then
     echo "No files given. Abort."
@@ -35,12 +35,13 @@ SERVER=shell.berlios.de
 ROOT=/home/groups/gennf/htdocs
 
 if [ -n "$BERLIOS_USER" ]; then
-    BERLIOS_USER=${$BERLIOS_USER}@
+    BERLIOS_USER="$BERLIOS_USER@"
 fi
 
 for f in $FILES; do
     echo "Upload of $f."
-    scp $f $BERLIOS_USER$SERVER:$ROOT
-    fn=`echo $f | awk -F/ '{ print $NF; }`
-    ssh $BERLIOS_USER$SERVER "cd $ROOT; chmod 664 $fn"
+    scp $f "$BERLIOS_USER$SERVER:$ROOT"
+    fn=`echo $f | awk -F/ '{ print $NF; }'`
+    ssh "$BERLIOS_USER$SERVER" "cd $ROOT; chmod 664 $fn"
 done
+
