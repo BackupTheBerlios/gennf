@@ -296,6 +296,9 @@
   "MCVS/F-D636EE3C0CFBE5D4BF3AE6987E95B71A.fig"
   "doc/beispiel2.fig")
  (:FILE
+  "MCVS/F-D668EC7CE645733E2A96E6946E1C4CA2.tex"
+  "doc/demo-ueberblick.tex")
+ (:FILE
   "MCVS/F-DA9E90AB46860DC75ED36F2D7CAFE3BF.lisp"
   "src/error.lisp")
  (:FILE

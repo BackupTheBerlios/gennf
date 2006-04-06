@@ -16,7 +16,7 @@ MOD1_FILES="fd.lisp send-more-money.lisp"
 MOD2_DIR=$PWD/data/fd.3
 MOD2_FILES="fd.asd"
 
-MODULE=fd
+MODULE=find
 WORK=work
 
 DESTDIR=$PWD
