@@ -517,7 +517,9 @@ using simpler software to store the revisions of files like
 \subsection{Structuring} 
 
 Section \ref{distrib} describes the general structure of the
-\texttt{MAP}-file.
+\texttt{MAP}-file. \GENNF{} supports operations like renaming, moving
+and deleting of files only by using the explicit subcommands delete
+and move. 
 
 We chose the same representation for \texttt{MAP}-files as
 \textsc{metacvs} to support a possible import of projects. By starting
@@ -590,11 +592,14 @@ $ gennf add main.c
 ...
 \end{verbatim}}
 
-To test the new frontend we wrote a small shell based test suite.
-
-\emph{WHAT DOES THIS MEAN?? It allowed us to test new features while
-  changes to the code kept stable.  As much as}
-
+  While testing the developed frontend we noticed a strange behaviour
+  of \GENNF{} when using \textsc{emacs} for editing files.
+  \textsc{emacs} renames the original file by appending a \~ and then
+  copies the file with its original file name. All changes are now
+  made to the copy of the controlled file. \textsc{emacs} behaves
+  this way because it does not recopgnize that the file is under
+  version control. If \textsc{emacs} recognizes a know version tree it will not
+  show this behavior.
 
 \subsection{Dropped features}
 
