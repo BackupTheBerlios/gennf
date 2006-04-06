@@ -53,17 +53,10 @@ Bernd Mahr, Steffen Evers}
 
 \begin{document}
 
-\AtBeginSection[] {
-  \begin{frame}
-    \frametitle{"Ubersicht}
-    \tableofcontents[currentsection]
-  \end{frame}
-}
-
-% \AtBeginSubsection[] {
+% \AtBeginSection[] {
 %   \begin{frame}
 %     \frametitle{"Ubersicht}
-%     \tableofcontents[currentsubsection]
+%     \tableofcontents[currentsection]
 %   \end{frame}
 % }
 
@@ -74,4 +67,138 @@ Bernd Mahr, Steffen Evers}
   \tableofcontents
 \end{frame}
 
+\section{Projekt}
+
+\begin{frame} \frametitle{Ziele}
+  \begin{block}{}
+    \begin{itemize}
+    \item Erweiterung von metacvs
+    \item Verteilung
+      \begin{itemize}
+      \item Nutzung mehrerer Repositories
+      \item Leichtes zusammen f"uhren von Repos.
+      \item CVS als Infrastruktur
+      \end{itemize}
+    \item CodeSignierung
+      \begin{itemize}
+      \item Sicherstellung der Codequellen
+      \item Signierung gesichteter Codezeilen
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame} \frametitle{Erreichtes}
+  \begin{itemize}
+  \item Verteilung
+  \item Eigenst"andiges Frontend f"ur CVS
+  \item Kommandozeilen Programm
+  \item Portables Common Lisp Projekt
+  \item portable Pfadnamenbibleothek
+  \end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{Ablauf}
+  \begin{block}{1. H"alfte}
+    \begin{description}
+    \item[Dezember] Planung
+    \item[Dezember] Portierung von MCVS nach SBCL
+    \item[Monat] Neuanfang: Eigengentwurf in SBCL
+    \item[Februar] Basisfunktionnalit"at Verteilung
+    \end{description}
+  \end{block}
+  \begin{block}{2. H"alfte}
+    \begin{description}
+    \item[Februar] Verzeichnisstruktur
+    \item[M"arz] Frontend, Verzeichnisstruktur
+    \item[April] Frontend, Tests, Schliff, Release v0.1
+    \end{description}
+  \end{block}
+\end{frame}
+
+\begin{frame} \frametitle{Probleme I}
+  \begin{block}{Recherche}
+    \begin{itemize}
+    \item Portierung von MCVS nach SBCL
+      \begin{itemize}
+      \item 
+      \end{itemize}
+    \item vorhandene verteilte Systeme
+      \begin{itemize}
+      \item Darcs
+      \item Mercurial
+      \item BZR (GNU Arch)
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+  \begin{block}{Mitgliederanzahlverringerung}
+    \begin{itemize}
+    \item Verlust der Codesignierung
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame} \frametitle{Probleme II}
+  \begin{block}{CVS}
+    \begin{itemize}
+    \item Zuviele unben"otigte Features
+    \item Teilw. schwer zu erreichende Eigenschaften
+    \item Merge f"ur unsere Zwecke ungeignet
+    \end{itemize}
+  \end{block}
+  \begin{block}{Konsequenzen}
+    \begin{itemize}
+    \item Lisp Diff Algorithmen (cl-difflib)
+    \item Benutzung temp. Plattenspeichers
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame} \frametitle{Ergebnis}
+  \begin{block}{Verteiltes Versionierungs System}
+    \begin{itemize}
+    \item Basis Funktionalit"at:
+      \begin{itemize}
+      \item add, move, delete
+      \item checkout, update, commit
+      \item branch, merge
+      \end{itemize}
+    \item Nachteile:
+      \begin{itemize}
+      \item Langsam
+      \item Hohe Netzwerklast
+      \item Fehlende Kommandos (diff, patch, log, etc)
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+ \frametitle{(make-instance 'data-structure)}
+ 
+ \begin{block}{Verteilung} 
+   \begin{description}
+   \item[Repository] Menge von Branches
+   \item[Branch] Sequenz von Changes
+   \item[Change] Commit oder Merge
+   \item[Merge] Zusammenf"uhrung von Branches
+   \item[Commit] Beitrag
+   \end{description}
+ \end{block}
+
+ \begin{block}{Struktur} 
+   \begin{description}
+   \item[210987] $\mapsto$ parser.lisp
+   \item[123456] $\mapsto$ tests/momo.lisp
+   \item[654321]  $\mapsto$ doc/folien.tex
+   \end{description}
+ \end{block}
+
+\end{frame}
+
+\section{Vorf"uhrung} 
+\begin{frame}
+  
+\end{frame}
 \end{document}
