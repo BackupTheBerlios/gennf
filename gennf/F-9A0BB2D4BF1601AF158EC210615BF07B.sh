@@ -36,5 +36,5 @@ rm -rf $MODULE
 
 tell "Merge branch from second repository in first."
 cd ..
-$GENNF merge fd --root-from $REPO2 --root-to $REPO1 \
+$GENNF merge $MODULE --root-from $REPO2 --root-to $REPO1 \
     --branch-from 1 --branch-to 1

@@ -12,7 +12,7 @@ cvs -d $REPO1 init
 cvs -d $REPO2 init
 
 tell "Setup module."
-$GENNF setup $MODULE --root $REPO1 --symbolic-name fd \
+$GENNF setup $MODULE --root $REPO1 --symbolic-name find \
     --description "Finite-domain-constraint-solver"
 
 tell "Create working directory."

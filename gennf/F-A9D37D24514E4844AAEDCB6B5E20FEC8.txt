@@ -1,0 +1,39 @@
+# demo-script.txt
+#
+
+# Repositories setzen.
+$ export REPO1=/home/...
+$ export REPO2=/home/...
+
+# Branch erzeugen.
+$ gennf branch find --root-from $REPO1 --root-to $REPO2 --branch 1
+
+# Den neuen Branch auschecken.
+$ gennf checkout find --root $REPO2
+
+# Dateien umbenennen im neuen Branch und hochschicken.
+$ cd find
+$ gennf move tests.lisp tests/tests.lisp
+$ gennf move sudoku.lisp tests/sudoku.lisp
+$ gennf move send-more-money.lisp tests/send-more-money.lisp
+
+# Sandbox umbenennen.
+$ cd ..
+$ mv find find.2
+
+# Ersten Branch auschecken.
+$ gennf checkout find --root $REPO1
+
+# Datei umbenennen und hochschicken.
+$ cd find
+$ gennf move tests.lisp fd-test.lisp
+$ gennf commit
+
+# Den zweiten Branch in den ersten Branch mischen.
+$ gennf merge find --root-from $REPO2 --root-to $REPO1 --branch-from 1
+  --branch-to 1
+
+# Das MAP-File reparieren und hochschicken.
+$ cd <tmp>
+$ vi ...
+$ gennf merge-finish

@@ -252,6 +252,9 @@
   "MCVS/F-A96CEFA9ED332E6690F0391EB081D4AD.asd"
   "demo/data/conflicts-resolved/fd.asd")
  (:FILE
+  "MCVS/F-A9D37D24514E4844AAEDCB6B5E20FEC8.txt"
+  "doc/demo-script.txt")
+ (:FILE
   "MCVS/F-ABFCD555D3597D76F2AE7BB47DAD0C07"
   "sbcl-port/unix-bindings/Makefile")
  (:FILE
