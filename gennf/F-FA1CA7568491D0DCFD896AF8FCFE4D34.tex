@@ -1,27 +1,11 @@
 % \documentclass[german, handout]{beamer}
 \documentclass[german, presentation]{beamer}
 
-\newcommand{\GPG}{\textsc{gpg}}
-\newcommand{\PGP}{\textsc{pgp}}
-\newcommand{\SBCL}{\textsc{sbcl}}
 \newcommand{\GENNF}{\textsc{gennf}}
-\newcommand{\METACVS}{\textsc{metacvs}}
-\newcommand{\CVS}{\textsc{cvs}}
-\newcommand{\DARCS}{\textsc{darcs}}
-\newcommand{\GNUARCH}{\textsc{gnu\,arch}}
-\newcommand{\MERCURIAL}{\textsc{mercurial}}
-\newcommand{\SVK}{\textsc{svk}}
-\newcommand{\LISP}{\textsc{lisp}}
-\newcommand{\COMMONLISP}{\textsc{common lisp}}
-\newcommand{\LIBGPGME}{\textsc{libgpgme}}
-\newcommand{\OSICAT}{\textsc{osicat}}
-\newcommand{\PORTPATH}{\textsc{portpath}}
-\newcommand{\POSIX}{\textsc{posix}}
-\newcommand{\HAKEN}{\ding{51}}
 
 \usepackage{babel}
 \usepackage{stmaryrd}
-\usepackage{pifont}
+%\usepackage{pifont}
 
 
 \usetheme{Rochester}
@@ -53,12 +37,6 @@ Bernd Mahr, Steffen Evers}
 
 \begin{document}
 
-% \AtBeginSection[] {
-%   \begin{frame}
-%     \frametitle{"Ubersicht}
-%     \tableofcontents[currentsection]
-%   \end{frame}
-% }
 
 \frame[plain]{\titlepage}
 
@@ -67,44 +45,50 @@ Bernd Mahr, Steffen Evers}
   \tableofcontents
 \end{frame}
 
+
 \section{Projekt}
 
+
 \begin{frame} \frametitle{Ziele}
-  \begin{block}{}
+  \begin{beamercolorbox}{block body}
     \begin{itemize}
-    \item Erweiterung von metacvs
+    \item Erweiterung von \textsc{metacvs}
     \item Verteilung
       \begin{itemize}
       \item Nutzung mehrerer Repositories
-      \item Leichtes zusammen f"uhren von Repos.
-      \item CVS als Infrastruktur
+      \item Einfache Zusammenf"uhrung von Entwicklungslinien
+      \item \textsc{cvs} als Infrastruktur
       \end{itemize}
-    \item CodeSignierung
+    \item Code Signierung
       \begin{itemize}
       \item Sicherstellung der Codequellen
       \item Signierung gesichteter Codezeilen
       \end{itemize}
     \end{itemize}
-  \end{block}
+  \end{beamercolorbox}
 \end{frame}
 
+
 \begin{frame} \frametitle{Erreichtes}
-  \begin{itemize}
-  \item Verteilung
-  \item Eigenst"andiges Frontend f"ur CVS
-  \item Kommandozeilen Programm
-  \item Portables Common Lisp Projekt
-  \item portable Pfadnamenbibleothek
-  \end{itemize}
+  \begin{beamercolorbox}{block body}
+    \begin{itemize}
+    \item Verteilung
+    \item Eigenst"andiges Frontend f"ur \textsc{cvs}
+    \item Kommandozeilen-Programm
+    \item Portables \textsc{common~lisp} Projekt
+    \item Nebenprodukt: portable Pfadnamenbibliothek
+    \end{itemize}
+  \end{beamercolorbox}
 \end{frame}
+
 
 \begin{frame} \frametitle{Ablauf}
   \begin{block}{1. H"alfte}
     \begin{description}
-    \item[Dezember] Planung
-    \item[Dezember] Portierung von MCVS nach SBCL
-    \item[Monat] Neuanfang: Eigengentwurf in SBCL
-    \item[Februar] Basisfunktionnalit"at Verteilung
+    \item[November] Themensuche und Planung
+    \item[Dezember] Planung, Portierung von \textsc{metacvs} nach \textsc{sbcl}
+    \item[Januar] Neuanfang: Eigenentwurf in \textsc{sbcl}
+    \item[Februar] Basisfunktionalit"at Verteilung
     \end{description}
   \end{block}
   \begin{block}{2. H"alfte}
@@ -116,89 +100,139 @@ Bernd Mahr, Steffen Evers}
   \end{block}
 \end{frame}
 
+
 \begin{frame} \frametitle{Probleme I}
   \begin{block}{Recherche}
     \begin{itemize}
-    \item Portierung von MCVS nach SBCL
+    \item Erweiterung von \textsc{metacvs}
       \begin{itemize}
-      \item 
+      \item Aufgrund der \textsc{metacvs} Struktur nicht m"oglich
+      \item Portierung nach \textsc{sbcl} unn"otiger Zeitverlust
+      \item \textsc{metacvs} Code nicht gr"undlich genug inspiziert
       \end{itemize}
-    \item vorhandene verteilte Systeme
+    \item Vorhandene verteilte Systeme
       \begin{itemize}
-      \item Darcs
-      \item Mercurial
-      \item BZR (GNU Arch)
+        \item \textsc{bzr} (\textsc{gnu~arch}): vergleichbare Funktionalit"at
+%       \item \textsc{darcs}
+%       \item \textsc{mercurial}
+%       \item \textsc{bzr} (\textsc{gnu~arch})
       \end{itemize}
     \end{itemize}
   \end{block}
   \begin{block}{Mitgliederanzahlverringerung}
     \begin{itemize}
-    \item Verlust der Codesignierung
+    \item Streichung der Code Signierung
     \end{itemize}
   \end{block}
 \end{frame}
 
 
 \begin{frame} \frametitle{Probleme II}
-  \begin{block}{CVS}
+  \begin{block}{\textsc{cvs}}
     \begin{itemize}
     \item Zuviele unben"otigte Features
-    \item Teilw. schwer zu erreichende Eigenschaften
-    \item Merge f"ur unsere Zwecke ungeignet
+    \item Kontrolle der Operationen nicht ausreichend feingranular
+    \item Merge f"ur unsere Zwecke ungeeignet
+    \item Entwicklungsmodell mit unserem schlecht vertr"aglich
     \end{itemize}
   \end{block}
   \begin{block}{Konsequenzen}
     \begin{itemize}
-    \item Lisp Diff Algorithmen (cl-difflib)
-    \item Benutzung temp. Plattenspeichers
+    \item Einsatz von \textsc{cl-difflib} und eigenen Merge-Routinen
+    \item H"aufige Aufrufe von \textsc{cvs}
+    \item Starke Nutzung tempor"aren Plattenspeichers
     \end{itemize}
   \end{block}
 \end{frame}
 
+
 \begin{frame} \frametitle{Ergebnis}
-  \begin{block}{Verteiltes Versionierungs System}
+  \begin{block}{Verteiltes Versionsmanagement System}
     \begin{itemize}
-    \item Basis Funktionalit"at:
+    \item Basisfunktionalit"at:
       \begin{itemize}
-      \item add, move, delete
-      \item checkout, update, commit
-      \item branch, merge
+      \item \texttt{add}, \texttt{move}, \texttt{delete}
+      \item \texttt{checkout}, \texttt{update}, \texttt{commit}
+      \item \texttt{branch}, \texttt{merge}
       \end{itemize}
     \item Nachteile:
       \begin{itemize}
       \item Langsam
       \item Hohe Netzwerklast
-      \item Fehlende Kommandos (diff, patch, log, etc)
+      \item Fehlende Kommandos: \texttt{diff}, \texttt{patch},
+        \texttt{log}, \ldots
       \end{itemize}
     \end{itemize}
   \end{block}
 \end{frame}
 
+
 \begin{frame}
- \frametitle{(make-instance 'data-structure)}
- 
+ \frametitle{\tt (make-instance 'data-structure)}
  \begin{block}{Verteilung} 
    \begin{description}
-   \item[Repository] Menge von Branches
-   \item[Branch] Sequenz von Changes
-   \item[Change] Commit oder Merge
-   \item[Merge] Zusammenf"uhrung von Branches
-   \item[Commit] Beitrag
+   \item[\sf Repository] Menge von Branches
+   \item[\sf Branch] Sequenz von Changes
+   \item[\sf Change] Commit oder Merge
+   \item[\sf Merge] Zusammenf"uhrung von Branches
+   \item[\sf Commit] Beitrag, "Anderung
    \end{description}
  \end{block}
-
- \begin{block}{Struktur} 
+ \begin{block}{Verzeichnisstruktur} 
    \begin{description}
-   \item[210987] $\mapsto$ parser.lisp
-   \item[123456] $\mapsto$ tests/momo.lisp
-   \item[654321]  $\mapsto$ doc/folien.tex
+   \item[\sf 210987] $\mapsto$ \tt parser.lisp
+   \item[\sf 123456] $\mapsto$ \tt tests/momo.lisp
+   \item[\sf 654321] $\mapsto$ \tt doc/folien.tex
    \end{description}
  \end{block}
-
 \end{frame}
 
-\section{Vorf"uhrung} 
+
 \begin{frame}
-  
+  \frametitle{Links}
+  \begin{beamercolorbox}{block body}
+    \begin{itemize}
+    \item Projektseite und -bericht \\ \texttt{http://gennf.berlios.de/}
+    \item \GENNF{} v0.1 und \textsc{port-path} v0.1 \\
+      \texttt{http://developer.berlios.de/projects/gennf/}
+    \item \textsc{sbcl} v0.9.10 \\
+      \texttt{http://sbcl.sourceforge.net/}
+    \item \textsc{osicat} v0.5.0 \\
+      \texttt{http://common-lisp.net/project/osicat/}
+    \item \textsc{uffi} v1.5.9 \\
+      \texttt{http://uffi.b9.com/}
+    \item \textsc{cl-difflib} v0.1 \\
+      \texttt{http://www.cliki.net/CL-DIFFLIB}
+    \end{itemize}
+
+    
+  \end{beamercolorbox}
 \end{frame}
+
+\section{Demonstration}
+
+
+\begin{frame}[fragile]
+  \frametitle{\GENNF{} in Aktion}
+  \begin{beamercolorbox}{block body}
+    {\small
+\begin{semiverbatim}
+ $ gennf setup find --root $REPO1 --symbolic-name find
+     --description Finite-domain-constraint-solver \vspace{5pt}
+ $ gennf checkout find --root $REPO1 \vspace{5pt}
+ $ gennf add README packages.lisp fd.asd fd.lisp
+     tests.lisp sudoku.lisp send-more-money.lisp \vspace{5pt}
+ $ gennf commit
+\end{semiverbatim}
+    }
+  \end{beamercolorbox}
+  
+  \bigskip
+
+  \begin{center}
+    {\Large\bf \alert{Fortsetzung folgt!}}
+  \end{center}
+
+\end{frame}
+
 \end{document}
