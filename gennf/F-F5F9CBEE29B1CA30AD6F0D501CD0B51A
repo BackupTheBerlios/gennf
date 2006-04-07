@@ -16,28 +16,28 @@
 # along with gennf; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id: F-F5F9CBEE29B1CA30AD6F0D501CD0B51A,v 1.2 2006/04/04 14:37:59 florenz Exp $
+# $Id: F-F5F9CBEE29B1CA30AD6F0D501CD0B51A,v 1.3 2006/04/07 14:03:51 florenz Exp $
 #
 # Makefile for gennf transparencies (in German).
 #
 
-OUTPUT = folien.pdf
+OUTPUT = folien.pdf gennf-praesentation.pdf
 
 .SUFFIXES: .fig .pdf_t
 
-all : $(OUTPUT)
+all: $(OUTPUT)
 
 .fig.pdf_t:
 	fig2dev -L pdftex -p dummy $< $*.pdf
 	fig2dev -L pdftex_t -p $*.pdf $< $*.pdf_t
 
-$(OUTPUT): folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
+$(OUTPUT): 
 	pdflatex $<
 	pdflatex $<
 
-publish : gennf-report.pdf
-	scp gennf-report.pdf $(USER)$(SERVER):$(ROOT)
-	ssh $(USER)$(SERVER) "cd $(ROOT); chmod 664 gennf-report.pdf"
+clean:
+	rm -f *.vrb *.aux *.log *.nav *.out *.bak *~ *.snm *.toc *.pdf_t $(OUTPUT)
 
-clean :
-	rm -f *.aux *.log *.nav *.out *.bak *~ *.snm *.toc *.pdf_t $(OUTPUT)
+# Dependencies.
+folien.pdf: folien.tex beispiel0.pdf_t beispiel1.pdf_t orthogonal.pdf_t
+gennf-praesentation.pdf: gennf-praesentation.tex
